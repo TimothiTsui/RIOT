@@ -31,6 +31,7 @@ PSEUDOMODULES += gnrc_sock_check_reuse
 PSEUDOMODULES += gnrc_txtsnd
 PSEUDOMODULES += l2filter_blacklist
 PSEUDOMODULES += l2filter_whitelist
+PSEUDOMODULES += lis2dh12_spi
 PSEUDOMODULES += log
 PSEUDOMODULES += log_printfnoformat
 PSEUDOMODULES += lora
@@ -97,6 +98,10 @@ PSEUDOMODULES += si7006
 PSEUDOMODULES += si7013
 PSEUDOMODULES += si7020
 PSEUDOMODULES += si7021
+
+# include variants of RN2XX3 drivers as pseudo modules
+PSEUDOMODULES += rn2483
+PSEUDOMODULES += rn2903
 
 # add all pseudo random number generator variants as pseudomodules
 PSEUDOMODULES += prng_%

@@ -123,7 +123,7 @@ ifneq (,$(filter trickle,$(USEMODULE)))
   USEMODULE += xtimer
 endif
 
-ifneq (,$(filter ieee802154,$(USEMODULE)))
+ifneq (,$(filter ieee802154 nrfmin,$(USEMODULE)))
   ifneq (,$(filter gnrc_ipv6, $(USEMODULE)))
     USEMODULE += gnrc_sixlowpan
   endif
@@ -646,6 +646,12 @@ ifneq (,$(filter spiffs,$(USEMODULE)))
   USEMODULE += spiffs_fs
   USEMODULE += mtd
 endif
+ifneq (,$(filter littlefs,$(USEMODULE)))
+  USEPKG += littlefs
+  USEMODULE += vfs
+  USEMODULE += littlefs_fs
+  USEMODULE += mtd
+endif
 
 ifneq (,$(filter l2filter_%,$(USEMODULE)))
   USEMODULE += l2filter
@@ -666,6 +672,11 @@ endif
 
 ifneq (,$(filter ccn-lite,$(USEPKG)))
   USEMODULE += ccn-lite-utils
+endif
+
+ifneq (,$(filter fatfs_vfs,$(USEMODULE)))
+  USEPKG += fatfs
+  USEMODULE += vfs
 endif
 
 # always select gpio (until explicit dependencies are sorted out)
