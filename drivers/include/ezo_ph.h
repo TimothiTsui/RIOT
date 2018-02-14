@@ -37,57 +37,24 @@ extern "C" {
 #define EZO_PH_I2C_ADDRESS  (0x68)
 #endif
 
-/**
- * @brief   ADC resolution
- */
-enum {
-    EZO_PH_RES_8BITS  = 8,  /**< 8 bits resolution (ADC081C family) */
-    EZO_PH_RES_10BITS = 10, /**< 10 bits resolution (ADC101C family) */
-    EZO_PH_RES_12BITS = 12, /**< 12 bits resolution (ADC121C family) */
-};
 
-/**
- * @brief   ADC default resolution for device variants
- */
-#if   defined(MODULE_ADC081C)
-#define ADCXX1C_RES_DEFAULT     ADCXX1C_RES_8BITS
-#elif defined(MODULE_ADC101C)
-#define ADCXX1C_RES_DEFAULT     ADCXX1C_RES_10BITS
-#elif defined(MODULE_ADC121C)
-#define ADCXX1C_RES_DEFAULT     ADCXX1C_RES_12BITS
-#else
-#define ADCXX1C_RES_DEFAULT     (-1)
-#error "ADCXX1C: Failed to select resolution: unknown ADCXX1C device variant!"
-#endif
-
-/**
- * @brief   Conversion interval configuration value
- */
-enum {
-    ADCXX1C_CYCLE_DISABLED = 0,  /**< No cycle conversion */
-    ADCXX1C_CYCLE_32,            /**< Conversion cycle = Tconvert x 32 */
-    ADCXX1C_CYCLE_64,            /**< Conversion cycle = Tconvert x 64 */
-    ADCXX1C_CYCLE_128,           /**< Conversion cycle = Tconvert x 128 */
-    ADCXX1C_CYCLE_256,           /**< Conversion cycle = Tconvert x 256 */
-    ADCXX1C_CYCLE_512,           /**< Conversion cycle = Tconvert x 512 */
-    ADCXX1C_CYCLE_1024,          /**< Conversion cycle = Tconvert x 1024 */
-    ADCXX1C_CYCLE_2048,          /**< Conversion cycle = Tconvert x 2048 */
-};
 
 /**
  * @brief   Named return values
  */
 enum {
-    ADCXX1C_OK          =  0,       /**< everything was fine */
-    ADCXX1C_NOI2C       = -1,       /**< I2C communication failed */
-    ADCXX1C_NODEV       = -2,       /**< no ADCXX1C device found on the bus */
-    ADCXX1C_NODATA      = -3        /**< no data available */
+    EZO_PH__NODEV      = -2,    /**< no EZO_PH device found on the bus */
+    EZO_PH_NOI2C       = -1,    /**< I2C communication failed */
+    EZO_PH_OK          = 1,     /**< everything was fine */
+    EZO_PH_ERROR       = 2,     /**< EZO_PH returned "error" */
+    EZO_PH_NOTREADY    = 254,   /**< EZO_PH is still processing, not ready yet */
+    EZO_PH_NODATA      = 255    /**< no data to send */
 };
 
 /**
- * @brief   ADCxx1C params
+ * @brief   EZO_PH params
  */
-typedef struct adcxx1c_params {
+typedef struct ezo_ph_params {
     i2c_t i2c;            /**< i2c device */
     uint8_t addr;         /**< i2c address */
     uint8_t bits;         /**< resolution */
@@ -96,7 +63,7 @@ typedef struct adcxx1c_params {
     int16_t low_limit;    /**< alert low value */
     int16_t high_limit;   /**< alert high value */
     int16_t hysteresis;   /**< alert hysteresis */
-} adcxx1c_params_t;
+} ezo_ph_params_t;
 
 /**
  * @brief   ADCxx1C alert callback
