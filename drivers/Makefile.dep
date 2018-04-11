@@ -47,6 +47,10 @@ ifneq (,$(filter bmp180,$(USEMODULE)))
   USEMODULE += xtimer
 endif
 
+ifneq (,$(filter bmx055,$(USEMODULE)))
+  FEATURES_REQUIRED += periph_i2c
+endif
+
 ifneq (,$(filter bm%280,$(USEMODULE)))
   FEATURES_REQUIRED += periph_i2c
   USEMODULE += xtimer
@@ -108,6 +112,8 @@ ifneq (,$(filter encx24j600,$(USEMODULE)))
 endif
 
 ifneq (,$(filter ethos,$(USEMODULE)))
+  FEATURES_REQUIRED += periph_uart
+  USEMODULE += iolist
   USEMODULE += netdev_eth
   USEMODULE += random
   USEMODULE += tsrb
@@ -267,11 +273,18 @@ endif
 ifneq (,$(filter sdcard_spi,$(USEMODULE)))
   FEATURES_REQUIRED += periph_gpio
   FEATURES_REQUIRED += periph_spi
+  USEMODULE += checksum
   USEMODULE += xtimer
 endif
 
 ifneq (,$(filter sht11,$(USEMODULE)))
   USEMODULE += xtimer
+endif
+
+ifneq (,$(filter si114%,$(USEMODULE)))
+  USEMODULE += xtimer
+  FEATURES_REQUIRED += periph_i2c
+  USEMODULE += si114x
 endif
 
 ifneq (,$(filter si70%,$(USEMODULE)))
@@ -301,6 +314,7 @@ endif
 ifneq (,$(filter sx127%,$(USEMODULE)))
   FEATURES_REQUIRED += periph_gpio
   FEATURES_REQUIRED += periph_spi
+  USEMODULE += iolist
   USEMODULE += xtimer
   USEMODULE += sx127x
   USEMODULE += netif

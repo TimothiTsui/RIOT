@@ -80,6 +80,10 @@
 #include "net/gnrc/ipv6/nib.h"
 #endif
 
+#ifdef MODULE_SKALD
+#include "net/skald.h"
+#endif
+
 
 #define ENABLE_DEBUG (0)
 #include "debug.h"
@@ -150,6 +154,20 @@ void auto_init(void)
 #ifdef MODULE_GNRC_IPV6_NIB
     DEBUG("Auto init gnrc_ipv6_nib module.\n");
     gnrc_ipv6_nib_init();
+#endif
+#ifdef MODULE_SKALD
+    DEBUG("Auto init Skald\n");
+    skald_init();
+#endif
+#ifdef MODULE_RDCLI_COMMON
+    DEBUG("Auto init rdcli_common module\n");
+    extern void rdcli_common_init(void);
+    rdcli_common_init();
+#endif
+#ifdef MODULE_RDCLI_SIMPLE_STANDALONE
+    DEBUG("Auto init rdcli_simple module\n");
+    extern void rdcli_simple_run(void);
+    rdcli_simple_run();
 #endif
 
 /* initialize network devices */
@@ -311,6 +329,10 @@ auto_init_mpu9150();
     extern void auto_init_bmp180(void);
     auto_init_bmp180();
 #endif
+#ifdef MODULE_BMX055
+    extern void auto_init_bmx055(void);
+    auto_init_bmx055();
+#endif
 #if defined(MODULE_BME280) || defined(MODULE_BMP280)
     extern void auto_init_bmx280(void);
     auto_init_bmx280();
@@ -370,6 +392,10 @@ auto_init_mpu9150();
 #ifdef MODULE_LIS2DH12
     extern void auto_init_lis2dh12(void);
     auto_init_lis2dh12();
+#endif
+#ifdef MODULE_SI114X
+    extern void auto_init_si114x(void);
+    auto_init_si114x();
 #endif
 
 #endif /* MODULE_AUTO_INIT_SAUL */

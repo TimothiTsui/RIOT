@@ -64,6 +64,7 @@ PSEUDOMODULES += pktqueue
 PSEUDOMODULES += printf_float
 PSEUDOMODULES += prng
 PSEUDOMODULES += prng_%
+PSEUDOMODULES += rdcli_simple_standalone
 PSEUDOMODULES += saul_adc
 PSEUDOMODULES += saul_default
 PSEUDOMODULES += saul_gpio
@@ -93,6 +94,11 @@ PSEUDOMODULES += adc121c
 PSEUDOMODULES += sx1272
 PSEUDOMODULES += sx1276
 
+# include variants of Si114x drivers as pseudo modules
+PSEUDOMODULES += si1145
+PSEUDOMODULES += si1146
+PSEUDOMODULES += si1147
+
 # include variants of Si70xx drivers as pseudo modules
 PSEUDOMODULES += si7006
 PSEUDOMODULES += si7013
@@ -112,3 +118,8 @@ PSEUDOMODULES += stm32_periph_%
 # declare periph submodules as pseudomodules, but exclude periph_common
 PSEUDOMODULES += periph_%
 NO_PSEUDOMODULES += periph_common
+
+# Submodules and auto-init code provided by Skald
+PSEUDOMODULES += auto_init_skald
+PSEUDOMODULES += skald_ibeacon
+PSEUDOMODULES += skald_eddystone

@@ -819,6 +819,13 @@ int gnrc_netif_ipv6_get_iid(gnrc_netif_t *netif, eui64_t *eui64)
                 }
                 break;
 #endif
+#ifdef MODULE_NORDIC_SOFTDEVICE_BLE
+            case NETDEV_TYPE_BLE:
+                assert(netif->l2addr_len == sizeof(eui64_t));
+                memcpy(eui64, netif->l2addr, sizeof(eui64_t));
+                eui64->uint8[0] ^= 0x02;
+                return 0;
+#endif
 #if defined(MODULE_CC110X) || defined(MODULE_NRFMIN)
             case NETDEV_TYPE_CC110X:
             case NETDEV_TYPE_NRFMIN:
@@ -841,9 +848,11 @@ static inline bool _addr_anycast(const gnrc_netif_t *netif, unsigned idx)
 
 static int _addr_idx(const gnrc_netif_t *netif, const ipv6_addr_t *addr)
 {
-    for (unsigned i = 0; i < GNRC_NETIF_IPV6_ADDRS_NUMOF; i++) {
-        if (ipv6_addr_equal(&netif->ipv6.addrs[i], addr)) {
-            return i;
+    if (!ipv6_addr_is_unspecified(addr)) {
+        for (unsigned i = 0; i < GNRC_NETIF_IPV6_ADDRS_NUMOF; i++) {
+            if (ipv6_addr_equal(&netif->ipv6.addrs[i], addr)) {
+                return i;
+            }
         }
     }
     return -1;
@@ -867,7 +876,7 @@ static unsigned _match(const gnrc_netif_t *netif, const ipv6_addr_t *addr,
         }
         match = ipv6_addr_match_prefix(&(netif->ipv6.addrs[i]), addr);
         if (((match > 64U) || !ipv6_addr_is_link_local(&(netif->ipv6.addrs[i]))) &&
-            (match > best_match)) {
+            (match >= best_match)) {
             if (idx != NULL) {
                 *idx = i;
             }
@@ -1090,9 +1099,11 @@ static ipv6_addr_t *_src_addr_selection(gnrc_netif_t *netif,
 
 static int _group_idx(const gnrc_netif_t *netif, const ipv6_addr_t *addr)
 {
-    for (unsigned i = 0; i < GNRC_NETIF_IPV6_GROUPS_NUMOF; i++) {
-        if (ipv6_addr_equal(&netif->ipv6.groups[i], addr)) {
-            return i;
+    if (!ipv6_addr_is_unspecified(addr)) {
+        for (unsigned i = 0; i < GNRC_NETIF_IPV6_GROUPS_NUMOF; i++) {
+            if (ipv6_addr_equal(&netif->ipv6.groups[i], addr)) {
+                return i;
+            }
         }
     }
     return -1;
@@ -1105,6 +1116,7 @@ bool gnrc_netif_is_6ln(const gnrc_netif_t *netif)
     switch (netif->device_type) {
         case NETDEV_TYPE_IEEE802154:
         case NETDEV_TYPE_CC110X:
+        case NETDEV_TYPE_BLE:
         case NETDEV_TYPE_NRFMIN:
             return true;
         default:
@@ -1120,7 +1132,9 @@ static void _update_l2addr_from_dev(gnrc_netif_t *netif)
     netopt_t opt = NETOPT_ADDRESS;
 
     switch (netif->device_type) {
-#if defined(MODULE_NETDEV_IEEE802154) || defined(MODULE_XBEE)
+#if defined(MODULE_NETDEV_IEEE802154) || defined(MODULE_XBEE) \
+    || defined(MODULE_NORDIC_SOFTDEVICE_BLE)
+        case NETDEV_TYPE_BLE:
         case NETDEV_TYPE_IEEE802154: {
                 uint16_t tmp;
 
@@ -1179,6 +1193,14 @@ static void _init_from_device(gnrc_netif_t *netif)
         case NETDEV_TYPE_ETHERNET:
 #ifdef MODULE_GNRC_IPV6
             netif->ipv6.mtu = ETHERNET_DATA_LEN;
+#endif
+            break;
+#endif
+#ifdef MODULE_NORDIC_SOFTDEVICE_BLE
+        case NETDEV_TYPE_BLE:
+            netif->ipv6.mtu = IPV6_MIN_MTU;
+#ifdef MODULE_GNRC_SIXLOWPAN_IPHC
+            netif->flags |= GNRC_NETIF_FLAGS_6LO_HC;
 #endif
             break;
 #endif

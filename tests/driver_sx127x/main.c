@@ -106,7 +106,7 @@ int lora_setup_cmd(int argc, char **argv) {
     netdev->driver->set(netdev, NETOPT_BANDWIDTH,
                         &lora_bw, sizeof(lora_bw));
     netdev->driver->set(netdev, NETOPT_SPREADING_FACTOR,
-                        &lora_sf, lora_sf);
+                        &lora_sf, sizeof(lora_sf));
     netdev->driver->set(netdev, NETOPT_CODING_RATE,
                         &lora_cr, sizeof(lora_cr));
 
@@ -224,10 +224,12 @@ int send_cmd(int argc, char **argv)
     printf("sending \"%s\" payload (%d bytes)\n",
            argv[1], strlen(argv[1]) + 1);
 
-    struct iovec vec[1];
-    vec[0].iov_base = argv[1];
-    vec[0].iov_len = strlen(argv[1]) + 1;
-    if (netdev->driver->send(netdev, vec, 1) == -ENOTSUP) {
+    iolist_t iolist = {
+        .iol_base = argv[1],
+        .iol_len = (strlen(argv[1]) + 1)
+    };
+
+    if (netdev->driver->send(netdev, &iolist) == -ENOTSUP) {
         puts("Cannot send: radio is still transmitting");
     }
 

@@ -21,9 +21,11 @@ BOARD_INSUFFICIENT_MEMORY := airfy-beacon \
                              feather-m0 \
                              limifrog-v1 maple-mini \
                              mbed_lpc1768 \
+                             mega-xplained \
                              microbit \
                              msb-430 \
                              msb-430h \
+                             msba2 \
                              nrf51dongle \
                              nrf6310 \
                              nucleo32-f031 \
@@ -41,6 +43,7 @@ BOARD_INSUFFICIENT_MEMORY := airfy-beacon \
                              nucleo-f410 \
                              nucleo-l053 \
                              nucleo-l073 \
+                             nucleo-l433rc \
                              nz32-sc151 \
                              opencm904 \
                              openmote \
@@ -99,6 +102,7 @@ ARM_CORTEX_M_BOARDS := airfy-beacon \
                        fox \
                        frdm-k22f \
                        frdm-k64f \
+                       frdm-kw41z \
                        iotlab-a8-m3 \
                        iotlab-m3 \
                        limifrog-v1 \
@@ -140,6 +144,7 @@ ARM_CORTEX_M_BOARDS := airfy-beacon \
                        nucleo-l053 \
                        nucleo-l073 \
                        nucleo-l152 \
+                       nucleo-l433rc \
                        nucleo-l476 \
                        nz32-sc151 \
                        opencm904 \
@@ -205,6 +210,15 @@ ifneq (,$(filter tests-cpp_%, $(UNIT_TESTS)))
   export CPPMIX := 1
 endif
 
+ifneq (, $(filter $(AVR_BOARDS), $(BOARD)))
+  LARGE_STACK_TESTS += tests-qDSA
+endif
+
+LARGE_STACK_TESTS += tests-tweetnacl
+ifneq (,$(filter $(LARGE_STACK_TESTS), $(UNIT_TESTS)))
+  CFLAGS += -DTHREAD_STACKSIZE_MAIN=\(4*THREAD_STACKSIZE_DEFAULT+THREAD_EXTRA_STACKSIZE_PRINTF\)
+endif
+
 DISABLE_MODULE += auto_init
 
 # Pull in `Makefile.include`s from the test suites:
@@ -215,11 +229,17 @@ BASELIBS += $(UNIT_TESTS:%=$(BINDIR)/%.a)
 
 INCLUDES += -I$(RIOTBASE)/tests/unittests/common
 
+# list of boards to run CI tests on
+TEST_ON_CI_WHITELIST += all
+
 include $(RIOTBASE)/Makefile.include
 
 .PHONY: $(UNIT_TESTS)
 
 all:
+
+info-unittests:
+	@echo $(UNIT_TESTS)
 
 $(UNIT_TESTS): all
 
