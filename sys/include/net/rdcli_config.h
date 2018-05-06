@@ -7,8 +7,9 @@
  */
 
 /**
- * @defgroup    net_rdcli_config CoAP Resource Directory Client Configuration
- * @ingroup     net_rdcli
+ * @defgroup    net_rdcli_config CoRE RD Client Configuration
+ * @ingroup     net
+ * @brief       Shared CoRE Resource Directory Client Configuration
  * @{
  *
  * @file
@@ -76,10 +77,11 @@ extern "C" {
 /** @} */
 
 /**
- * @brief   Default IPv6 address to use when looking for RDs
+ * @brief   Use ALL_NODES multicast address as default address when looking for
+ *          a RD server
  */
 #ifndef RDCLI_SERVER_ADDR
-#define RDCLI_SERVER_ADDR       IPV6_ADDR_ALL_NODES_LINK_LOCAL
+#define RDCLI_SERVER_ADDR       "ff02::1"
 #endif
 
 /**
