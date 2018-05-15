@@ -1,8 +1,8 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <fmt.h>
 #include <periph/gpio.h>
 #include <periph/i2c.h>
-#include <stdio.h>
 #include "net/ipv6/addr.h"
 #include "openthread/ip6.h"
 #include "openthread/thread.h"
