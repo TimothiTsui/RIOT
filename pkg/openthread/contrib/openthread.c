@@ -19,7 +19,7 @@
 #include <assert.h>
 
 #include "openthread/platform/alarm.h"
-#include "openthread/platform/uart.h"
+#include "pkg/openthread/platform/uart.h"
 #include "ot.h"
 #include "random.h"
 #include "thread.h"
