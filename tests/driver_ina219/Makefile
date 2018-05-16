@@ -4,6 +4,7 @@ FEATURES_REQUIRED = periph_i2c
 
 USEMODULE += ina219
 USEMODULE += xtimer
+USEMODULE += fmt
 
 # set default device parameters in case they are undefined
 TEST_INA219_I2C  ?= I2C_DEV\(0\)
