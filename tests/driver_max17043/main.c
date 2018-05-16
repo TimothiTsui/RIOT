@@ -54,7 +54,7 @@ int main(void){
 
     while(1) {
 
-        /* Read shunt resistor voltage, in millivolts */
+        /* Read cell voltage from vcel register */
         if (max17043_read_vcell(&dev, &val) == -1)
         {
             puts("read failed");

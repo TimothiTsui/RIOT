@@ -54,26 +54,6 @@ static int max17043_read_reg(const max17043_t *dev, uint8_t reg, uint8_t *out)
     return 0;
 }
 
-/** @brief Write one 16 bit register to a max17043 device and swap byte order, if necessary. */
-//static int max17043_write_reg(const max17043_t *dev, uint8_t reg, uint16_t in)
-//{
-//    union {
-//        uint8_t c[2];
-//        uint16_t u16;
-//    } tmp = { .u16 = 0 };
-//    int status = 0;
-//
-//    tmp.u16 = htons(in);
-//
-//    status = i2c_write_regs(dev->i2c, dev->addr, reg, &tmp.c[0], 2);
-//
-//    if (status != 2) {
-//        return -1;
-//    }
-//
-//    return 0;
-//}
-
 
 int max17043_init(max17043_t *dev, i2c_t i2c, uint8_t address)
 {
