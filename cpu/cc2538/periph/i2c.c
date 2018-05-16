@@ -33,7 +33,7 @@
 #endif
 #include "timex.h" /* for US_PER_SEC */
 
-#define ENABLE_DEBUG (0)
+#define ENABLE_DEBUG (1)
 #include "debug.h"
 
 #ifndef I2C_0_SCL_PIN
@@ -461,6 +461,7 @@ int i2c_read_regs(i2c_t dev, uint8_t address, uint8_t reg, void *data, int lengt
 
     /* Transmit reg byte to slave */
     if (i2c_busy()) {
+        DEBUG("i2c_busy()\n");
         return 0;
     }
 
@@ -470,6 +471,7 @@ int i2c_read_regs(i2c_t dev, uint8_t address, uint8_t reg, void *data, int lengt
         recover_i2c_bus();
 
         if (I2CM_STAT & BUSBSY) {
+            DEBUG("I2CM_STAT & BUSBSY\n");
             return 0;
         }
     }
@@ -479,10 +481,12 @@ int i2c_read_regs(i2c_t dev, uint8_t address, uint8_t reg, void *data, int lengt
     stat = i2c_ctrl_blocking(START | RUN);
 
     if (stat & ARBLST) {
+        DEBUG("stat & ARBLST: %d\n", stat);
         return 0;
     }
     else if (stat & ANY_ERROR) {
         i2cm_ctrl_write(STOP);
+        DEBUG("stat & ANY_ERROR\n");
         return 0;
     }
     else {

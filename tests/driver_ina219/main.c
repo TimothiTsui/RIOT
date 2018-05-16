@@ -103,12 +103,12 @@
  */
 
 #define CONFIG        (INA219_MODE_CONTINUOUS_SHUNT_BUS | INA219_RANGE_40MV | \
-                      INA219_BRNG_16V_FSR | INA219_SADC_AVG_4_SAMPLES | \
-                      INA219_BADC_AVG_4_SAMPLES)
+                      INA219_BRNG_16V_FSR | INA219_BADC_AVG_128_SAMPLES | \
+                      INA219_BADC_AVG_128_SAMPLES)
 #define CALIBRATION   (10240)
 #define CURRENT_DEVIDER_MA (25)
 #define POWER_MULTIPLIER_MW (1)
-#define SLEEP    (100 * 20000U)
+#define SLEEP    (100 * 30000U)
 
 int main(void){
 
@@ -161,18 +161,22 @@ int main(void){
          * register */
         val = (val >> INA219_BUS_VOLTAGE_SHIFT) * 4;
         print("\tbus: ", 6);
-        print_float((val * 0.001), 3);
+        print_float((val * 0.001), 2);
         print(" V ", 4);
 
         /* Read current register milliampere, the scale depends on the value of the
          * calibration register */
         ina219_read_current(&dev, &val);
-        printf("\tcurrent: %6d mA", (val / CURRENT_DEVIDER_MA));
+        print("\tcurrent: ", 10);
+        print_float(((val / CURRENT_DEVIDER_MA) ), 2);
+        print(" mA", 4);
 
         /* Read power register in watts, the scale depends on the value of the
          * calibration register */
         ina219_read_power(&dev, &val);
-        printf("\tpower: %6d mW\n", (val * POWER_MULTIPLIER_MW));
+        print("\tpower: ", 8);
+        print_float(((val) * POWER_MULTIPLIER_MW), 4);
+        print(" mW\n", 4);
 
         xtimer_usleep(SLEEP);
     }

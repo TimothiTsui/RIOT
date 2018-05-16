@@ -69,19 +69,9 @@ typedef enum max17043_config {
  */
 int max17043_init(max17043_t *dev, i2c_t i2c, uint8_t address);
 
-/**
- * @brief   Write to calibration register
- *
- * @param[in]  dev          device descriptor of sensor to configure
- * @param[in]  calibration  calibration register settings, see data sheet
- *
- * @return                  0 on success
- * @return                  <0 on error
- */
-int max17043_set_config(const max17043_t *dev, uint16_t config);
 
 /**
- * @brief   Read shunt voltage
+ * @brief   Read v voltage
  *
  * @param[in]  dev          device descriptor of sensor
  * @param[out] voltage      measured voltage across shunt resistor
@@ -90,7 +80,7 @@ int max17043_set_config(const max17043_t *dev, uint16_t config);
  * @return                  <0 on error
  */
 
-int max17043_read_vcell(const max17043_t *dev, uint16_t *vcell);
+int max17043_read_vcell(const max17043_t *dev, uint8_t *vcell);
 
 /*int max17043_read_soc(const max17043_t *dev, int16_t *battery);*/
 

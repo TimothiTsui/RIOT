@@ -27,25 +27,30 @@
 #include "byteorder.h"
 #include "include/max17043-regs.h"
 
-#define ENABLE_DEBUG    (0)
+#define ENABLE_DEBUG    (1)
 #include "debug.h"
 
 /** @brief Read one 16 bit register from a max17043 device and swap byte order, if necessary. */
-static int max17043_read_reg(const max17043_t *dev, uint8_t reg, uint16_t *out)
+static int max17043_read_reg(const max17043_t *dev, uint8_t reg, uint8_t *out)
 {
-    union {
-        uint8_t c[2];
-        uint16_t u16;
-    } tmp = { .u16 = 0 };
+//    union {
+//        uint8_t c[2];
+//        uint16_t u16;
+//    } tmp = { .u16 = 0 };
     int status = 0;
 
-    status = i2c_read_regs(dev->i2c, dev->addr, reg, &tmp.c[0], 2);
+    uint8_t test = 0;
+
+    //status = i2c_read_regs(dev->i2c, dev->addr, reg, &tmp.c[0], 2);
+    status = i2c_read_reg(dev->i2c, dev->addr, reg, &test);
+
+    DEBUG("status %d , tmp: %d\n", status, test);
 
     if (status != 2) {
         return -1;
     }
 
-    *out = ntohs(tmp.u16);
+    *out = test;
     return 0;
 }
 
@@ -75,12 +80,13 @@ int max17043_init(max17043_t *dev, i2c_t i2c, uint8_t address)
     /* write device descriptor */
     dev->i2c = i2c;
     dev->addr = address;
+
     return 0;
 }
 
-int max17043_read_vcell(const max17043_t *dev, uint16_t *vcell)
+int max17043_read_vcell(const max17043_t *dev, uint8_t *vcell)
 {
-    return max17043_read_reg(dev, MAX17043_REG_VCELL, (uint16_t *)vcell);
+    return max17043_read_reg(dev, MAX17043_REG_VCELL, (uint8_t *)vcell);
 }
 
 /*int max17043_read_soc(const max17043_t *dev, uint16_t config)
