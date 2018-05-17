@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Eistec AB
+ * Copyright (C) 2018 University of Applied Science Emden/Leer
  *
  * This file is subject to the terms and conditions of the GNU Lesser
  * General Public License v2.1. See the file LICENSE in the top level
@@ -9,16 +9,17 @@
 /**
  * @defgroup    drivers_ina219 INA219 current/power monitor
  * @ingroup     drivers_sensors
- * @brief       Device driver for Texas Instruments INA219 High or Low Side,
- *              Bi-Directional CURRENT/POWER MONITOR with Two-Wire Interface
+ * @brief       Device driver for Texas Instruments INA219 Zerø-Drift High
+ *              Side, Bi-Directional CURRENT/POWER MONITOR with Two-Wire
+ *              Interface
  * @{
  *
  * @file
- * @brief       Device driver interface for Texas Instruments INA219 High or Low
+ * @brief       Device driver for Texas Instruments INA219 Zerø-Drift High
  *              Side, Bi-Directional CURRENT/POWER MONITOR with Two-Wire
  *              Interface
  *
- * @author      Joakim NohlgÃ¥rd <joakim.nohlgard@eistec.se>
+ * @author      Dhruv Verma <dhruv2scs@gmail.com>
  */
 
 #ifndef INA219_H

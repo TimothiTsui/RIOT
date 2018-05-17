@@ -18,41 +18,44 @@
  * @}
  */
 
-#ifndef TEST_max17043_I2C
-#error "TEST_max17043_I2C not defined"
+#ifndef TEST_MAX17043_I2C
+#error "TEST_MAX17043_I2C not defined"
 #endif
-#ifndef TEST_max17043_ADDR
-#error "TEST_max17043_ADDR not defined"
+#ifndef TEST_MAX17043_ADDR
+#error "TEST_MAX17043_ADDR not defined"
 #endif
 
-#include <stdio.h>
+#include <fmt.h>
 
 #include "xtimer.h"
 #include "max17043.h"
+
 
 #define CONFIG   (MAX17043_CONFIG_DEFAULT)
 
 #define SLEEP    (100 * 20000U)
 
+
 int main(void){
     max17043_t dev;
-    int16_t val;
+    uint8_t val;
 
     puts("max17043 sensor driver test application\n");
-    printf("Initializing I2C_%i... ", TEST_max17043_I2C);
-    if(i2c_init_master(TEST_max17043_I2C, I2C_SPEED_FAST) < 0) {
+    printf("Initializing I2C_%i... ", TEST_MAX17043_I2C);
+    if(i2c_init_master(TEST_MAX17043_I2C, I2C_SPEED_FAST) < 0) {
         return -1;
     }
 
     printf("Initializing max17043 sensor at I2C_%i, address 0x%02x... ",
-            TEST_max17043_I2C, TEST_max17043_ADDR);
-    if(max17043_init(&dev, TEST_max17043_I2C, TEST_max17043_ADDR) == 0) {
+            TEST_MAX17043_I2C, TEST_MAX17043_ADDR);
+    if(max17043_init(&dev, TEST_MAX17043_I2C, TEST_MAX17043_I2C) == 0) {
         puts("[OK]\n");
     }
     else {
         puts("[Failed]");
         return 1;
     }
+
     puts("Set configuration register");
     if(max17043_set_config(&dev, CONFIG) == 0) {
         puts("[OK]\n");
@@ -62,41 +65,22 @@ int main(void){
         return 1;
     }
 
-//    puts("Set calibration register");
-//    if(max17043_set_calibration(&dev, CALIBRATION) == 0) {
-//        puts("[OK]\n");
-//    }
-//    else {
-//        puts("[Failed]");
-//        return 1;
-//    }
-
     while(1) {
-        printf("Hallo!");
-        /* Read shunt resistor voltage, in millivolts */
-        max17043_read_vcell(&dev, &val);
-        val = (val >> 4);
-        printf("Vcell: %6d mV", (val));
-//
-//        /* Read VBUS voltage, in volts */
-////        max17043_read_soc(&dev, &val);
-////        printf("\tsoc: %6d", (val));
-//        /* The bus voltage is found in the topmost 13 bits of the bus voltage
-//         * register */
-//
-//
-//
-//        /* Read current register milliampere, the scale depends on the value of the
-//         * calibration register */
-////        max17043_read_current(&dev, &val);
-////        printf("\tcurrent: %6d mA", (val / 25));
-////
-////        /* Read power register in watts, the scale depends on the value of the
-////         * calibration register */
-////        max17043_read_power(&dev, &val);
-////        printf("\tpower: %6d mW\n", (val));
-//
-       xtimer_usleep(SLEEP);
+
+
+        /* Read cell voltage from vcel register */
+        if (max17043_read_vcell(&dev, &val) == -1)
+        {
+            puts("read failed");
+        }
+        else
+        {
+            //val = (val >> 4);
+            printf("Vcell: %6d V", (val));
+        }
+
+        xtimer_usleep(SLEEP);
+
     }
 
     return 0;

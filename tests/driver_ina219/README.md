@@ -1,5 +1,5 @@
 # About
-This is a manual test application for the INA220 current and power monitor driver.
+This is a manual test application for the INA210 current and power monitor driver.
 
 # Usage
 This test application will initialize the sensor with the following parameters:
