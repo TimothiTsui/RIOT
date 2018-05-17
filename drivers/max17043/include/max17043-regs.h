@@ -33,12 +33,14 @@
  * All registers in the max17043 are 16 bit wide and transmitted MSB first.
  */
 typedef enum max17043_reg {
-    MAX17043_REG_VCELL         = 0x0002, /**< reports measurement of battery voltage (read only) */
-    MAX17043_REG_SOC           = 0x0004, /**< reports battery voltage (read only) */
-    MAX17043_REG_MODE          = 0x0006, /**< sends special commands to IC (write only) */
-    MAX17043_REG_VERSION       = 0x0008, /**< returns IC version (read only) */
-    MAX17043_REG_CONFIG        = 0x000C, /**< adjusts IC performance based on application condition (read/write) */
-    MAX17043_REG_COMMAND       = 0x00FE, /**< sends special commands to IC (write) */
+    MAX17043_REG_WRITE         = 0x6C,
+    MAX17043_REG_READ          = 0x6D,
+    MAX17043_REG_VCELL         = 0x02, /**< reports measurement of battery voltage (read only) */
+    MAX17043_REG_SOC           = 0x04, /**< reports battery voltage (read only) */
+    MAX17043_REG_MODE          = 0x06, /**< sends special commands to IC (write only) */
+    MAX17043_REG_VERSION       = 0x08, /**< returns IC version (read only) */
+    MAX17043_REG_CONFIG        = 0x0C, /**< adjusts IC performance based on application condition (read/write) */
+    MAX17043_REG_COMMAND       = 0xFE, /**< sends special commands to IC (write) */
 } max17043_reg_t;
 
 

@@ -481,12 +481,12 @@ int i2c_read_regs(i2c_t dev, uint8_t address, uint8_t reg, void *data, int lengt
     stat = i2c_ctrl_blocking(START | RUN);
 
     if (stat & ARBLST) {
-        DEBUG("stat & ARBLST: %d\n", stat);
+        DEBUG("stat & ARBLST: %i\n", stat);
         return 0;
     }
     else if (stat & ANY_ERROR) {
         i2cm_ctrl_write(STOP);
-        DEBUG("stat & ANY_ERROR\n");
+        DEBUG("stat & ANY_ERROR %i\n", stat);
         return 0;
     }
     else {

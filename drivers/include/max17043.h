@@ -14,9 +14,7 @@
  * @{
  *
  * @file
- * @brief       Device driver interface for Texas Instruments max17043 High or Low
- *              Side, Bi-Directional CURRENT/POWER MONITOR with Two-Wire
- *              Interface
+ *
  *
  * @author      Dhruv Verma <dhruv2scs@gmail.com>
  */
@@ -81,7 +79,9 @@ int max17043_init(max17043_t *dev, i2c_t i2c, uint8_t address);
  * @return                  <0 on error
  */
 
-int max17043_read_vcell(const max17043_t *dev, uint8_t *vcell);
+float max17043_read_vcell(const max17043_t *dev);
+
+/*int max17043_read_vcell(const max17043_t *dev, int16_t *voltage);*/
 
 /*int max17043_read_soc(const max17043_t *dev, int16_t *battery);*/
 

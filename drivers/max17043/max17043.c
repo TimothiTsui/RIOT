@@ -31,32 +31,8 @@
 #include "debug.h"
 
 /** @brief Read one 16 bit register from a max17043 device and swap byte order, if necessary. */
-static int max17043_read_reg(const max17043_t *dev, uint8_t reg, uint8_t *out)
-{
-//    union {
-//        uint8_t c[2];
-//        uint16_t u16;
-//    } tmp = { .u16 = 0 };
-    int status = 0;
 
-    uint8_t test = 0;
-
-    //status = i2c_read_regs(dev->i2c, dev->addr, reg, &tmp.c[0], 2);
-    status = i2c_read_reg(dev->i2c, dev->addr, reg, &test);
-
-    DEBUG("status %d , tmp: %d\n", status, test);
-
-    if (status != 2) {
-        return -1;
-    }
-
-    *out = test;
-    return 0;
-}
-
-
-int max17043_init(max17043_t *dev, i2c_t i2c, uint8_t address)
-{
+int max17043_init(max17043_t *dev, i2c_t i2c, uint8_t address){
     /* write device descriptor */
     dev->i2c = i2c;
     dev->addr = address;
@@ -64,26 +40,53 @@ int max17043_init(max17043_t *dev, i2c_t i2c, uint8_t address)
     return 0;
 }
 
-int max17043_read_vcell(const max17043_t *dev, uint8_t *vcell)
+/** @brief Read one 16 bit register from a INA219 device and swap byte order, if necessary.*/
+/*static int max17043_read_reg(const max17043_t *dev, uint8_t reg, uint16_t *out)
 {
-    return max17043_read_reg(dev, MAX17043_REG_VCELL, (uint8_t *)vcell);
-}
+    union {
+        uint8_t c[2];
+        uint16_t u16;
+    } tmp = { .u16 = 0 };
+    int status = 0;
 
-/*int max17043_read_soc(const max17043_t *dev, uint16_t config)
-{
-    return max17043_read_reg(dev, MAX17043_REG_SOC , config);
-}
+    status = i2c_read_regs(dev->i2c, dev->addr, reg, &tmp.c[0], 2);
 
-int max17043_set_mode(const max17043_t *dev, uint16_t config)
-{
-    return max17043_write_reg(dev, MAX17043_REG_MODE, config);
-}
+    if (status != 2) {
+        return -1;
+    }
 
-int max17043_set_config(const max17043_t *dev, uint16_t config)
-{
-    return max17043_write_reg(dev, MAX17043_REG_CONFIG, config);
+    *out = ntohs(tmp.u16);
+    return 0;
 }*/
 
+float max17043_read_vcell(const max17043_t *dev){
+
+    int8_t msb = 0;
+    int8_t lsb = 0;
+    printf("address: %d\n", dev->addr);
+
+    i2c_acquire(dev->i2c);
+    i2c_write_byte(dev->i2c, dev->addr, MAX17043_REG_VCELL);
+
+    i2c_read_byte(dev->i2c, dev->addr, &msb);
+    i2c_read_byte(dev->i2c, dev->addr, &lsb);
+
+    i2c_release(dev->i2c);
+
+    float temp, xo;
+
+    temp = ((lsb|(msb << 8)) >> 4);
+    xo = 1.25* temp;
 
 
+    return xo;
+
+
+
+}
+
+/*int max17043_read_vcell(const max17043_t *dev, int16_t *voltage)
+{
+    return max17043_read_reg(dev, MAX17043_REG_VCELL, (uint16_t *)voltage);
+}*/
 
