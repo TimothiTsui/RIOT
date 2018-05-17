@@ -30,13 +30,12 @@
 #include "xtimer.h"
 #include "max17043.h"
 
-#define CONFIG   (MAX17043_CONFIG_DEFAULT)
-
-#define SLEEP    (100 * 40000U)
+#define SLEEP    (100 * 30000U)
 
 int main(void){
     max17043_t dev;
-    //int16_t val;
+    // uint16_t val;
+    float temp = 0;
 
     puts("INA219 sensor driver test application\n");
     printf("Initializing I2C_%i... ", TEST_MAX17043_I2C);
@@ -54,21 +53,26 @@ int main(void){
         return 1;
     }
 
-    while(1) {
-       print_float(max17043_read_vcell(&dev), 4);
+    //while(1) {
 
-      /*     Read cell voltage from vcel register
-        if(ret_val == -1) {
-            puts("write failed");
-        }
-        else {
-            //val = (val >> 4);
-            printf("write success: %d\n", val);
-        }*/
+
+        max17043_read_soc(&dev, &temp);
+
+        print_float(temp, 2);
+        puts("%\n");
+        // print("voltage: %i\n", val);
+
+        /*     Read cell voltage from vcel register
+         if(ret_val == -1) {
+         puts("write failed");
+         }
+         else {
+         //val = (val >> 4);
+         printf("write success: %d\n", val);
+         }*/
 
         xtimer_usleep(SLEEP);
-
-    }
-
+//
+    //}
     return 0;
 }
