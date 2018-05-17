@@ -49,12 +49,13 @@ typedef enum max17043_mode {
 } max17043_mode_t;
 
 typedef enum max17043_config {
+    MAX17043_CONFIG_DEFAULT = 0x971C,
     MAX17043_CONFIG_SLEEP = 0x0080,
     MAX17043_CONFIG_NOT_SLEEP = 0x0000,
 } max17043_config_t;
 
-/** max17043 reset command bit (in configuration register) */
-#define max17043_RESET_BIT (0x8000)
+///** max17043 reset command bit (in configuration register) */
+//#define max17043_RESET_BIT (0x8000)
 
 
 /**

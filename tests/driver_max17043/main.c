@@ -13,7 +13,7 @@
  * @file
  * @brief       Test application for the max17043 sensor driver
  *
- * @author      Joakim Nohlgård <joakim.nohlgard@eistec.se>
+ * @author      Dhruv Verma <dhruv2scs@gmail.com>
  *
  * @}
  */
@@ -30,18 +30,13 @@
 #include "xtimer.h"
 #include "max17043.h"
 
-/* Use the following configuration:
- *
- *  - Continuous measurements, both shunt and bus voltage
- *  - +/- 320 mV Vshunt range
- *  - 32 V maximum bus voltage
- *  - 12 bit ADC resolution, no hardware averaging
- */
+#define CONFIG   (MAX17043_CONFIG_DEFAULT)
+
 #define SLEEP    (100 * 20000U)
 
 int main(void){
     max17043_t dev;
-//    int16_t val;
+    int16_t val;
 
     puts("max17043 sensor driver test application\n");
     printf("Initializing I2C_%i... ", TEST_max17043_I2C);
@@ -59,14 +54,14 @@ int main(void){
         return 1;
     }
     puts("Set configuration register");
-//    if(max17043_set_config(&dev, CONFIG) == 0) {
-//        puts("[OK]\n");
-//    }
-//    else {
-//        puts("[Failed]");
-//        return 1;
-//    }
-//
+    if(max17043_set_config(&dev, CONFIG) == 0) {
+        puts("[OK]\n");
+    }
+    else {
+        puts("[Failed]");
+        return 1;
+    }
+
 //    puts("Set calibration register");
 //    if(max17043_set_calibration(&dev, CALIBRATION) == 0) {
 //        puts("[OK]\n");
@@ -79,9 +74,9 @@ int main(void){
     while(1) {
         printf("Hallo!");
         /* Read shunt resistor voltage, in millivolts */
-//        max17043_read_vcell(&dev, &val);
-//        val = (val >> 4);
-//        printf("Vcell: %6d mV", (val));
+        max17043_read_vcell(&dev, &val);
+        val = (val >> 4);
+        printf("Vcell: %6d mV", (val));
 //
 //        /* Read VBUS voltage, in volts */
 ////        max17043_read_soc(&dev, &val);
