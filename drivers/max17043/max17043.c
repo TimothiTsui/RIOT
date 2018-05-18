@@ -61,6 +61,26 @@ static int max17043_read_reg(const max17043_t *dev, uint8_t reg, uint16_t *out)
     return 0;
 }
 
+/** @brief Write one 16 bit register to a INA219 device and swap byte order, if necessary. */
+static int max17043_write_reg(const max17043_t *dev, uint8_t reg, uint16_t in)
+{
+    union {
+        uint8_t c[2];
+        uint16_t u16;
+    } tmp = { .u16 = 0 };
+    int status = 0;
+
+    tmp.u16 = htons(in);
+
+    status = i2c_write_regs(dev->i2c, dev->addr, reg, &tmp.c[0], 2);
+
+    if (status != 2) {
+        return -1;
+    }
+
+    return 0;
+}
+
 int max17043_read_soc(const max17043_t *dev, uint16_t *soc){
     return max17043_read_reg(dev, MAX17043_REG_SOC, soc);
 }
@@ -72,3 +92,29 @@ int max17043_read_vcell(const max17043_t *dev, uint16_t *vcell){
 
     return status;
 }
+
+int max17043_set_quick_start(const max17043_t *dev){
+    return max17043_write_reg(dev, MAX17043_REG_MODE, MAX17043_MODE_QUICK_START);
+}
+
+
+int max17043_set_sleep(const max17043_t *dev){
+    uint16_t config;
+    max17043_read_reg(dev, MAX17043_REG_CONFIG, &config);
+    printf("Config value: %x\n", config);
+
+    config ^= 1 << 7;
+
+
+    if(max17043_write_reg(dev, MAX17043_REG_CONFIG, config) == -1){
+        printf("Write error config");
+    }
+    else{
+        max17043_read_reg(dev, MAX17043_REG_CONFIG, &config);
+        printf("Write successful: %x\n", config);
+    }
+    return 0;
+}
+
+
+

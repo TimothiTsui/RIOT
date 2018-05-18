@@ -37,13 +37,13 @@ int main(void){
     // uint16_t val;
     uint16_t temp;
 
-    puts("INA219 sensor driver test application\n");
+    puts("MAX17043 sensor driver test application\n");
     printf("Initializing I2C_%i... ", TEST_MAX17043_I2C);
     if(i2c_init_master(TEST_MAX17043_I2C, I2C_SPEED_FAST) < 0) {
         return -1;
     }
 
-    printf("Initializing max17043 sensor at I2C_%i, address 0x%02x... ",
+    printf("Initializing MAX17043 sensor at I2C_%i, address 0x%02x... ",
     TEST_MAX17043_I2C, TEST_MAX17043_ADDR);
     if(max17043_init(&dev, TEST_MAX17043_I2C, TEST_MAX17043_ADDR) == 0) {
         puts("[OK]\n");
@@ -55,32 +55,34 @@ int main(void){
 
     //while(1) {
 
+    max17043_read_soc(&dev, &temp);
+    printf("Raw soc value: %d\n", temp);
+    float val = temp * .001;
+    puts("Soc value: ");
+    print_float(val, 2);
+    puts("%\n");
 
-        max17043_read_soc(&dev, &temp);
-        printf("msb: %d\n", temp);
-        float val = temp*.001;
-        print_float(val, 2);
-        puts("%\n");
+    max17043_read_vcell(&dev, &temp);
+    printf("Raw voltage value: %d\n", temp);
+    val = temp * 0.00125;
+    puts("Voltage value: ");
+    print_float(val, 2);
+    puts("V\n");
 
-        max17043_read_vcell(&dev, &temp);
-        printf("%dV\n", temp);
-        val = temp*0.00125;
-        print_float(val, 2);
-        puts("V\n");
+     max17043_set_quick_start(&dev);
 
-        // print("voltage: %i\n", val);
+//    if(ret_val == -1) {
+//        puts("write failed");
+//    }
+//    else {
+//        printf("write success: %d\n", ret_val);
+//    }
 
-        /*     Read cell voltage from vcel register
-         if(ret_val == -1) {
-         puts("write failed");
-         }
-         else {
-         //val = (val >> 4);
-         printf("write success: %d\n", val);
-         }*/
+     max17043_set_sleep(&dev);
 
-        xtimer_usleep(SLEEP);
+
+      xtimer_usleep(SLEEP);
 //
-    //}
-    return 0;
-}
+        //}
+        return 0;
+    }

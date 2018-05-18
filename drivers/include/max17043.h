@@ -79,15 +79,13 @@ int max17043_init(max17043_t *dev, i2c_t i2c, uint8_t address);
  * @return                  <0 on error
  */
 
-int max17043_read_soc(const max17043_t *dev, uint16_t *temp);
+int max17043_read_soc(const max17043_t *dev, uint16_t *soc);
 
-int max17043_read_vcell(const max17043_t *dev, uint16_t *temp);
+int max17043_read_vcell(const max17043_t *dev, uint16_t *vcell);
 
-/*int max17043_read_vcell(const max17043_t *dev, int16_t *voltage);*/
+int max17043_set_quick_start(const max17043_t *dev);
 
-/*int max17043_read_soc(const max17043_t *dev, int16_t *battery);*/
-
-
+int max17043_set_sleep(const max17043_t *dev);
 
 #ifdef __cplusplus
 }
