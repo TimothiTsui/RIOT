@@ -57,10 +57,16 @@ int main(void){
 
 
         max17043_read_soc(&dev, &temp);
-        print("msb: %d\n", temp);
+        printf("msb: %d\n", temp);
+        float val = temp*.001;
+        print_float(val, 2);
+        puts("%\n");
 
-       /* max17043_read_vcell(&dev, &temp);
-        print("%iV\n", temp);*/
+        max17043_read_vcell(&dev, &temp);
+        printf("%dV\n", temp);
+        val = temp*0.00125;
+        print_float(val, 2);
+        puts("V\n");
 
         // print("voltage: %i\n", val);
 

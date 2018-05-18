@@ -99,7 +99,7 @@ int max17043_read_vcell(const max17043_t *dev, uint16_t *temp){
     //    *voltage = (uint16_t)msb;
 //    temp = ((uint16_t)msb << 8) | lsb;
 
-    *temp = ((lsb | (msb << 8)) >> 4);
+    *temp = ((lsb | ((uint16_t)msb << 8)) >> 4);
 
     return 0;
 }
