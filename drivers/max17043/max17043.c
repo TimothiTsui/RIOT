@@ -42,70 +42,33 @@ int max17043_init(max17043_t *dev, i2c_t i2c, uint8_t address){
 }
 
 /** @brief Read one 16 bit register from a INA219 device and swap byte order, if necessary.*/
-//static int max17043_read_reg(const max17043_t *dev, uint8_t reg, uint16_t *out)
-//{
-//    union {
-//        uint8_t c[2];
-//        uint16_t u16;
-//    } tmp = { .u16 = 0 };
-//    int status = 0;
-//
-//    status = i2c_read_regs(dev->i2c, dev->addr, reg, &tmp.c[0], 2);
-//
-//    if (status != 2) {
-//        return -1;
-//    }
-//
-//    *out = ntohs(tmp.u16);
-//    return 0;
-//}
-int max17043_read_soc(const max17043_t *dev, uint16_t *temp){
+static int max17043_read_reg(const max17043_t *dev, uint8_t reg, uint16_t *out)
+{
+    union {
+        uint8_t c[2];
+        uint16_t u16;
+    } tmp = { .u16 = 0 };
+    int status = 0;
 
-    uint8_t msb = 0;
-    uint8_t lsb = 0;
+    status = i2c_read_regs(dev->i2c, dev->addr, reg, &tmp.c[0], 2);
 
-    i2c_acquire(dev->i2c);
-    i2c_write_byte(dev->i2c, dev->addr, MAX17043_REG_SOC);
+    if (status != 2) {
+        return -1;
+    }
 
-    i2c_read_byte(dev->i2c, dev->addr, &msb);
-    i2c_read_byte(dev->i2c, dev->addr, &lsb);
-
-    i2c_release(dev->i2c);
-
-//    uint16_t voltage = ((lsb|(msb << 8)) >> 4);
-//    printf("msb: %x\n", voltage);
-//    *voltage = (uint16_t)msb;
-    *temp = ((uint16_t)msb * 1000) + lsb;
-
+    *out = ntohs(tmp.u16);
 
     return 0;
 }
 
-int max17043_read_vcell(const max17043_t *dev, uint16_t *temp){
-    uint8_t msb = 0;
-    uint8_t lsb = 0;
-    //printf("address: %x\n", dev->addr);
-
-    i2c_acquire(dev->i2c);
-    i2c_write_byte(dev->i2c, dev->addr, MAX17043_REG_VCELL);
-
-    i2c_read_byte(dev->i2c, dev->addr, &msb);
-    i2c_read_byte(dev->i2c, dev->addr, &lsb);
-
-    i2c_release(dev->i2c);
-
-    //    uint16_t voltage = ((lsb|(msb << 8)) >> 4);
-    //    printf("msb: %x\n", voltage);
-    //    *voltage = (uint16_t)msb;
-//    temp = ((uint16_t)msb << 8) | lsb;
-
-    *temp = ((lsb | ((uint16_t)msb << 8)) >> 4);
-
-    return 0;
+int max17043_read_soc(const max17043_t *dev, uint16_t *soc){
+    return max17043_read_reg(dev, MAX17043_REG_SOC, soc);
 }
 
-//int max17043_read_vcell(const max17043_t *dev, int16_t *voltage)
-//{
-//    return max17043_read_reg(dev, MAX17043_REG_VCELL, (uint16_t *)voltage);
-//}
+int max17043_read_vcell(const max17043_t *dev, uint16_t *vcell){
+    int status = max17043_read_reg(dev, MAX17043_REG_VCELL, vcell);
 
+    *vcell = *vcell >> 4;
+
+    return status;
+}
