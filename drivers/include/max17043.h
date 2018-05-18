@@ -79,7 +79,9 @@ int max17043_init(max17043_t *dev, i2c_t i2c, uint8_t address);
  * @return                  <0 on error
  */
 
-int max17043_read_soc(const max17043_t *dev, float *temp);
+int max17043_read_soc(const max17043_t *dev, uint16_t *temp);
+
+int max17043_read_vcell(const max17043_t *dev, uint16_t *temp);
 
 /*int max17043_read_vcell(const max17043_t *dev, int16_t *voltage);*/
 
