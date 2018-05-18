@@ -28,7 +28,7 @@
 #include <fmt.h>
 
 #include "xtimer.h"
-#include "max17043.h"
+#include <max17043.h>
 
 #define SLEEP    (100 * 30000U)
 
@@ -57,7 +57,7 @@ int main(void){
 
 
         max17043_read_soc(&dev, &temp);
-        print("%" PRIu16 "\n", temp);
+        print("msb: %d\n", temp);
 
        /* max17043_read_vcell(&dev, &temp);
         print("%iV\n", temp);*/

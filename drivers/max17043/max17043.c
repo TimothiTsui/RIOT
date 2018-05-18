@@ -59,7 +59,6 @@ int max17043_init(max17043_t *dev, i2c_t i2c, uint8_t address){
 //    *out = ntohs(tmp.u16);
 //    return 0;
 //}
-
 int max17043_read_soc(const max17043_t *dev, uint16_t *temp){
 
     uint8_t msb = 0;
@@ -76,7 +75,8 @@ int max17043_read_soc(const max17043_t *dev, uint16_t *temp){
 //    uint16_t voltage = ((lsb|(msb << 8)) >> 4);
 //    printf("msb: %x\n", voltage);
 //    *voltage = (uint16_t)msb;
-   *temp = (uint16_t)msb;
+    *temp = ((uint16_t)msb * 1000) + lsb;
+
 
     return 0;
 }
@@ -99,7 +99,7 @@ int max17043_read_vcell(const max17043_t *dev, uint16_t *temp){
     //    *voltage = (uint16_t)msb;
 //    temp = ((uint16_t)msb << 8) | lsb;
 
-    *temp = ((lsb|(msb << 8)) >> 4);
+    *temp = ((lsb | (msb << 8)) >> 4);
 
     return 0;
 }
