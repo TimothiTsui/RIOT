@@ -28,7 +28,7 @@
 #include "byteorder.h"
 #include "include/max17043-regs.h"
 
-#define ENABLE_DEBUG    (1)
+#define ENABLE_DEBUG    (0)
 #include "debug.h"
 
 /** @brief Read one 16 bit register from a max17043 device and swap byte order, if necessary. */
@@ -60,7 +60,7 @@ int max17043_init(max17043_t *dev, i2c_t i2c, uint8_t address){
 //    return 0;
 //}
 
-int max17043_read_soc(const max17043_t *dev, float *temp){
+int max17043_read_soc(const max17043_t *dev, uint16_t *temp){
 
     uint8_t msb = 0;
     uint8_t lsb = 0;
@@ -76,7 +76,30 @@ int max17043_read_soc(const max17043_t *dev, float *temp){
 //    uint16_t voltage = ((lsb|(msb << 8)) >> 4);
 //    printf("msb: %x\n", voltage);
 //    *voltage = (uint16_t)msb;
-   *temp = ((0.003906)*lsb + msb);
+   *temp = (uint16_t)msb;
+
+    return 0;
+}
+
+int max17043_read_vcell(const max17043_t *dev, uint16_t *temp){
+    uint8_t msb = 0;
+    uint8_t lsb = 0;
+    //printf("address: %x\n", dev->addr);
+
+    i2c_acquire(dev->i2c);
+    i2c_write_byte(dev->i2c, dev->addr, MAX17043_REG_VCELL);
+
+    i2c_read_byte(dev->i2c, dev->addr, &msb);
+    i2c_read_byte(dev->i2c, dev->addr, &lsb);
+
+    i2c_release(dev->i2c);
+
+    //    uint16_t voltage = ((lsb|(msb << 8)) >> 4);
+    //    printf("msb: %x\n", voltage);
+    //    *voltage = (uint16_t)msb;
+//    temp = ((uint16_t)msb << 8) | lsb;
+
+    *temp = ((lsb|(msb << 8)) >> 4);
 
     return 0;
 }

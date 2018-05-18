@@ -35,7 +35,7 @@
 int main(void){
     max17043_t dev;
     // uint16_t val;
-    float temp = 0;
+    uint16_t temp;
 
     puts("INA219 sensor driver test application\n");
     printf("Initializing I2C_%i... ", TEST_MAX17043_I2C);
@@ -57,9 +57,11 @@ int main(void){
 
 
         max17043_read_soc(&dev, &temp);
+        print("%" PRIu16 "\n", temp);
 
-        print_float(temp, 2);
-        puts("%\n");
+       /* max17043_read_vcell(&dev, &temp);
+        print("%iV\n", temp);*/
+
         // print("voltage: %i\n", val);
 
         /*     Read cell voltage from vcel register
