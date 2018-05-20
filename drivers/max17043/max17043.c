@@ -22,7 +22,7 @@
 
 #include <stdint.h>
 #include <fmt.h>
-
+#include <bitfield.h>
 #include "max17043.h"
 #include "periph/i2c.h"
 #include "byteorder.h"
@@ -81,14 +81,18 @@ static int max17043_write_reg(const max17043_t *dev, uint8_t reg, uint16_t in)
     return 0;
 }
 
-int max17043_read_soc(const max17043_t *dev, uint16_t *soc){
-    return max17043_read_reg(dev, MAX17043_REG_SOC, soc);
+int max17043_read_soc(const max17043_t *dev, uint8_t *soc, uint8_t *soc_decimal){
+    uint16_t result;
+    int status = max17043_read_reg(dev, MAX17043_REG_SOC, &result);
+    *soc = (result & 0xFF00) >> 8;
+    *soc_decimal = (result & 0x00FF);
+    return status;
 }
 
-int max17043_read_vcell(const max17043_t *dev, uint16_t *vcell){
+int max17043_read_cell_voltage(const max17043_t *dev, uint16_t *vcell){
     int status = max17043_read_reg(dev, MAX17043_REG_VCELL, vcell);
 
-    *vcell = *vcell >> 4;
+    *vcell = (*vcell >> 4) * 1.25;
 
     return status;
 }
@@ -104,7 +108,6 @@ int max17043_set_sleep(const max17043_t *dev){
     printf("Config value: %x\n", config);
 
     config ^= 1 << 7;
-
 
     if(max17043_write_reg(dev, MAX17043_REG_CONFIG, config) == -1){
         printf("Write error config");

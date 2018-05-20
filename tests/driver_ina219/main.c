@@ -108,7 +108,7 @@
 #define CALIBRATION   (10240)
 #define CURRENT_DEVIDER_MA (25)
 #define POWER_MULTIPLIER_MW (1)
-#define SLEEP    (100 * 30000U)
+#define SLEEP    (100 * 20000U)
 
 int main(void){
 

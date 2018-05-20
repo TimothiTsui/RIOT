@@ -34,8 +34,10 @@
 
 int main(void){
     max17043_t dev;
-    // uint16_t val;
-    uint16_t temp;
+
+    uint8_t percent;
+    uint8_t percent_decimal;
+    uint16_t voltage;
 
     puts("MAX17043 sensor driver test application\n");
     printf("Initializing I2C_%i... ", TEST_MAX17043_I2C);
@@ -53,23 +55,19 @@ int main(void){
         return 1;
     }
 
-    //while(1) {
+    /* Read state of charge. MSB is percent,
+     * LSB is percent_decimal. LSB 1/256 = 0.003906 precision */
+    max17043_read_soc(&dev, &percent, &percent_decimal);
+    puts("State of charge:");
+    print_float(percent + (percent_decimal * 0.003906), 3);
+    puts("% \n");
 
-    max17043_read_soc(&dev, &temp);
-    printf("Raw soc value: %d\n", temp);
-    float val = temp * .001;
-    puts("Soc value: ");
-    print_float(val, 2);
-    puts("%\n");
+    /* Read cell voltage, in millivolts */
+    max17043_read_cell_voltage(&dev, &voltage);
+    printf("Voltage:\n");
+    printf("%dmV \n\n", voltage);
 
-    max17043_read_vcell(&dev, &temp);
-    printf("Raw voltage value: %d\n", temp);
-    val = temp * 0.00125;
-    puts("Voltage value: ");
-    print_float(val, 2);
-    puts("V\n");
-
-     max17043_set_quick_start(&dev);
+    //max17043_set_quick_start(&dev);
 
 //    if(ret_val == -1) {
 //        puts("write failed");
@@ -78,11 +76,7 @@ int main(void){
 //        printf("write success: %d\n", ret_val);
 //    }
 
-     max17043_set_sleep(&dev);
+    //max17043_set_sleep(&dev);
 
-
-      xtimer_usleep(SLEEP);
-//
-        //}
-        return 0;
-    }
+    return 0;
+}
