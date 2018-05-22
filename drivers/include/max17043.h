@@ -87,6 +87,9 @@ int max17043_set_quick_start(const max17043_t *dev);
 
 int max17043_set_sleep(const max17043_t *dev);
 
+int max17043_reset(const max17043_t *dev);
+
+
 #ifdef __cplusplus
 }
 #endif
