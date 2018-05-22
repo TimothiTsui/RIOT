@@ -36,7 +36,7 @@ typedef enum max17043_reg {
     MAX17043_REG_WRITE         = 0x6C,
     MAX17043_REG_READ          = 0x6D,
     MAX17043_REG_VCELL         = 0x02, /**< reports measurement of battery voltage (read only) */
-    MAX17043_REG_SOC           = 0x04, /**< reports battery voltage (read only) */
+    MAX17043_REG_SOC           = 0x04, /**< reports battery state of charge in %. Decimal 1/256% (read only) */
     MAX17043_REG_MODE          = 0x06, /**< sends special commands to IC (write only) */
     MAX17043_REG_VERSION       = 0x08, /**< returns IC version (read only) */
     MAX17043_REG_CONFIG        = 0x0C, /**< adjusts IC performance based on application condition (read/write) */

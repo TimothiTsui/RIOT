@@ -162,7 +162,7 @@ int main(void){
         val = (val >> INA219_BUS_VOLTAGE_SHIFT) * 4;
         print("\tbus: ", 6);
         print_float((val * 0.001), 2);
-        print(" V ", 4);
+        print(" V \n", 5);
 
         /* Read current register milliampere, the scale depends on the value of the
          * calibration register */
