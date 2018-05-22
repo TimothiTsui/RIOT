@@ -30,7 +30,7 @@
 #include "xtimer.h"
 #include <max17043.h>
 
-#define SLEEP    (100 * 30000U)
+#define SLEEP    (100 * 300000U)
 
 int main(void){
     max17043_t dev;
@@ -55,26 +55,42 @@ int main(void){
         return 1;
     }
 
-    /* Read state of charge. MSB is percent,
-     * LSB is percent_decimal. LSB 1/256 = 0.003906 precision */
-    max17043_read_soc(&dev, &percent, &percent_decimal);
-    puts("State of charge:");
-    print_float(percent + (percent_decimal * 0.003906), 3);
-    puts("% \n");
-
-    /* Read cell voltage, in millivolts */
-    max17043_read_cell_voltage(&dev, &voltage);
-    printf("Voltage:\n");
-    printf("%dmV \n\n", voltage);
-
-    //max17043_set_quick_start(&dev);
-
+//    /* Power-On reset */
+//    int ret_val = max17043_reset(&dev);
+//
 //    if(ret_val == -1) {
 //        puts("write failed");
 //    }
 //    else {
 //        printf("write success: %d\n", ret_val);
 //    }
+//
+//    xtimer_usleep(SLEEP);
+//
+//    /* Making a quick start */
+//    ret_val = max17043_set_quick_start(&dev);
+//
+//    if(ret_val == -1) {
+//        puts("write failed");
+//    }
+//    else {
+//        printf("write success: %d\n", ret_val);
+//    }
+
+    while(1) {
+        /* Read state of charge. MSB is percent,
+         * LSB is percent_decimal. LSB 1/256 = 0.003906 precision */
+        max17043_read_soc(&dev, &percent, &percent_decimal);
+        puts("State of charge:");
+        print_float(percent + (percent_decimal * 0.003906), 3);
+        puts("% \n");
+
+        /* Read cell voltage, in millivolts */
+        max17043_read_cell_voltage(&dev, &voltage);
+        printf("Voltage:\n");
+        printf("%dmV \n\n", voltage);
+        xtimer_usleep(SLEEP);
+    }
 
     //max17043_set_sleep(&dev);
 

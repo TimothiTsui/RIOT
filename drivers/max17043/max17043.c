@@ -50,7 +50,9 @@ static int max17043_read_reg(const max17043_t *dev, uint8_t reg, uint16_t *out)
     } tmp = { .u16 = 0 };
     int status = 0;
 
+    i2c_acquire(dev->i2c);
     status = i2c_read_regs(dev->i2c, dev->addr, reg, &tmp.c[0], 2);
+    i2c_release(dev->i2c);
 
     if (status != 2) {
         return -1;
@@ -72,7 +74,9 @@ static int max17043_write_reg(const max17043_t *dev, uint8_t reg, uint16_t in)
 
     tmp.u16 = htons(in);
 
+    i2c_acquire(dev->i2c);
     status = i2c_write_regs(dev->i2c, dev->addr, reg, &tmp.c[0], 2);
+    i2c_release(dev->i2c);
 
     if (status != 2) {
         return -1;
@@ -84,6 +88,7 @@ static int max17043_write_reg(const max17043_t *dev, uint8_t reg, uint16_t in)
 int max17043_read_soc(const max17043_t *dev, uint8_t *soc, uint8_t *soc_decimal){
     uint16_t result;
     int status = max17043_read_reg(dev, MAX17043_REG_SOC, &result);
+    printf("soc raw 16bit: %x\n", result);
     *soc = (result & 0xFF00) >> 8;
     *soc_decimal = (result & 0x00FF);
     return status;
@@ -101,6 +106,11 @@ int max17043_set_quick_start(const max17043_t *dev){
     return max17043_write_reg(dev, MAX17043_REG_MODE, MAX17043_MODE_QUICK_START);
 }
 
+int max17043_reset(const max17043_t *dev)
+{
+    return max17043_write_reg(dev, MAX17043_REG_COMMAND, 0x5400);
+
+}
 
 int max17043_set_sleep(const max17043_t *dev){
     uint16_t config;
