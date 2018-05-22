@@ -168,14 +168,14 @@ int main(void){
          * calibration register */
         ina219_read_current(&dev, &val);
         print("\tcurrent: ", 10);
-        print_float(((val / CURRENT_DEVIDER_MA) ), 2);
+        print_float(((val / CURRENT_DEVIDER_MA) ), 5);
         print(" mA", 4);
 
         /* Read power register in watts, the scale depends on the value of the
          * calibration register */
         ina219_read_power(&dev, &val);
         print("\tpower: ", 8);
-        print_float(((val) * POWER_MULTIPLIER_MW), 4);
+        print_float(((val) * POWER_MULTIPLIER_MW), 6);
         print(" mW\n", 4);
 
         xtimer_usleep(SLEEP);
