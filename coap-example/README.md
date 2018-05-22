@@ -83,7 +83,7 @@ libcoap CLI
 
 * Get the name of the board:
 ```
-    # coap-client -m get coap://[fe80::105d:80ff:fe38:3ce8%tap0]/riot/board
+    # coap-client -m get coap://[fe80::ac3c:16ff:fed3:897b%tap0]/riot/board
 ```
 
 * Update and get the internal value:
