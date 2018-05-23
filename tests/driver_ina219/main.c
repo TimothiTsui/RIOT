@@ -108,7 +108,7 @@
 #define CALIBRATION   (10240)
 #define CURRENT_DEVIDER_MA (25)
 #define POWER_MULTIPLIER_MW (1)
-#define SLEEP    (100 * 20000U)
+#define SLEEP    (100 * 100000U)
 
 int main(void){
 
@@ -151,32 +151,32 @@ int main(void){
     while(1) {
         /* Read shunt resistor voltage, in millivolts */
         ina219_read_shunt(&dev, &val);
-        print("shunt: ", 7);
+        puts("shunt: ");
         print_float((val * 0.01), 2);
-        print(" mV ", 4);
+        puts(" mV ");
 
         /* Read VBUS voltage, in volts */
         ina219_read_bus(&dev, &val);
         /* The bus voltage is found in the topmost 13 bits of the bus voltage
          * register */
         val = (val >> INA219_BUS_VOLTAGE_SHIFT) * 4;
-        print("\tbus: ", 6);
+        puts("bus: ");
         print_float((val * 0.001), 2);
-        print(" V \n", 5);
+        puts(" V");
 
         /* Read current register milliampere, the scale depends on the value of the
          * calibration register */
         ina219_read_current(&dev, &val);
-        print("\tcurrent: ", 10);
+        puts("current: ");
         print_float(((val / CURRENT_DEVIDER_MA) ), 5);
-        print(" mA", 4);
+        puts(" mA");
 
         /* Read power register in watts, the scale depends on the value of the
          * calibration register */
         ina219_read_power(&dev, &val);
-        print("\tpower: ", 8);
+        puts("power: ");
         print_float(((val) * POWER_MULTIPLIER_MW), 6);
-        print(" mW\n", 4);
+        puts(" mW\n");
 
         xtimer_usleep(SLEEP);
     }
