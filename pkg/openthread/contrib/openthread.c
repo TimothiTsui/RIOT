@@ -32,7 +32,7 @@
 
 #ifdef MODULE_CC2538_RF
 #include "cc2538_rf.h"
-//#include "net/gnrc/netif/ieee802154.h"
+#include "net/gnrc/netif/ieee802154.h"
 #endif
 
 #define ENABLE_DEBUG (1)
@@ -53,10 +53,10 @@
 static at86rf2xx_t at86rf2xx_dev;
 #endif
 
-//#ifdef MODULE_CC2538_RF
-//static cc2538_rf_t cc2538_rf_dev;
+#ifdef MODULE_CC2538_RF
+static cc2538_rf_t cc2538_rf_dev;
 //static char _cc2538_rf_stack[CC2538_MAC_STACKSIZE];
-//#endif
+#endif
 
 #define OPENTHREAD_NETDEV_BUFLEN (ETHERNET_MAX_LEN)
 
@@ -91,7 +91,7 @@ void openthread_bootstrap(void){
 #endif
 
 #ifdef MODULE_CC2538_RF
-    cc2538_setup(cc2538_rf_t->netdev);
+    cc2538_setup(&cc2538_rf_dev);
 //    gnrc_netif_ieee802154_create(_cc2538_rf_stack,
 //                                     CC2538_MAC_STACKSIZE,
 //                                     CC2538_MAC_PRIO, "cc2538_rf",
