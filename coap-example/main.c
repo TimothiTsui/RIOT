@@ -18,6 +18,7 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "net/nanocoap.h"
 #include "net/nanocoap_sock.h"
@@ -34,6 +35,7 @@ extern int _gnrc_netif_config(int argc, char **argv);
 
 int main(void)
 {
+    //system("ifconfig tap0 | awk '/inet6/{print $2}'");
     puts("RIOT nanocoap example application");
 
     /* nanocoap_server uses gnrc sock which uses gnrc which needs a msg queue */
@@ -49,6 +51,7 @@ int main(void)
     /* initialize nanocoap server instance */
     uint8_t buf[COAP_INBUF_SIZE];
     sock_udp_ep_t local = { .port=COAP_PORT, .family=AF_INET6 };
+    system("coap-client -m post coap://[::1]:5683/lights -e 'hello'");
     nanocoap_server(&local, buf, sizeof(buf));
 
     /* should be never reached */
