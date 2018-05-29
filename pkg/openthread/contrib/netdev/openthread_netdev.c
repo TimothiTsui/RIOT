@@ -23,7 +23,7 @@
 #include "openthread/cli.h"
 #include "openthread/instance.h"
 #include "openthread/ip6.h"
-#include "openthread/platform/alarm.h"
+#include "openthread/platform/alarm-milli.h"
 #include "openthread/platform/uart.h"
 #include "openthread/tasklet.h"
 #include "openthread/thread.h"
@@ -44,7 +44,7 @@ static otInstance *sInstance;
  * @{
  */
 #ifndef OPENTHREAD_PANID
-#define OPENTHREAD_PANID            0x1234
+#define OPENTHREAD_PANID            0xface
 #endif
 #ifndef OPENTHREAD_CHANNEL
 #define OPENTHREAD_CHANNEL          (26U)
@@ -78,7 +78,7 @@ static void *_openthread_event_loop(void *arg) {
     otPlatUartEnable();
 
     /* init OpenThread */
-    sInstance = otInstanceInit();
+    sInstance = otInstanceInitSingle();
 
     msg_init_queue(_queue, OPENTHREAD_QUEUE_LEN);
     netdev_t *dev;
@@ -107,7 +107,7 @@ static void *_openthread_event_loop(void *arg) {
         switch (msg.type) {
             case OPENTHREAD_XTIMER_MSG_TYPE_EVENT:
                 /* Tell OpenThread a time event was received */
-                otPlatAlarmFired(sInstance);
+                otPlatAlarmMilliFired(sInstance);
                 break;
             case OPENTHREAD_NETDEV_MSG_TYPE_EVENT:
                 /* Received an event from driver */

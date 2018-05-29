@@ -25,7 +25,7 @@
 #include "cc2538_rf.h"
 #include "cc2538_rf_netdev.h"
 
-#define ENABLE_DEBUG    (0)
+#define ENABLE_DEBUG    (1)
 #include "debug.h"
 
 #define CC2538_ACCEPT_FT_2_ACK     (1 << 5)
