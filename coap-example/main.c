@@ -51,7 +51,7 @@ int main(void)
     /* initialize nanocoap server instance */
     uint8_t buf[COAP_INBUF_SIZE];
     sock_udp_ep_t local = { .port=COAP_PORT, .family=AF_INET6 };
-    system("coap-client -m post coap://[::1]:5683/lights -e 'hello'");
+    system("coap-client -m get coap://[::1]:5683/lights");
     nanocoap_server(&local, buf, sizeof(buf));
 
     /* should be never reached */
