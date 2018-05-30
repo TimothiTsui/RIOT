@@ -1,6 +1,6 @@
 PKG_NAME=openthread
 PKG_URL=https://github.com/openthread/openthread.git
-PKG_VERSION=fbfd76a990b81f007957e1bd774e51bce742e53e
+PKG_VERSION=52644515a6c6fdbfa0576515c849ce65d241aafa
 PKG_BUILDDIR ?= $(BINDIRBASE)/pkg/$(BOARD)/$(PKG_NAME)
 
 $(info Compile OpenThread for FTD device)

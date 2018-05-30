@@ -28,66 +28,99 @@
 
 /* adapted from OpenThread posix example:
  * See: https://github.com/openthread/openthread/blob/master/examples/platforms/posix/logging.c */
-void otPlatLog(otLogLevel aLogLevel, otLogRegion aLogRegion, const char *aFormat, ...)
-{
+void otPlatLog(otLogLevel aLogLevel, otLogRegion aLogRegion,
+        const char *aFormat, ...){
     va_list args;
 
-    switch (aLogLevel) {
-        case kLogLevelNone:
-            fprintf(stderr, "NONE ");
-            break;
+    switch(aLogLevel) {
+    case OT_LOG_LEVEL_NONE:
+        fprintf(stderr, "NONE ");
+        break;
 
-        case kLogLevelCrit:
-            fprintf(stderr, "CRIT ");
-            break;
+    case OT_LOG_LEVEL_CRIT:
+        fprintf(stderr, "CRIT ");
+        break;
 
-        case kLogLevelWarn:
-            fprintf(stderr, "WARN ");
-            break;
+    case OT_LOG_LEVEL_WARN:
+        fprintf(stderr, "WARN ");
+        break;
 
-        case kLogLevelInfo:
-            fprintf(stderr, "INFO ");
-            break;
+    case OT_LOG_LEVEL_INFO:
+        fprintf(stderr, "INFO ");
+        break;
 
-        case kLogLevelDebg:
-            fprintf(stderr, "DEBG ");
-            break;
+    case OT_LOG_LEVEL_DEBG:
+        fprintf(stderr, "DEBG ");
+        break;
     }
 
-    switch (aLogRegion) {
-        case kLogRegionApi:
-            fprintf(stderr, "API  ");
-            break;
+    switch(aLogRegion) {
+    case OT_LOG_REGION_API:
+        fprintf(stderr, "API  ");
+        break;
 
-        case kLogRegionMle:
-            fprintf(stderr, "MLE  ");
-            break;
+    case OT_LOG_REGION_MLE:
+        fprintf(stderr, "MLE  ");
+        break;
 
-        case kLogRegionArp:
-            fprintf(stderr, "ARP  ");
-            break;
+    case OT_LOG_REGION_ARP:
+        fprintf(stderr, "ARP  ");
+        break;
 
-        case kLogRegionNetData:
-            fprintf(stderr, "NETD ");
-            break;
+    case OT_LOG_REGION_NET_DATA:
+        fprintf(stderr, "NETD ");
+        break;
 
-        case kLogRegionIp6:
-            fprintf(stderr, "IPV6 ");
-            break;
+    case OT_LOG_REGION_IP6:
+        fprintf(stderr, "IPV6 ");
+        break;
 
-        case kLogRegionIcmp:
-            fprintf(stderr, "ICMP ");
-            break;
+    case OT_LOG_REGION_ICMP:
+        fprintf(stderr, "ICMP ");
+        break;
 
-        case kLogRegionMac:
-            fprintf(stderr, "MAC  ");
-            break;
+    case OT_LOG_REGION_MAC:
+        fprintf(stderr, "MAC  ");
+        break;
 
-        case kLogRegionMem:
-            fprintf(stderr, "MEM  ");
-            break;
-        default:
-            break;
+    case OT_LOG_REGION_MEM:
+        fprintf(stderr, "MEM  ");
+        break;
+
+    case OT_LOG_REGION_NCP:
+        fprintf(stderr, "NCP  ");
+        break;
+
+    case OT_LOG_REGION_MESH_COP:
+        fprintf(stderr, "MESH_COP  ");
+        break;
+
+    case OT_LOG_REGION_NET_DIAG:
+        fprintf(stderr, "NET_DIAG  ");
+        break;
+
+    case OT_LOG_REGION_PLATFORM:
+        fprintf(stderr, "PLATFORM  ");
+        break;
+
+    case OT_LOG_REGION_COAP:
+        fprintf(stderr, "COAP  ");
+        break;
+
+    case OT_LOG_REGION_CLI:
+        fprintf(stderr, "CLI  ");
+        break;
+
+    case OT_LOG_REGION_CORE:
+        fprintf(stderr, "CORE  ");
+        break;
+
+    case OT_LOG_REGION_UTIL:
+        fprintf(stderr, "UTIL  ");
+        break;
+
+    default:
+        break;
     }
 
     va_start(args, aFormat);
