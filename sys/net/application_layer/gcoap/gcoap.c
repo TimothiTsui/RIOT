@@ -28,7 +28,7 @@
 #include "random.h"
 #include "thread.h"
 
-#define ENABLE_DEBUG (0)
+#define ENABLE_DEBUG (1)
 #include "debug.h"
 
 /* Return values used by the _find_resource function. */
@@ -421,7 +421,7 @@ static ssize_t _finish_pdu(coap_pkt_t *pdu, uint8_t *buf, size_t len)
         if (pdu->payload_len) {
             memmove(buf + hdr_len, pdu->payload, pdu->payload_len);
         }
-
+        printf("%d\n", *(buf));
         return hdr_len + pdu->payload_len;
     }
     else {

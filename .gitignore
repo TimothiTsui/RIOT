@@ -57,3 +57,4 @@ Makefile.local
 # scan-build artifacts
 scan-build/
 /INA219/
+/OpenThread/
