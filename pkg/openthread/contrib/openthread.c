@@ -48,7 +48,7 @@ static at86rf2xx_t at86rf2xx_dev;
 
 #ifdef MODULE_CC2538_RF
 static cc2538_rf_t cc2538_rf_dev;
-//static char _cc2538_rf_stack[CC2538_MAC_STACKSIZE];
+static char _cc2538_rf_stack[CC2538_MAC_STACKSIZE];
 #endif
 
 //static netdev_t *netdev;
@@ -92,6 +92,14 @@ void openthread_bootstrap(void){
 
 #ifdef MODULE_CC2538_RF
     cc2538_setup(&cc2538_rf_dev);
+<<<<<<< HEAD
+=======
+    gnrc_netif_ieee802154_create(_cc2538_rf_stack,
+                                     CC2538_MAC_STACKSIZE,
+                                     CC2538_MAC_PRIO, "cc2538_rf",
+                                     (netdev_t *)&cc2538_rf_dev);
+
+>>>>>>> branch 'master' of https://skullbox305@github.com/skullbox305/RIOT.git
     netdev_t *netdev = (netdev_t *)&cc2538_rf_dev;
 #endif
 
