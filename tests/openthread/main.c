@@ -29,6 +29,9 @@ int main(void)
     uint8_t res = ot_call_command("panid", NULL, (void*)&panid);
     printf("Current panid: 0x%x (res:%x)\n", panid, res);
 
+//    char line_buf[SHELL_DEFAULT_BUFSIZE];
+//        shell_run(NULL, line_buf, SHELL_DEFAULT_BUFSIZE);
+
     openthread_uart_run();
     return 0;
 }

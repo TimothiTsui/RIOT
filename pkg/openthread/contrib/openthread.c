@@ -24,7 +24,7 @@
 #include "random.h"
 #include "thread.h"
 #include "xtimer.h"
-
+//
 #ifdef MODULE_AT86RF2XX
 #include "at86rf2xx.h"
 #include "at86rf2xx_params.h"
@@ -32,7 +32,6 @@
 
 #ifdef MODULE_CC2538_RF
 #include "cc2538_rf.h"
-#include "net/gnrc/netif/ieee802154.h"
 #endif
 
 #define ENABLE_DEBUG (1)
@@ -42,12 +41,6 @@
 #define OPENTHREAD_NETIF_NUMOF        (sizeof(at86rf2xx_params) / sizeof(at86rf2xx_params[0]))
 #endif
 
-#ifdef MODULE_CC2538_RF
-#define CC2538_MAC_STACKSIZE       (THREAD_STACKSIZE_DEFAULT)
-#ifndef CC2538_MAC_PRIO
-#define CC2538_MAC_PRIO            (GNRC_NETIF_PRIO)
-#endif
-#endif
 
 #ifdef MODULE_AT86RF2XX
 static at86rf2xx_t at86rf2xx_dev;
@@ -58,11 +51,18 @@ static cc2538_rf_t cc2538_rf_dev;
 //static char _cc2538_rf_stack[CC2538_MAC_STACKSIZE];
 #endif
 
+//static netdev_t *netdev;
+
 #define OPENTHREAD_NETDEV_BUFLEN (ETHERNET_MAX_LEN)
 
 static uint8_t rx_buf[OPENTHREAD_NETDEV_BUFLEN];
 static uint8_t tx_buf[OPENTHREAD_NETDEV_BUFLEN];
 static char ot_thread_stack[2 * THREAD_STACKSIZE_MAIN];
+
+//void openthread_set_netdev(netdev_t *dev){
+//    netdev = dev;
+//    DEBUG("Openthread: netdev set.\n");
+//}
 
 /* init and run OpeanThread's UART simulation (stdio) */
 void openthread_uart_run(void){
@@ -92,11 +92,6 @@ void openthread_bootstrap(void){
 
 #ifdef MODULE_CC2538_RF
     cc2538_setup(&cc2538_rf_dev);
-//    gnrc_netif_ieee802154_create(_cc2538_rf_stack,
-//                                     CC2538_MAC_STACKSIZE,
-//                                     CC2538_MAC_PRIO, "cc2538_rf",
-//                                     (netdev_t *)&cc2538_rf_dev);
-
     netdev_t *netdev = (netdev_t *)&cc2538_rf_dev;
 #endif
 

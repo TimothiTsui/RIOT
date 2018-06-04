@@ -47,7 +47,7 @@ static otInstance *sInstance;
 #define OPENTHREAD_PANID            0xface
 #endif
 #ifndef OPENTHREAD_CHANNEL
-#define OPENTHREAD_CHANNEL          (26U)
+#define OPENTHREAD_CHANNEL          (16U)
 #endif
 /** @} */
 
@@ -113,6 +113,7 @@ static void *_openthread_event_loop(void *arg) {
                 /* Received an event from driver */
                 dev = msg.content.ptr;
                 dev->driver->isr(dev);
+                DEBUG("Event loop: netdev message type event\n");
                 break;
             case OPENTHREAD_SERIAL_MSG_TYPE_EVENT:
                 /* Tell OpenThread about the reception of a CLI command */
@@ -123,6 +124,7 @@ static void *_openthread_event_loop(void *arg) {
                 job = msg.content.ptr;
                 reply.content.value = ot_exec_command(sInstance, job->command, job->arg, job->answer);
                 msg_reply(&msg, &reply);
+                DEBUG("Event loop: job message type event\n");
                 break;
         }
     }

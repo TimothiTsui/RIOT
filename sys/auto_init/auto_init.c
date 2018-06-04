@@ -143,6 +143,7 @@ void auto_init(void)
 #endif
 #ifdef MODULE_OPENTHREAD
     extern void openthread_bootstrap(void);
+    DEBUG("Bootstrapping OpenThread.\n");
     openthread_bootstrap();
 #endif
 #ifdef MODULE_GCOAP
@@ -219,6 +220,8 @@ void auto_init(void)
 #ifdef MODULE_CC2538_RF
     extern void auto_init_cc2538_rf(void);
     auto_init_cc2538_rf();
+    DEBUG("Auto init CC2538_RF module.\n");
+
 #endif
 
 #ifdef MODULE_XBEE
