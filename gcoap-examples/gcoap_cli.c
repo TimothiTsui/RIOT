@@ -157,6 +157,7 @@ static ssize_t _climate_handler(coap_pkt_t* pdu, uint8_t *buf, size_t len, void 
                     char payload[6] = { 0 };
                     memcpy(payload, (char *)pdu->payload, pdu->payload_len);
                     req_count = (uint16_t)strtoul(payload, NULL, 10);
+                    printf("Payload: %s, %u\n", payload, req_count);
                     return gcoap_response(pdu, buf, len, COAP_CODE_CHANGED);
                 }
                 else {
