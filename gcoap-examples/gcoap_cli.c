@@ -33,11 +33,13 @@ static void _resp_handler(unsigned req_state, coap_pkt_t* pdu,
                           sock_udp_ep_t *remote);
 static ssize_t _stats_handler(coap_pkt_t* pdu, uint8_t *buf, size_t len, void *ctx);
 static ssize_t _riot_board_handler(coap_pkt_t* pdu, uint8_t *buf, size_t len, void *ctx);
+static ssize_t _climate_handler(coap_pkt_t* pdu, uint8_t *buf, size_t len, void *ctx);
 
 /* CoAP resources */
 static const coap_resource_t _resources[] = {
     { "/cli/stats", COAP_GET | COAP_PUT, _stats_handler, NULL },
     { "/riot/board", COAP_GET, _riot_board_handler, NULL },
+    { "/sensors/temp", COAP_GET | COAP_PUT, _climate_handler, NULL }
 };
 
 static gcoap_listener_t _listener = {
@@ -104,6 +106,7 @@ static ssize_t _stats_handler(coap_pkt_t* pdu, uint8_t *buf, size_t len, void *c
 
     /* read coap method type in packet */
     unsigned method_flag = coap_method2flag(coap_get_code_detail(pdu));
+    printf("Method: %d\n", method_flag);
 
     switch(method_flag) {
         case COAP_GET:
@@ -131,13 +134,46 @@ static ssize_t _stats_handler(coap_pkt_t* pdu, uint8_t *buf, size_t len, void *c
     return 0;
 }
 
+static ssize_t _climate_handler(coap_pkt_t* pdu, uint8_t *buf, size_t len, void *ctx)
+{
+    (void)ctx;
+    DEBUG("[CoAP] _climate_handler\n");
+    unsigned method_flag = coap_method2flag(coap_get_code_detail(pdu));
+    printf("Method: %d\n", method_flag);
+
+    switch(method_flag){
+            case COAP_GET:
+                gcoap_resp_init(pdu, buf, len, COAP_CODE_CONTENT);
+
+                /* write the response buffer with the request count value */
+                size_t payload_len = fmt_u16_dec((char *)pdu->payload, req_count);
+
+                return gcoap_finish(pdu, payload_len, COAP_FORMAT_JSON);
+
+            case COAP_PUT:
+                /* convert the payload to an integer and update the internal
+                   value */
+                if (pdu->payload_len <= 5) {
+                    char payload[6] = { 0 };
+                    memcpy(payload, (char *)pdu->payload, pdu->payload_len);
+                    req_count = (uint16_t)strtoul(payload, NULL, 10);
+                    return gcoap_response(pdu, buf, len, COAP_CODE_CHANGED);
+                }
+                else {
+                    return gcoap_response(pdu, buf, len, COAP_CODE_BAD_REQUEST);
+                }
+    }
+
+    return 0;
+}
+
 static ssize_t _riot_board_handler(coap_pkt_t *pdu, uint8_t *buf, size_t len, void *ctx)
 {
     (void)ctx;
     gcoap_resp_init(pdu, buf, len, COAP_CODE_CONTENT);
     /* write the RIOT board name in the response buffer */
     memcpy(pdu->payload, RIOT_BOARD, strlen(RIOT_BOARD));
-    return gcoap_finish(pdu, strlen(RIOT_BOARD), COAP_FORMAT_TEXT);
+    return gcoap_finish(pdu, strlen(RIOT_BOARD), COAP_FORMAT_JSON);
 }
 
 static size_t _send(uint8_t *buf, size_t len, char *addr_str, char *port_str)
