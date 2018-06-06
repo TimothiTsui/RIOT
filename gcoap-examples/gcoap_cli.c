@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 Ken Bannister. All rights reserved.
+ * Copyright (c) 2015-2017 Dhruv Verma. All rights reserved.
  *
  * This file is subject to the terms and conditions of the GNU Lesser
  * General Public License v2.1. See the file LICENSE in the top level
@@ -13,7 +13,7 @@
  * @file
  * @brief       gcoap CLI support
  *
- * @author      Ken Bannister <kb2ma@runbox.com>
+ * @author      Dhruv Verma <dhruv2scs@gmail.com>
  *
  * @}
  */
@@ -31,13 +31,11 @@
 
 static void _resp_handler(unsigned req_state, coap_pkt_t* pdu,
                           sock_udp_ep_t *remote);
-static ssize_t _stats_handler(coap_pkt_t* pdu, uint8_t *buf, size_t len, void *ctx);
 static ssize_t _riot_board_handler(coap_pkt_t* pdu, uint8_t *buf, size_t len, void *ctx);
 static ssize_t _climate_handler(coap_pkt_t* pdu, uint8_t *buf, size_t len, void *ctx);
 
 /* CoAP resources */
 static const coap_resource_t _resources[] = {
-    { "/cli/stats", COAP_GET | COAP_PUT, _stats_handler, NULL },
     { "/riot/board", COAP_GET, _riot_board_handler, NULL },
     { "/sensors/temp", COAP_GET | COAP_PUT, _climate_handler, NULL }
 };
@@ -100,39 +98,6 @@ static void _resp_handler(unsigned req_state, coap_pkt_t* pdu,
  *      allows any two byte value for example purposes. Semantically, the only
  *      valid action is to set the value to 0.
  */
-static ssize_t _stats_handler(coap_pkt_t* pdu, uint8_t *buf, size_t len, void *ctx)
-{
-    (void)ctx;
-
-    /* read coap method type in packet */
-    unsigned method_flag = coap_method2flag(coap_get_code_detail(pdu));
-    printf("Method: %d\n", method_flag);
-
-    switch(method_flag) {
-        case COAP_GET:
-            gcoap_resp_init(pdu, buf, len, COAP_CODE_CONTENT);
-
-            /* write the response buffer with the request count value */
-            size_t payload_len = fmt_u16_dec((char *)pdu->payload, req_count);
-
-            return gcoap_finish(pdu, payload_len, COAP_FORMAT_TEXT);
-
-        case COAP_PUT:
-            /* convert the payload to an integer and update the internal
-               value */
-            if (pdu->payload_len <= 5) {
-                char payload[6] = { 0 };
-                memcpy(payload, (char *)pdu->payload, pdu->payload_len);
-                req_count = (uint16_t)strtoul(payload, NULL, 10);
-                return gcoap_response(pdu, buf, len, COAP_CODE_CHANGED);
-            }
-            else {
-                return gcoap_response(pdu, buf, len, COAP_CODE_BAD_REQUEST);
-            }
-    }
-
-    return 0;
-}
 
 static ssize_t _climate_handler(coap_pkt_t* pdu, uint8_t *buf, size_t len, void *ctx)
 {
