@@ -25,6 +25,7 @@
 #include "net/gcoap.h"
 #include "od.h"
 #include "fmt.h"
+#include "random_sensor.c"
 
 #define ENABLE_DEBUG (1)
 #include "debug.h"
@@ -102,6 +103,9 @@ static ssize_t _settings_handler(coap_pkt_t* pdu, uint8_t *buf, size_t len,
         gcoap_resp_init(pdu, buf, len, COAP_CODE_CONTENT);
 
         /* write the response buffer with the request count value */
+        uint16_t val;
+        val = sensor_get_refresh();
+        printf("Val: %u", val);
         size_t payload_len = fmt_u16_dec((char *)pdu->payload, req_count);
         printf("Payload get: %s\n", (char *)pdu->payload);
 
@@ -114,6 +118,8 @@ static ssize_t _settings_handler(coap_pkt_t* pdu, uint8_t *buf, size_t len,
             char payload[6] = {0};
             memcpy(payload, (char *)pdu->payload, pdu->payload_len);
             req_count = (uint16_t)strtoul(payload, NULL, 10);
+            sensor_set_refresh(req_count);
+            sensor_set_accuracy(req_count);
             printf("Payload put: %s, %u\n", payload, req_count);
             return gcoap_response(pdu, buf, len, COAP_CODE_CHANGED);
         }
