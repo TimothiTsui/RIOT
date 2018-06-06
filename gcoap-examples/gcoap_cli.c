@@ -30,21 +30,22 @@
 #include "debug.h"
 
 static void _resp_handler(unsigned req_state, coap_pkt_t* pdu,
-                          sock_udp_ep_t *remote);
-static ssize_t _riot_board_handler(coap_pkt_t* pdu, uint8_t *buf, size_t len, void *ctx);
-static ssize_t _climate_handler(coap_pkt_t* pdu, uint8_t *buf, size_t len, void *ctx);
+        sock_udp_ep_t *remote);
+static ssize_t _riot_board_handler(coap_pkt_t* pdu, uint8_t *buf, size_t len,
+        void *ctx);
+static ssize_t _climate_handler(coap_pkt_t* pdu, uint8_t *buf, size_t len,
+        void *ctx);
+static ssize_t _settings_handler(coap_pkt_t* pdu, uint8_t *buf, size_t len,
+        void *ctx);
 
-/* CoAP resources */
-static const coap_resource_t _resources[] = {
-    { "/riot/board", COAP_GET, _riot_board_handler, NULL },
-    { "/sensors/temp", COAP_GET | COAP_PUT, _climate_handler, NULL }
-};
+/* CoAP resources add alphabetically unless you want a shitty bug*/
+static const coap_resource_t _resources[] = {{"/device/settings", COAP_GET
+        | COAP_PUT | COAP_POST, _settings_handler, NULL}, {"/riot/board",
+        COAP_GET, _riot_board_handler, NULL}, {"/sensors/temp", COAP_GET
+        | COAP_PUT | COAP_POST, _climate_handler, NULL}};
 
-static gcoap_listener_t _listener = {
-    (coap_resource_t *)&_resources[0],
-    sizeof(_resources) / sizeof(_resources[0]),
-    NULL
-};
+static gcoap_listener_t _listener = {(coap_resource_t *)&_resources[0],
+        sizeof(_resources) / sizeof(_resources[0]), NULL};
 
 /* Counts requests sent by CLI. */
 static uint16_t req_count = 0;
@@ -53,32 +54,31 @@ static uint16_t req_count = 0;
  * Response callback.
  */
 static void _resp_handler(unsigned req_state, coap_pkt_t* pdu,
-                          sock_udp_ep_t *remote)
-{
-    (void)remote;       /* not interested in the source currently */
+        sock_udp_ep_t *remote){
+    (void)remote; /* not interested in the source currently */
 
-    if (req_state == GCOAP_MEMO_TIMEOUT) {
+    if(req_state == GCOAP_MEMO_TIMEOUT) {
         printf("gcoap: timeout for msg ID %02u\n", coap_get_id(pdu));
         return;
     }
-    else if (req_state == GCOAP_MEMO_ERR) {
+    else if(req_state == GCOAP_MEMO_ERR) {
         printf("gcoap: error in response\n");
         return;
     }
 
-    char *class_str = (coap_get_code_class(pdu) == COAP_CLASS_SUCCESS)
-                            ? "Success" : "Error";
+    char *class_str =
+            (coap_get_code_class(pdu) == COAP_CLASS_SUCCESS) ?
+                    "Success" : "Error";
     printf("gcoap: response %s, code %1u.%02u", class_str,
-                                                coap_get_code_class(pdu),
-                                                coap_get_code_detail(pdu));
-    if (pdu->payload_len) {
-        if (pdu->content_type == COAP_FORMAT_TEXT
+            coap_get_code_class(pdu), coap_get_code_detail(pdu));
+    if(pdu->payload_len) {
+        if(pdu->content_type == COAP_FORMAT_TEXT
                 || pdu->content_type == COAP_FORMAT_LINK
                 || coap_get_code_class(pdu) == COAP_CLASS_CLIENT_FAILURE
                 || coap_get_code_class(pdu) == COAP_CLASS_SERVER_FAILURE) {
             /* Expecting diagnostic payload in failure cases */
             printf(", %u bytes\n%.*s\n", pdu->payload_len, pdu->payload_len,
-                                                          (char *)pdu->payload);
+                    (char *)pdu->payload);
         }
         else {
             printf(", %u bytes\n", pdu->payload_len);
@@ -90,8 +90,55 @@ static void _resp_handler(unsigned req_state, coap_pkt_t* pdu,
     }
 }
 
+static ssize_t _settings_handler(coap_pkt_t* pdu, uint8_t *buf, size_t len,
+        void *ctx){
+    (void)ctx;
+    DEBUG("[CoAP] _settings_handler\n");
+    unsigned method_flag = coap_method2flag(coap_get_code_detail(pdu));
+    printf("Method: %d\n", method_flag);
+
+    switch(method_flag) {
+    case COAP_GET:
+        gcoap_resp_init(pdu, buf, len, COAP_CODE_CONTENT);
+
+        /* write the response buffer with the request count value */
+        size_t payload_len = fmt_u16_dec((char *)pdu->payload, req_count);
+        printf("Payload get: %s\n", (char *)pdu->payload);
+
+        return gcoap_finish(pdu, payload_len, COAP_FORMAT_JSON);
+
+    case COAP_PUT:
+        /* convert the payload to an integer and update the internal
+         value */
+        if(pdu->payload_len <= 5) {
+            char payload[6] = {0};
+            memcpy(payload, (char *)pdu->payload, pdu->payload_len);
+            req_count = (uint16_t)strtoul(payload, NULL, 10);
+            printf("Payload put: %s, %u\n", payload, req_count);
+            return gcoap_response(pdu, buf, len, COAP_CODE_CHANGED);
+        }
+        else {
+            return gcoap_response(pdu, buf, len, COAP_CODE_BAD_REQUEST);
+        }
+
+    case COAP_POST:
+        if(pdu->payload_len <= 5) {
+            char payload[6] = {0};
+            memcpy(payload, (char *)pdu->payload, pdu->payload_len);
+            req_count = (uint16_t)strtoul(payload, NULL, 10);
+            printf("Payload put: %s, %u\n", payload, req_count);
+            return gcoap_response(pdu, buf, len, COAP_CODE_CHANGED);
+        }
+        else {
+            return gcoap_response(pdu, buf, len, COAP_CODE_BAD_REQUEST);
+        }
+    }
+
+    return 0;
+}
+
 /*
- * Server callback for /cli/stats. Accepts either a GET or a PUT.
+ * Server callback for /sensors/temp. Accepts either a GET or a PUT.
  *
  * GET: Returns the count of packets sent by the CLI.
  * PUT: Updates the count of packets. Rejects an obviously bad request, but
@@ -99,42 +146,55 @@ static void _resp_handler(unsigned req_state, coap_pkt_t* pdu,
  *      valid action is to set the value to 0.
  */
 
-static ssize_t _climate_handler(coap_pkt_t* pdu, uint8_t *buf, size_t len, void *ctx)
-{
+static ssize_t _climate_handler(coap_pkt_t* pdu, uint8_t *buf, size_t len,
+        void *ctx){
     (void)ctx;
     DEBUG("[CoAP] _climate_handler\n");
     unsigned method_flag = coap_method2flag(coap_get_code_detail(pdu));
     printf("Method: %d\n", method_flag);
 
-    switch(method_flag){
-            case COAP_GET:
-                gcoap_resp_init(pdu, buf, len, COAP_CODE_CONTENT);
+    switch(method_flag) {
+    case COAP_GET:
+        gcoap_resp_init(pdu, buf, len, COAP_CODE_CONTENT);
 
-                /* write the response buffer with the request count value */
-                size_t payload_len = fmt_u16_dec((char *)pdu->payload, req_count);
+        /* write the response buffer with the request count value */
+        size_t payload_len = fmt_u16_dec((char *)pdu->payload, req_count);
+        printf("Payload get: %s\n", (char *)pdu->payload);
 
-                return gcoap_finish(pdu, payload_len, COAP_FORMAT_JSON);
+        return gcoap_finish(pdu, payload_len, COAP_FORMAT_JSON);
 
-            case COAP_PUT:
-                /* convert the payload to an integer and update the internal
-                   value */
-                if (pdu->payload_len <= 5) {
-                    char payload[6] = { 0 };
-                    memcpy(payload, (char *)pdu->payload, pdu->payload_len);
-                    req_count = (uint16_t)strtoul(payload, NULL, 10);
-                    printf("Payload: %s, %u\n", payload, req_count);
-                    return gcoap_response(pdu, buf, len, COAP_CODE_CHANGED);
-                }
-                else {
-                    return gcoap_response(pdu, buf, len, COAP_CODE_BAD_REQUEST);
-                }
+    case COAP_PUT:
+        /* convert the payload to an integer and update the internal
+         value */
+        if(pdu->payload_len <= 5) {
+            char payload[6] = {0};
+            memcpy(payload, (char *)pdu->payload, pdu->payload_len);
+            req_count = (uint16_t)strtoul(payload, NULL, 10);
+            printf("Payload put: %s, %u\n", payload, req_count);
+            return gcoap_response(pdu, buf, len, COAP_CODE_CHANGED);
+        }
+        else {
+            return gcoap_response(pdu, buf, len, COAP_CODE_BAD_REQUEST);
+        }
+
+    case COAP_POST:
+        if(pdu->payload_len <= 5) {
+            char payload[6] = {0};
+            memcpy(payload, (char *)pdu->payload, pdu->payload_len);
+            req_count = (uint16_t)strtoul(payload, NULL, 10);
+            printf("Payload put: %s, %u\n", payload, req_count);
+            return gcoap_response(pdu, buf, len, COAP_CODE_CHANGED);
+        }
+        else {
+            return gcoap_response(pdu, buf, len, COAP_CODE_BAD_REQUEST);
+        }
     }
 
     return 0;
 }
 
-static ssize_t _riot_board_handler(coap_pkt_t *pdu, uint8_t *buf, size_t len, void *ctx)
-{
+static ssize_t _riot_board_handler(coap_pkt_t *pdu, uint8_t *buf, size_t len,
+        void *ctx){
     (void)ctx;
     gcoap_resp_init(pdu, buf, len, COAP_CODE_CONTENT);
     /* write the RIOT board name in the response buffer */
@@ -142,8 +202,7 @@ static ssize_t _riot_board_handler(coap_pkt_t *pdu, uint8_t *buf, size_t len, vo
     return gcoap_finish(pdu, strlen(RIOT_BOARD), COAP_FORMAT_JSON);
 }
 
-static size_t _send(uint8_t *buf, size_t len, char *addr_str, char *port_str)
-{
+static size_t _send(uint8_t *buf, size_t len, char *addr_str, char *port_str){
     ipv6_addr_t addr;
     size_t bytes_sent;
     sock_udp_ep_t remote;
@@ -152,8 +211,8 @@ static size_t _send(uint8_t *buf, size_t len, char *addr_str, char *port_str)
 
     /* parse for interface */
     int iface = ipv6_addr_split_iface(addr_str);
-    if (iface == -1) {
-        if (gnrc_netif_numof() == 1) {
+    if(iface == -1) {
+        if(gnrc_netif_numof() == 1) {
             /* assign the single interface found in gnrc_netif_numof() */
             remote.netif = (uint16_t)gnrc_netif_iter(NULL)->pid;
         }
@@ -162,7 +221,7 @@ static size_t _send(uint8_t *buf, size_t len, char *addr_str, char *port_str)
         }
     }
     else {
-        if (gnrc_netif_get_by_pid(iface) == NULL) {
+        if(gnrc_netif_get_by_pid(iface) == NULL) {
             puts("gcoap_cli: interface not valid");
             return 0;
         }
@@ -170,11 +229,12 @@ static size_t _send(uint8_t *buf, size_t len, char *addr_str, char *port_str)
     }
 
     /* parse destination address */
-    if (ipv6_addr_from_str(&addr, addr_str) == NULL) {
+    if(ipv6_addr_from_str(&addr, addr_str) == NULL) {
         puts("gcoap_cli: unable to parse destination address");
         return 0;
     }
-    if ((remote.netif == SOCK_ADDR_ANY_NETIF) && ipv6_addr_is_link_local(&addr)) {
+    if((remote.netif == SOCK_ADDR_ANY_NETIF)
+            && ipv6_addr_is_link_local(&addr)) {
         puts("gcoap_cli: must specify interface for link local target");
         return 0;
     }
@@ -182,32 +242,31 @@ static size_t _send(uint8_t *buf, size_t len, char *addr_str, char *port_str)
 
     /* parse port */
     remote.port = atoi(port_str);
-    if (remote.port == 0) {
+    if(remote.port == 0) {
         puts("gcoap_cli: unable to parse destination port");
         return 0;
     }
 
     bytes_sent = gcoap_req_send2(buf, len, &remote, _resp_handler);
-    if (bytes_sent > 0) {
+    if(bytes_sent > 0) {
         req_count++;
     }
     return bytes_sent;
 }
 
-int gcoap_cli_cmd(int argc, char **argv)
-{
+int gcoap_cli_cmd(int argc, char **argv){
     /* Ordered like the RFC method code numbers, but off by 1. GET is code 0. */
     char *method_codes[] = {"get", "post", "put"};
     uint8_t buf[GCOAP_PDU_BUF_SIZE];
     coap_pkt_t pdu;
     size_t len;
 
-    if (argc == 1) {
+    if(argc == 1) {
         /* show help for main commands */
         goto end;
     }
 
-    if (strcmp(argv[1], "info") == 0) {
+    if(strcmp(argv[1], "info") == 0) {
         uint8_t open_reqs = gcoap_op_state();
 
         printf("CoAP server is listening on port %u\n", GCOAP_PORT);
@@ -218,49 +277,51 @@ int gcoap_cli_cmd(int argc, char **argv)
 
     /* if not 'info', must be a method code */
     int code_pos = -1;
-    for (size_t i = 0; i < sizeof(method_codes) / sizeof(char*); i++) {
-        if (strcmp(argv[1], method_codes[i]) == 0) {
+    for(size_t i = 0; i < sizeof(method_codes) / sizeof(char*); i++) {
+        if(strcmp(argv[1], method_codes[i]) == 0) {
             code_pos = i;
         }
     }
-    if (code_pos == -1) {
+    if(code_pos == -1) {
         goto end;
     }
 
     /* parse options */
-    int apos          = 2;               /* position of address argument */
+    int apos = 2; /* position of address argument */
     unsigned msg_type = COAP_TYPE_NON;
-    if (argc > apos && strcmp(argv[apos], "-c") == 0) {
+    if(argc > apos && strcmp(argv[apos], "-c") == 0) {
         msg_type = COAP_TYPE_CON;
         apos++;
     }
 
-    if (argc == apos + 3 || argc == apos + 4) {
-        gcoap_req_init(&pdu, &buf[0], GCOAP_PDU_BUF_SIZE, code_pos+1, argv[apos+2]);
-        if (argc == apos + 4) {
-            memcpy(pdu.payload, argv[apos+3], strlen(argv[apos+3]));
+    if(argc == apos + 3 || argc == apos + 4) {
+        gcoap_req_init(&pdu, &buf[0], GCOAP_PDU_BUF_SIZE, code_pos + 1,
+                argv[apos + 2]);
+        if(argc == apos + 4) {
+            memcpy(pdu.payload, argv[apos + 3], strlen(argv[apos + 3]));
         }
         coap_hdr_set_type(pdu.hdr, msg_type);
 
-        if (argc == apos + 4) {
-            len = gcoap_finish(&pdu, strlen(argv[apos+3]), COAP_FORMAT_TEXT);
+        if(argc == apos + 4) {
+            len = gcoap_finish(&pdu, strlen(argv[apos + 3]), COAP_FORMAT_TEXT);
         }
         else {
             len = gcoap_finish(&pdu, 0, COAP_FORMAT_NONE);
         }
 
         printf("gcoap_cli: sending msg ID %u, %u bytes\n", coap_get_id(&pdu),
-               (unsigned) len);
-        if (!_send(&buf[0], len, argv[apos], argv[apos+1])) {
+                (unsigned)len);
+        if(!_send(&buf[0], len, argv[apos], argv[apos + 1])) {
             puts("gcoap_cli: msg send failed");
         }
         else {
             /* send Observe notification for /cli/stats */
-            switch (gcoap_obs_init(&pdu, &buf[0], GCOAP_PDU_BUF_SIZE,
+            switch(gcoap_obs_init(&pdu, &buf[0], GCOAP_PDU_BUF_SIZE,
                     &_resources[0])) {
             case GCOAP_OBS_INIT_OK:
                 DEBUG("gcoap_cli: creating /cli/stats notification\n");
-                size_t payload_len = fmt_u16_dec((char *)pdu.payload, req_count);
+                size_t payload_len = fmt_u16_dec((char *)pdu.payload,
+                        req_count);
                 len = gcoap_finish(&pdu, payload_len, COAP_FORMAT_TEXT);
                 gcoap_obs_send(&buf[0], len, &_resources[0]);
                 break;
@@ -268,26 +329,26 @@ int gcoap_cli_cmd(int argc, char **argv)
                 DEBUG("gcoap_cli: no observer for /cli/stats\n");
                 break;
             case GCOAP_OBS_INIT_ERR:
-                DEBUG("gcoap_cli: error initializing /cli/stats notification\n");
+                DEBUG(
+                        "gcoap_cli: error initializing /cli/stats notification\n");
                 break;
             }
         }
         return 0;
     }
     else {
-        printf("usage: %s <get|post|put> [-c] <addr>[%%iface] <port> <path> [data]\n",
-               argv[0]);
+        printf(
+                "usage: %s <get|post|put> [-c] <addr>[%%iface] <port> <path> [data]\n",
+                argv[0]);
         printf("Options\n");
         printf("    -c  Send confirmably (defaults to non-confirmable)\n");
         return 1;
     }
 
-    end:
-    printf("usage: %s <get|post|put|info>\n", argv[0]);
+    end: printf("usage: %s <get|post|put|info>\n", argv[0]);
     return 1;
 }
 
-void gcoap_cli_init(void)
-{
+void gcoap_cli_init(void){
     gcoap_register_listener(&_listener);
 }

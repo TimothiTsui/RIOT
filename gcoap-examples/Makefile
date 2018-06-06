@@ -20,6 +20,7 @@ BOARD_INSUFFICIENT_MEMORY := chronos msb-430 msb-430h nucleo-f031k6 nucleo-f042k
 ## Uncomment to redefine request token length, max 8.
 #GCOAP_TOKENLEN = 2
 #CFLAGS += -DGCOAP_TOKENLEN=$(GCOAP_TOKENLEN)
+CFLAGS += -O0 -g -gdwarf-2
 
 # Include packages that pull up and auto-init the link layer.
 # NOTE: 6LoWPAN will be included if IEEE802.15.4 devices are present
