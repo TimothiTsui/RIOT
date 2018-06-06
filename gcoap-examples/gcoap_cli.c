@@ -103,10 +103,11 @@ static ssize_t _settings_handler(coap_pkt_t* pdu, uint8_t *buf, size_t len,
         gcoap_resp_init(pdu, buf, len, COAP_CODE_CONTENT);
 
         /* write the response buffer with the request count value */
-        uint16_t val;
-        val = sensor_get_refresh();
-        printf("Val: %u", val);
-        size_t payload_len = fmt_u16_dec((char *)pdu->payload, req_count);
+//        uint16_t val;
+//        val = sensor_get_refresh();
+//        printf("Val: %u", val);
+//        size_t payload_len = fmt_u16_dec((char *)pdu->payload, req_count);
+        size_t payload_len = sprintf((char *)pdu->payload, "{'refresh': %u, 'accuracy': %u}", sensor_get_refresh(), sensor_get_accuracy());
         printf("Payload get: %s\n", (char *)pdu->payload);
 
         return gcoap_finish(pdu, payload_len, COAP_FORMAT_JSON);
