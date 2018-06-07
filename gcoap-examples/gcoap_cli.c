@@ -110,11 +110,11 @@ static ssize_t _settings_handler(coap_pkt_t* pdu, uint8_t *buf, size_t len,
 
         printf("Payload get: %s\n", (char *)pdu->payload);
         /* Commenting for now due to testing */
-//        char *request = (char*)malloc(sizeof(char)*(50+payload_len));
-//        sprintf(request, "coap-client -m post coap://[::1]:5683/lights -e '%s'", (char*)pdu->payload);
-//        printf("Request: %s", request);
-//        system(request);
-//        free(request);
+        char *request = (char*)malloc(sizeof(char)*(50+payload_len));
+        sprintf(request, "coap-client -m post coap://[::1]:5683/lights -e '%s'", (char*)pdu->payload);
+        printf("Request: %s", request);
+        system(request);
+        free(request);
 
         return gcoap_finish(pdu, payload_len, COAP_FORMAT_JSON);
 
