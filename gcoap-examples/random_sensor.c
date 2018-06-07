@@ -192,13 +192,15 @@ static void *sensor_thread(void *arg)
         /* next round */
         count = (count+1)%5000;
         uint16_t sensor_val = sensor_get_refresh();
-        printf("Refresh rate set: %u seconds\n", sensor_val/100);
-        if(sensor_val != 0){
-            xtimer_usleep(sensor_get_refresh()*10000);
+        printf("Refresh rate set: %u seconds\n", sensor_val);
+        if(sensor_val > 0){
+            xtimer_usleep(sensor_get_refresh()*1000000);
+        }
+        else if(sensor_val == 0){
+            xtimer_usleep(SENSOR_TIMEOUT_MS); //5 second default
         }
         else{
-            xtimer_usleep(SENSOR_TIMEOUT_MS);
-            printf("Using default as sensor refresh rate is set to 0\n");
+            break;
         }
     }
     return NULL;

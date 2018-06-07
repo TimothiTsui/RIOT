@@ -27,29 +27,31 @@
 #include "xtimer.h"
 
 #define MAIN_QUEUE_SIZE (4)
-static msg_t _main_msg_queue[MAIN_QUEUE_SIZE];
-
-extern int gcoap_cli_cmd(int argc, char **argv);
+//static msg_t _main_msg_queue[MAIN_QUEUE_SIZE];
+//
+//extern int gcoap_cli_cmd(int argc, char **argv);
 extern void gcoap_cli_init(void);
 
 
-static const shell_command_t shell_commands[] = {
-    { "coap", "CoAP example", gcoap_cli_cmd },
-    { NULL, NULL, NULL }
-};
+//static const shell_command_t shell_commands[] = {
+//    { "coap", "CoAP example", gcoap_cli_cmd },
+//    { NULL, NULL, NULL }
+//};
 
 
 int main(void)
 {
     /* for the thread running the shell */
-    msg_init_queue(_main_msg_queue, MAIN_QUEUE_SIZE);
+//    msg_init_queue(_main_msg_queue, MAIN_QUEUE_SIZE);
     gcoap_cli_init();
     puts("gcoap example app");
+    int ret = sensor_init();
+    printf("Value returned: %d\n", ret);
 
     /* start shell */
-    puts("All up, running the shell now");
-    char line_buf[SHELL_DEFAULT_BUFSIZE];
-    shell_run(shell_commands, line_buf, SHELL_DEFAULT_BUFSIZE);
+//    puts("All up, running the shell now");
+//    char line_buf[SHELL_DEFAULT_BUFSIZE];
+//    shell_run(shell_commands, line_buf, SHELL_DEFAULT_BUFSIZE);
 
 //
 //    while(1){
