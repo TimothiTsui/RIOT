@@ -106,8 +106,14 @@ static ssize_t _settings_handler(coap_pkt_t* pdu, uint8_t *buf, size_t len,
 //        val = sensor_get_refresh();
 //        printf("Val: %u", val);
 //        size_t payload_len = fmt_u16_dec((char *)pdu->payload, req_count);
-        size_t payload_len = sprintf((char *)pdu->payload, "{'temp': %u}", sensor_get_temp());
+        size_t payload_len = sprintf((char *)pdu->payload, "{\"type\": \"temp\", \"ID\": \"6969\", \"Message\": \"%u\"}", sensor_get_temp());
+
         printf("Payload get: %s\n", (char *)pdu->payload);
+        char *request = (char*)malloc(sizeof(char)*(50+payload_len));
+        sprintf(request, "coap-client -m post coap://[::1]:5683/lights -e '%s'", (char*)pdu->payload);
+        printf("Request: %s", request);
+        system(request);
+        free(request);
 
         return gcoap_finish(pdu, payload_len, COAP_FORMAT_JSON);
 
