@@ -46,7 +46,12 @@ typedef struct{
     uint16_t accuracy;
 }SETTINGS;
 
+typedef struct{
+    uint16_t temp;
+}TEMP;
+
 SETTINGS value;
+TEMP reading;
 
 /**
  * @brief get avg temperature over N samples in Celcius (C) with factor 100
@@ -66,6 +71,10 @@ uint16_t sensor_get_refresh(void)
 uint16_t sensor_get_accuracy(void)
 {
     return value.accuracy;
+}
+
+uint16_t sensor_get_temp(void){
+    return reading.temp;
 }
 
 /**
@@ -169,18 +178,26 @@ static int _init(void) {
 static void *sensor_thread(void *arg)
 {
     (void) arg;
+    printf("Sensor thread starting\n");
     int count = 0;
-    xtimer_usleep(SENSOR_TIMEOUT_MS);
+    //xtimer_usleep(SENSOR_TIMEOUT_MS);
     while(1) {
+        printf("Reading values\n");
         /* get latest sensor data */
         mutex_lock(&mutex);
-        samples_temperature[count] = _get_temperature();
-        samples_humidity[count] = _get_humidity();
+        reading.temp = count;
         mutex_unlock(&mutex);
-        /* next round */
-        count = (count+1)%SENSOR_NUM_SAMPLES;
 
-        xtimer_usleep(SENSOR_TIMEOUT_MS);
+        printf("Value: %d\n", reading.temp);
+        /* next round */
+        count = (count+1)%5000;
+        uint16_t sensor_val = sensor_get_refresh();
+        printf("Refresh rate: %u seconds\n", sensor_val/100);
+        xtimer_usleep(sensor_val*10000);
+//        if(sensor_get_refresh() != 0)
+//            xtimer_usleep(sensor_get_refresh()*10000);
+//        else
+//            xtimer_usleep(SENSOR_TIMEOUT_MS);
     }
     return NULL;
 }
