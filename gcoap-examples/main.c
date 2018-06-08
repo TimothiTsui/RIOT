@@ -25,6 +25,7 @@
 #include "net/gcoap.h"
 #include "kernel_types.h"
 #include "xtimer.h"
+#include "sensor.h"
 
 #define MAIN_QUEUE_SIZE (4)
 //static msg_t _main_msg_queue[MAIN_QUEUE_SIZE];
@@ -46,6 +47,7 @@ int main(void)
     gcoap_cli_init();
     puts("gcoap example app");
     int ret = sensor_init();
+//    set_pid(ret);
     printf("Value returned: %d\n", ret);
 
     /* start shell */

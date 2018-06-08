@@ -697,18 +697,6 @@ int gcoap_get_resource_list(void *buf, size_t maxlen, uint8_t cf);
  */
 int gcoap_add_qstring(coap_pkt_t *pdu, const char *key, const char *val);
 
-uint16_t sensor_get_refresh(void);
-
-uint16_t sensor_get_accuracy(void);
-
-uint16_t sensor_get_temp(void);
-
-void sensor_set_refresh(uint16_t refresh);
-
-void sensor_set_accuracy(uint16_t accuracy);
-
-int sensor_init(void);
-
 #ifdef __cplusplus
 }
 #endif

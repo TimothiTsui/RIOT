@@ -2,7 +2,7 @@
  * random_sensor.c
  *
  *  Created on: 6 Jun 2018
- *      Author: riot
+ *      Author: Dhruv Verma
  */
 
 #include <assert.h>
@@ -15,6 +15,7 @@
 #include "mutex.h"
 #include "thread.h"
 #include "xtimer.h"
+#include "sensor.h"
 
 #ifdef MODULE_HDC1000
 #include "hdc1000.h"
@@ -50,8 +51,13 @@ typedef struct {
     uint16_t temp;
 } TEMP;
 
+//typedef struct {
+//    kernel_pid_t pid;
+//} PID;
+
 SETTINGS value;
 TEMP reading;
+//PID thread_pid;
 
 /**
  * @brief get avg temperature over N samples in Celcius (C) with factor 100
@@ -61,6 +67,10 @@ TEMP reading;
 uint16_t sensor_get_refresh(void){
     return value.refresh;
 }
+
+//void set_pid(kernel_pid_t pid){
+//    thread_pid.pid = pid;
+//}
 
 /**
  * @brief get avg humitity over N sampels in percent (%) with factor 100
@@ -84,6 +94,7 @@ uint16_t sensor_get_temp(void){
 
 void sensor_set_refresh(uint16_t refresh){
     value.refresh = refresh;
+//    thread_wakeup(thread_pid.pid);
     printf("Set refresh: %u\n", value.refresh);
 }
 
@@ -171,7 +182,7 @@ void send_values(void){
     printf("Sending values\n");
     char payload[50];
     size_t payload_len = sprintf(payload,
-            "{\"type\": \"temp\", \"ID\": \"6969\", \"Message\": \"%u\"}",
+            "{\"type\": \"temp\", \"ID\": \"7070\", \"Message\": \"%u\"}",
             sensor_get_temp());
 
     printf("Payload: %s\n", payload);
@@ -191,9 +202,9 @@ void send_values(void){
  */
 static void *sensor_thread(void *arg){
     (void)arg;
+
     printf("Sensor thread starting\n");
     int count = 0;
-    //xtimer_usleep(SENSOR_TIMEOUT_MS);
     while(1) {
         printf("Reading values\n");
         /* get latest sensor data */
@@ -207,8 +218,15 @@ static void *sensor_thread(void *arg){
         uint16_t sensor_val = sensor_get_refresh();
         printf("Refresh rate set: %u seconds\n", sensor_val);
         send_values();
+//        if(sensor_val > 0){
+//            xtimer_set(&timeout_timer, sensor_val * 1000000);
+//        }
+//        else{
+//            xtimer_set(&timeout_timer, SENSOR_TIMEOUT_MS);
+//        }
+//        xtimer_usleep(SENSOR_TIMEOUT_MS);
         if(sensor_val > 0) {
-            xtimer_usleep(sensor_get_refresh() * 1000000);
+            xtimer_usleep(sensor_val * 1000000);
         }
         else if(sensor_val == 0) {
             xtimer_usleep(SENSOR_TIMEOUT_MS); //5 second default
