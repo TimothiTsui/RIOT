@@ -40,9 +40,9 @@ static ssize_t _settings_handler(coap_pkt_t* pdu, uint8_t *buf, size_t len,
 
 /* CoAP resources add alphabetically unless you want a shitty bug*/
 static const coap_resource_t _resources[] = {{"/device/settings", COAP_GET
-        | COAP_PUT | COAP_POST, _settings_handler, NULL}, {"/riot/board",
-        COAP_GET, _riot_board_handler, NULL}, {"/sensors/temp", COAP_GET
-        | COAP_PUT | COAP_POST, _climate_handler, NULL}};
+        | COAP_PUT, _settings_handler, NULL}, {"/riot/board",
+COAP_GET, _riot_board_handler, NULL}, {"/sensors/temp", COAP_GET | COAP_PUT
+        | COAP_POST, _climate_handler, NULL}};
 
 static gcoap_listener_t _listener = {(coap_resource_t *)&_resources[0],
         sizeof(_resources) / sizeof(_resources[0]), NULL};
@@ -106,15 +106,18 @@ static ssize_t _settings_handler(coap_pkt_t* pdu, uint8_t *buf, size_t len,
 //        val = sensor_get_refresh();
 //        printf("Val: %u", val);
 //        size_t payload_len = fmt_u16_dec((char *)pdu->payload, req_count);
-        size_t payload_len = sprintf((char *)pdu->payload, "{\"type\": \"temp\", \"ID\": \"6969\", \"Message\": \"%u\"}", sensor_get_temp());
+        size_t payload_len = sprintf((char *)pdu->payload,
+                "{\"type\": \"temp\", \"ID\": \"6969\", \"Message\": \"%u\"}",
+                sensor_get_temp());
 
         printf("Payload get: %s\n", (char *)pdu->payload);
         /* Commenting for now due to testing */
-        char *request = (char*)malloc(sizeof(char)*(50+payload_len));
-        sprintf(request, "coap-client -m post coap://[::1]:5683/lights -e '%s'", (char*)pdu->payload);
-        printf("Request: %s", request);
-        system(request);
-        free(request);
+//        char *request = (char*)malloc(sizeof(char) * (50 + payload_len));
+//        sprintf(request, "coap-client -m post coap://[::1]:5683/lights -e '%s'",
+//                (char*)pdu->payload);
+//        printf("Request: %s", request);
+//        system(request);
+//        free(request);
 
         return gcoap_finish(pdu, payload_len, COAP_FORMAT_JSON);
 
@@ -127,18 +130,6 @@ static ssize_t _settings_handler(coap_pkt_t* pdu, uint8_t *buf, size_t len,
             req_count = (uint16_t)strtoul(payload, NULL, 10);
             sensor_set_refresh(req_count);
             sensor_set_accuracy(req_count);
-            printf("Payload put: %s, %u\n", payload, req_count);
-            return gcoap_response(pdu, buf, len, COAP_CODE_CHANGED);
-        }
-        else {
-            return gcoap_response(pdu, buf, len, COAP_CODE_BAD_REQUEST);
-        }
-
-    case COAP_POST:
-        if(pdu->payload_len <= 5) {
-            char payload[6] = {0};
-            memcpy(payload, (char *)pdu->payload, pdu->payload_len);
-            req_count = (uint16_t)strtoul(payload, NULL, 10);
             printf("Payload put: %s, %u\n", payload, req_count);
             return gcoap_response(pdu, buf, len, COAP_CODE_CHANGED);
         }

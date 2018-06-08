@@ -41,14 +41,14 @@ static mutex_t mutex;
 
 static char sensor_thread_stack[SENSOR_THREAD_STACKSIZE];
 
-typedef struct{
+typedef struct {
     uint16_t refresh;
     uint16_t accuracy;
-}SETTINGS;
+} SETTINGS;
 
-typedef struct{
+typedef struct {
     uint16_t temp;
-}TEMP;
+} TEMP;
 
 SETTINGS value;
 TEMP reading;
@@ -58,8 +58,7 @@ TEMP reading;
  *
  * @return temperature
  */
-uint16_t sensor_get_refresh(void)
-{
+uint16_t sensor_get_refresh(void){
     return value.refresh;
 }
 
@@ -68,8 +67,7 @@ uint16_t sensor_get_refresh(void)
  *
  * @return humidity
  */
-uint16_t sensor_get_accuracy(void)
-{
+uint16_t sensor_get_accuracy(void){
     return value.accuracy;
 }
 
@@ -94,14 +92,14 @@ void sensor_set_accuracy(uint16_t accuracy){
     printf("Set accuracy: %u\n", value.accuracy);
 }
 
-static int16_t _get_humidity(void) {
+static int16_t _get_humidity(void){
     int16_t h;
 #ifdef MODULE_HDC1000
     int16_t t;
     LOG_DEBUG("[SENSOR] _hdc1000_measure\n");
     hdc1000_read(&dev_hdc1000, &t, &h);
 #else
-    h = (int16_t) random_uint32_range(0, 10000);
+    h = (int16_t)random_uint32_range(0, 10000);
 #endif /* MODULE_HDC1000 */
     return h;
 }
@@ -111,8 +109,7 @@ static int16_t _get_humidity(void) {
  *
  * @param[out] temp the measured temperature in degree celsius * 100
  */
-static int16_t _get_temperature(void)
-{
+static int16_t _get_temperature(void){
     LOG_DEBUG("[SENSOR] _get_temperature\n");
     int16_t t;
 #ifdef MODULE_TMP006
@@ -124,10 +121,10 @@ static int16_t _get_temperature(void)
         LOG_ERROR("[SENSOR] tmp006_read failed\n");
         return 0;
     }
-    tmp006_convert(raw_volt, raw_temp,  &tamb, &tobj);
+    tmp006_convert(raw_volt, raw_temp, &tamb, &tobj);
     t = (int16_t)(tobj*100);
 #else
-    t = (int16_t) random_uint32_range(0, 5000);
+    t = (int16_t)random_uint32_range(0, 5000);
 #endif /* MODULE_TMP006 */
     return t;
 }
@@ -137,7 +134,7 @@ static int16_t _get_temperature(void)
  *
  * @return 0 on success, anything else on error
  */
-static int _init(void) {
+static int _init(void){
     LOG_DEBUG("[SENSOR] _init\n");
 #ifdef MODULE_HDC1000
     /* initialise humidity sensor hdc1000 */
@@ -162,12 +159,29 @@ static int _init(void) {
     }
 #endif /* MODULE_TMP006 */
     mutex_lock(&mutex);
-    for (unsigned i = 0; i < SENSOR_NUM_SAMPLES; i++) {
-        samples_humidity[i]    = _get_humidity();
+    for(unsigned i = 0; i < SENSOR_NUM_SAMPLES; i++) {
+        samples_humidity[i] = _get_humidity();
         samples_temperature[i] = _get_temperature();
     }
     mutex_unlock(&mutex);
     return 0;
+}
+
+void send_values(void){
+    printf("Sending values\n");
+    char payload[50];
+    size_t payload_len = sprintf(payload,
+            "{\"type\": \"temp\", \"ID\": \"6969\", \"Message\": \"%u\"}",
+            sensor_get_temp());
+
+    printf("Payload: %s\n", payload);
+    /* Commenting for now due to testing */
+    char *request = (char*)malloc(sizeof(char) * (50 + payload_len));
+    sprintf(request, "coap-client -m post coap://[::1]:5683/lights -e '%s'",
+            payload);
+    printf("Request: %s", request);
+    system(request);
+    free(request);
 }
 
 /**
@@ -175,9 +189,8 @@ static int _init(void) {
  *
  * @param[in] arg   unused
  */
-static void *sensor_thread(void *arg)
-{
-    (void) arg;
+static void *sensor_thread(void *arg){
+    (void)arg;
     printf("Sensor thread starting\n");
     int count = 0;
     //xtimer_usleep(SENSOR_TIMEOUT_MS);
@@ -190,16 +203,17 @@ static void *sensor_thread(void *arg)
 
         printf("Value: %d\n", reading.temp);
         /* next round */
-        count = (count+1)%5000;
+        count = (count + 1) % 5000;
         uint16_t sensor_val = sensor_get_refresh();
         printf("Refresh rate set: %u seconds\n", sensor_val);
-        if(sensor_val > 0){
-            xtimer_usleep(sensor_get_refresh()*1000000);
+        send_values();
+        if(sensor_val > 0) {
+            xtimer_usleep(sensor_get_refresh() * 1000000);
         }
-        else if(sensor_val == 0){
+        else if(sensor_val == 0) {
             xtimer_usleep(SENSOR_TIMEOUT_MS); //5 second default
         }
-        else{
+        else {
             break;
         }
     }
@@ -211,16 +225,14 @@ static void *sensor_thread(void *arg)
  *
  * @return PID of sensor control thread
  */
-int sensor_init(void)
-{
+int sensor_init(void){
     /* init sensors */
-    if (_init() != 0) {
+    if(_init() != 0) {
         return -1;
     }
     /* start sensor thread for periodic measurements */
     return thread_create(sensor_thread_stack, sizeof(sensor_thread_stack),
-                        THREAD_PRIORITY_MAIN-1, THREAD_CREATE_STACKTEST,
-                        sensor_thread, NULL, "sensor_thread");
+    THREAD_PRIORITY_MAIN - 1, THREAD_CREATE_STACKTEST, sensor_thread, NULL,
+            "sensor_thread");
 }
-
 
