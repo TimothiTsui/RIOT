@@ -51,13 +51,12 @@ typedef struct {
     uint16_t temp;
 } TEMP;
 
-//typedef struct {
-//    kernel_pid_t pid;
-//} PID;
 
 SETTINGS value;
 TEMP reading;
-//PID thread_pid;
+
+xtimer_t time;
+int pid;
 
 /**
  * @brief get avg temperature over N samples in Celcius (C) with factor 100
@@ -202,9 +201,10 @@ void send_values(void){
  */
 static void *sensor_thread(void *arg){
     (void)arg;
-
     printf("Sensor thread starting\n");
     int count = 0;
+    printf("PID sensor: %d\n", pid);
+    xtimer_ticks32_t last_wakeup = xtimer_now();
     while(1) {
         printf("Reading values\n");
         /* get latest sensor data */
@@ -218,18 +218,14 @@ static void *sensor_thread(void *arg){
         uint16_t sensor_val = sensor_get_refresh();
         printf("Refresh rate set: %u seconds\n", sensor_val);
         send_values();
-//        if(sensor_val > 0){
-//            xtimer_set(&timeout_timer, sensor_val * 1000000);
-//        }
-//        else{
-//            xtimer_set(&timeout_timer, SENSOR_TIMEOUT_MS);
-//        }
-//        xtimer_usleep(SENSOR_TIMEOUT_MS);
         if(sensor_val > 0) {
-            xtimer_usleep(sensor_val * 1000000);
+            //xtimer_usleep(sensor_val*1000000);
+            xtimer_periodic_wakeup(&last_wakeup, sensor_val*1000000);
         }
         else if(sensor_val == 0) {
-            xtimer_usleep(SENSOR_TIMEOUT_MS); //5 second default
+            //5 second default
+            //xtimer_usleep(SENSOR_TIMEOUT_MS);
+            xtimer_periodic_wakeup(&last_wakeup, SENSOR_TIMEOUT_MS);
         }
         else {
             break;
@@ -249,8 +245,11 @@ int sensor_init(void){
         return -1;
     }
     /* start sensor thread for periodic measurements */
-    return thread_create(sensor_thread_stack, sizeof(sensor_thread_stack),
-    THREAD_PRIORITY_MAIN - 1, THREAD_CREATE_STACKTEST, sensor_thread, NULL,
-            "sensor_thread");
+    pid = thread_create(sensor_thread_stack, sizeof(sensor_thread_stack),
+            THREAD_PRIORITY_MAIN - 1, THREAD_CREATE_STACKTEST, sensor_thread, NULL,
+                    "sensor_thread");
+    printf("PID: %d\n", pid);
+
+    return pid;
 }
 
