@@ -67,9 +67,9 @@ uint16_t sensor_get_refresh(void){
     return value.refresh;
 }
 
-//void set_pid(kernel_pid_t pid){
-//    thread_pid.pid = pid;
-//}
+kernel_pid_t set_pid(void){
+    return pid;
+}
 
 /**
  * @brief get avg humitity over N sampels in percent (%) with factor 100
@@ -93,7 +93,8 @@ uint16_t sensor_get_temp(void){
 
 void sensor_set_refresh(uint16_t refresh){
     value.refresh = refresh;
-//    thread_wakeup(thread_pid.pid);
+    thread_wakeup(pid);
+    xtimer_set_wakeup(&time, refresh*1000000, thread_getpid());
     printf("Set refresh: %u\n", value.refresh);
 }
 
@@ -178,6 +179,7 @@ static int _init(void){
 }
 
 void send_values(void){
+    //(void)arg;
     printf("Sending values\n");
     char payload[50];
     size_t payload_len = sprintf(payload,
@@ -203,8 +205,10 @@ static void *sensor_thread(void *arg){
     (void)arg;
     printf("Sensor thread starting\n");
     int count = 0;
-    printf("PID sensor: %d\n", pid);
-    xtimer_ticks32_t last_wakeup = xtimer_now();
+    printf("PID sensor: %d\n", thread_getpid());
+    //xtimer_ticks32_t last_wakeup = xtimer_now();
+    //time.arg = NULL;
+    //time.callback = send_values;
     while(1) {
         printf("Reading values\n");
         /* get latest sensor data */
@@ -217,19 +221,30 @@ static void *sensor_thread(void *arg){
         count = (count + 1) % 5000;
         uint16_t sensor_val = sensor_get_refresh();
         printf("Refresh rate set: %u seconds\n", sensor_val);
-        send_values();
         if(sensor_val > 0) {
             //xtimer_usleep(sensor_val*1000000);
-            xtimer_periodic_wakeup(&last_wakeup, sensor_val*1000000);
+            //xtimer_periodic_wakeup(&last_wakeup, sensor_val*1000000);
+            //thread_sleep();
+            //time.target = sensor_val;
+            xtimer_set_wakeup(&time, sensor_val*1000000, thread_getpid());
+            thread_sleep();
+            //thread_wakeup(thread_getpid());
+
         }
         else if(sensor_val == 0) {
             //5 second default
             //xtimer_usleep(SENSOR_TIMEOUT_MS);
-            xtimer_periodic_wakeup(&last_wakeup, SENSOR_TIMEOUT_MS);
+            //xtimer_periodic_wakeup(&last_wakeup, SENSOR_TIMEOUT_MS);
+            //thread_sleep();
+            //time.target = SENSOR_TIMEOUT_MS;
+            xtimer_set_wakeup(&time, SENSOR_TIMEOUT_MS, thread_getpid());
+            thread_sleep();
+            //thread_wakeup(thread_getpid());
         }
         else {
             break;
         }
+        send_values();
     }
     return NULL;
 }

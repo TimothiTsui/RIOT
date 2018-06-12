@@ -27,7 +27,7 @@ void sensor_set_accuracy(uint16_t accuracy);
 
 int sensor_init(void);
 
-void set_pid(kernel_pid_t pid);
+kernel_pid_t set_pid(void);
 
 
 
