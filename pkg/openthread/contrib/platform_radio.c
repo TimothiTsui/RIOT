@@ -54,6 +54,14 @@ static int _set_power(int16_t power)
     return _dev->driver->set(_dev, NETOPT_TX_POWER, &power, sizeof(int16_t));
 }
 
+/* get transmission power */
+static int16_t _get_power(void)
+{
+    int16_t power;
+    _dev->driver->get(_dev, NETOPT_TX_POWER, &power, sizeof(int16_t));
+    return power;
+}
+
 /* set IEEE802.15.4 PAN ID */
 static int _set_panid(uint16_t panid)
 {
@@ -101,6 +109,7 @@ static netopt_state_t _get_state(void)
     return state;
 }
 
+
 /* sets device state to SLEEP */
 static void _set_sleep(void)
 {
@@ -116,10 +125,10 @@ static void _set_idle(void)
 /* init framebuffers and initial state */
 void openthread_radio_init(netdev_t *dev, uint8_t *tb, uint8_t *rb)
 {
-    sTransmitFrame.mPsdu = tb;
     sTransmitFrame.mLength = 0;
-    sReceiveFrame.mPsdu = rb;
+    sTransmitFrame.mPsdu = tb;
     sReceiveFrame.mLength = 0;
+    sReceiveFrame.mPsdu = rb;
     _dev = dev;
 }
 
@@ -286,12 +295,24 @@ otRadioFrame *otPlatRadioGetTransmitBuffer(otInstance *aInstance)
 }
 
 /* OpenThread will call this function to set the transmit power */
-void otPlatRadioSetDefaultTxPower(otInstance *aInstance, int8_t aPower)
+otError otPlatRadioSetTransmitPower(otInstance *aInstance, int8_t aPower)
 {
     (void)aInstance;
 
     _set_power(aPower);
+
+    return OT_ERROR_NONE;
 }
+
+otError otPlatRadioGetTransmitPower(otInstance *aInstance, int8_t *aPower)
+{
+    (void)aInstance;
+
+    *aPower = _get_power();
+
+    return OT_ERROR_NONE;
+}
+
 
 /* OpenThread will call this for transmitting a packet*/
 otError otPlatRadioTransmit(otInstance *aInstance, otRadioFrame *aPacket)

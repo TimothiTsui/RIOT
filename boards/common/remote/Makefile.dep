@@ -1,12 +1,7 @@
-ifneq (,$(filter gnrc_netdev_default ipv6_addr,$(USEMODULE)))
+ifneq (,$(filter gnrc_netdev_default,$(USEMODULE)))
   USEMODULE += netif
   USEMODULE += cc2538_rf
   USEMODULE += netdev_ieee802154
-<<<<<<< HEAD
-  
-=======
-  USEMODULE += gnrc_netdev_default
->>>>>>> branch 'master' of https://skullbox305@github.com/skullbox305/RIOT.git
 
 endif
 

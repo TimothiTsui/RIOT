@@ -87,7 +87,7 @@ static void *_openthread_event_loop(void *arg) {
     otCliUartInit(sInstance);
 
 #if OPENTHREAD_ENABLE_DIAG
-    diagInit(sInstance);
+    otDiagInit(sInstance);
 #endif
 
     /* Init default parameters */
@@ -114,6 +114,8 @@ static void *_openthread_event_loop(void *arg) {
                 dev = msg.content.ptr;
                 dev->driver->isr(dev);
                 DEBUG("Event loop: netdev message type event\n");
+                break;
+            case OPENTHREAD_MSG_TYPE_RECV:
                 break;
             case OPENTHREAD_SERIAL_MSG_TYPE_EVENT:
                 /* Tell OpenThread about the reception of a CLI command */
@@ -174,8 +176,8 @@ int openthread_netdev_init(char *stack, int stacksize, char priority,
     netdev->driver->init(netdev);
     netdev->event_callback = _event_cb;
 
-    netopt_enable_t enable = NETOPT_ENABLE;
-    netdev->driver->set(netdev, NETOPT_TX_END_IRQ, &enable, sizeof(enable));
+//    netopt_enable_t enable = NETOPT_ENABLE;
+//    netdev->driver->set(netdev, NETOPT_TX_END_IRQ, &enable, sizeof(enable));
 
     _pid = thread_create(stack, stacksize,
                          priority, THREAD_CREATE_STACKTEST,

@@ -49,6 +49,7 @@ DEVELHELP ?= 1
 # Uncomment this to join RPL DODAGs even if DIOs do not contain
 # DODAG Configuration Options (see the doc for more info)
 # CFLAGS += -DGNRC_RPL_DODAG_CONF_OPTIONAL_ON_JOIN
+CFLAGS += -ggdb -Og -g3
 
 # Change this to 0 show compiler invocation lines by default:
 QUIET ?= 1

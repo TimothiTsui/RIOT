@@ -41,6 +41,9 @@
 #define OPENTHREAD_NETIF_NUMOF        (sizeof(at86rf2xx_params) / sizeof(at86rf2xx_params[0]))
 #endif
 
+#ifdef MODULE_CC2538_RF
+#define OPENTHREAD_NETIF_NUMOF        (1U)
+#endif
 
 #ifdef MODULE_AT86RF2XX
 static at86rf2xx_t at86rf2xx_dev;
@@ -48,10 +51,7 @@ static at86rf2xx_t at86rf2xx_dev;
 
 #ifdef MODULE_CC2538_RF
 static cc2538_rf_t cc2538_rf_dev;
-static char _cc2538_rf_stack[CC2538_MAC_STACKSIZE];
 #endif
-
-//static netdev_t *netdev;
 
 #define OPENTHREAD_NETDEV_BUFLEN (ETHERNET_MAX_LEN)
 
@@ -59,10 +59,6 @@ static uint8_t rx_buf[OPENTHREAD_NETDEV_BUFLEN];
 static uint8_t tx_buf[OPENTHREAD_NETDEV_BUFLEN];
 static char ot_thread_stack[2 * THREAD_STACKSIZE_MAIN];
 
-//void openthread_set_netdev(netdev_t *dev){
-//    netdev = dev;
-//    DEBUG("Openthread: netdev set.\n");
-//}
 
 /* init and run OpeanThread's UART simulation (stdio) */
 void openthread_uart_run(void){
@@ -92,14 +88,6 @@ void openthread_bootstrap(void){
 
 #ifdef MODULE_CC2538_RF
     cc2538_setup(&cc2538_rf_dev);
-<<<<<<< HEAD
-=======
-    gnrc_netif_ieee802154_create(_cc2538_rf_stack,
-                                     CC2538_MAC_STACKSIZE,
-                                     CC2538_MAC_PRIO, "cc2538_rf",
-                                     (netdev_t *)&cc2538_rf_dev);
-
->>>>>>> branch 'master' of https://skullbox305@github.com/skullbox305/RIOT.git
     netdev_t *netdev = (netdev_t *)&cc2538_rf_dev;
 #endif
 
