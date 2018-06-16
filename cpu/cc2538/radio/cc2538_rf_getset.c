@@ -149,6 +149,7 @@ int cc2538_get_tx_power(void)
 
 void cc2538_set_addr_long(uint64_t addr)
 {
+    DEBUG("%s(%llu): Setting long address \n", __FUNCTION__, addr);
     RFCORE_FFSM_EXT_ADDR0 = addr >> (7 * 8);
     RFCORE_FFSM_EXT_ADDR1 = addr >> (6 * 8);
     RFCORE_FFSM_EXT_ADDR2 = addr >> (5 * 8);
@@ -161,13 +162,14 @@ void cc2538_set_addr_long(uint64_t addr)
 
 void cc2538_set_addr_short(uint16_t addr)
 {
+    DEBUG("%s(%u): Setting short address \n", __FUNCTION__, addr);
     RFCORE_FFSM_SHORT_ADDR1 = addr;
     RFCORE_FFSM_SHORT_ADDR0 = addr >> 8;
 }
 
 void cc2538_set_chan(unsigned int chan)
 {
-    DEBUG("%s(%u): Setting channel to ", __FUNCTION__, chan);
+    DEBUG("%s(%u): Setting channel ", __FUNCTION__, chan);
 
     if (chan < IEEE802154_CHANNEL_MIN) {
         chan = IEEE802154_CHANNEL_MIN;
@@ -237,6 +239,7 @@ void cc2538_set_state(cc2538_rf_t *dev, netopt_state_t state)
 
 void cc2538_set_pan(uint16_t pan)
 {
+    DEBUG("%s(%u): Setting PAN ID to %x\n", __FUNCTION__, pan, pan);
     RFCORE_FFSM_PAN_ID0 = pan;
     RFCORE_FFSM_PAN_ID1 = pan >> 8;
 }

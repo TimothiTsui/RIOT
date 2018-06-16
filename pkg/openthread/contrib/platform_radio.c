@@ -37,6 +37,11 @@
 static otRadioFrame sTransmitFrame;
 static otRadioFrame sReceiveFrame;
 static int8_t Rssi;
+static uint8_t sChannel = 0;
+//static int8_t  sTxPower = 0;
+
+//static otRadioState sState             = OT_RADIO_STATE_DISABLED;
+//static bool         sIsReceiverEnabled = false;
 
 static netdev_t *_dev;
 
@@ -45,7 +50,13 @@ static bool sDisabled;
 /* set 15.4 channel */
 static int _set_channel(uint16_t channel)
 {
-    return _dev->driver->set(_dev, NETOPT_CHANNEL, &channel, sizeof(uint16_t));
+    int res = -1;
+    if(sChannel != channel)
+    {
+        res = _dev->driver->set(_dev, NETOPT_CHANNEL, &channel, sizeof(uint16_t));
+        sChannel = channel;
+    }
+    return res;
 }
 
 /* set transmission power */
@@ -298,7 +309,7 @@ otRadioFrame *otPlatRadioGetTransmitBuffer(otInstance *aInstance)
 otError otPlatRadioSetTransmitPower(otInstance *aInstance, int8_t aPower)
 {
     (void)aInstance;
-
+    DEBUG("openthread: otPlatRadioSetTransmitPower\n");
     _set_power(aPower);
 
     return OT_ERROR_NONE;
@@ -307,7 +318,7 @@ otError otPlatRadioSetTransmitPower(otInstance *aInstance, int8_t aPower)
 otError otPlatRadioGetTransmitPower(otInstance *aInstance, int8_t *aPower)
 {
     (void)aInstance;
-
+    DEBUG("openthread: otPlatRadioGetTransmitPower\n");
     *aPower = _get_power();
 
     return OT_ERROR_NONE;

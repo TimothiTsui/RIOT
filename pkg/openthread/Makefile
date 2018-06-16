@@ -2,15 +2,21 @@ PKG_NAME=openthread
 PKG_URL=https://github.com/openthread/openthread.git
 PKG_VERSION=d92b424bc9cbf0b9c80a6b2561a34468928fe8e1
 PKG_BUILDDIR ?= $(BINDIRBASE)/pkg/$(BOARD)/$(PKG_NAME)
+OPENTHREAD_DIR = $(RIOTBASE)/pkg/openthread
 
 $(info Compile OpenThread for FTD device)
-OPENTHREAD_ARGS+= --enable-cli-app=ftd --enable-application-coap --enable-diag --enable-debug
+OPENTHREAD_ARGS+= --enable-cli-app=ftd --enable-application-coap
+OPENTHREAD_ARGS+= --enable-jam-detection --enable-cert-log --enable-diag --enable-debug
 
 $(info $$OPENTHREAD_ARGS is [$(OPENTHREAD_ARGS)])
 
 .PHONY: all
 
+CONFIG_FILE      = OPENTHREAD_PROJECT_CORE_CONFIG_FILE='\"openthread-core-platform-config.h\"'
+CONFIG_FILE_PATH = $(OPENTHREAD_DIR)/contrib/
+
 OPENTHREAD_COMMON_FLAGS = -fdata-sections -ffunction-sections -ggdb -Og -g3
+OPENTHREAD_COMMON_FLAGS += -D$(CONFIG_FILE) -I$(CONFIG_FILE_PATH) 
 OPENTHREAD_COMMON_FLAGS += -Wno-implicit-fallthrough
 
 all: git-download
@@ -24,8 +30,8 @@ all: git-download
 		LDFLAGS="$(OPENTHREAD_COMMON_FLAGS) $(CFLAGS_CPU) -nostartfiles -specs=nano.specs \
 		-specs=nosys.specs -Wl,--gc-sections -Wl,-Map=map.map " \
 		./configure --disable-docs --host=$(TARGET_ARCH) --target=$(TARGET_ARCH) \
-		--prefix=/ --enable-default-logging $(OPENTHREAD_ARGS)
-	cd $(PKG_BUILDDIR) &&  DESTDIR=$(PKG_BUILDDIR)/output PREFIX=/ make -j4 clean install
+		--prefix=/ $(OPENTHREAD_ARGS)
+	cd $(PKG_BUILDDIR) &&  DESTDIR=$(PKG_BUILDDIR)/output PREFIX=/ make -j4 install
 
 	cp $(PKG_BUILDDIR)/output/lib/libmbedcrypto.a $(BINDIR)/libmbedcrypto.a
 	cp $(PKG_BUILDDIR)/output/lib/libopenthread-ftd.a $(BINDIR)/libopenthread.a

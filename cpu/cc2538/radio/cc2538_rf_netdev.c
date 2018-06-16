@@ -176,7 +176,19 @@ static int _set(netdev_t *netdev, netopt_t opt, const void *value, size_t value_
                     res = -EINVAL;
                 }
                 else {
+                    bool was_enabled = false;
+                    if(cc2538_is_on())
+                    {
+                        cc2538_off();
+                        was_enabled = true;
+                    }
+
                     cc2538_set_chan(chan);
+
+                    if(was_enabled)
+                    {
+                        cc2538_on();
+                    }
                 }
             }
             break;
