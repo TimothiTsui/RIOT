@@ -1,12 +1,13 @@
 PKG_NAME=openthread
 PKG_URL=https://github.com/openthread/openthread.git
-PKG_VERSION=d92b424bc9cbf0b9c80a6b2561a34468928fe8e1
+PKG_VERSION=63257be510c0c89d08da5cd89cb062aae943223c
 PKG_BUILDDIR ?= $(BINDIRBASE)/pkg/$(BOARD)/$(PKG_NAME)
 OPENTHREAD_DIR = $(RIOTBASE)/pkg/openthread
 
 $(info Compile OpenThread for FTD device)
 OPENTHREAD_ARGS+= --enable-cli-app=ftd --enable-application-coap
-OPENTHREAD_ARGS+= --enable-jam-detection --enable-cert-log --enable-diag --enable-debug
+OPENTHREAD_ARGS+=  --enable-diag --enable-debug
+#OPENTHREAD_ARGS+=  --enable-cert-log --enable-jam-detection
 
 $(info $$OPENTHREAD_ARGS is [$(OPENTHREAD_ARGS)])
 
@@ -31,7 +32,7 @@ all: git-download
 		-specs=nosys.specs -Wl,--gc-sections -Wl,-Map=map.map " \
 		./configure --disable-docs --host=$(TARGET_ARCH) --target=$(TARGET_ARCH) \
 		--prefix=/ $(OPENTHREAD_ARGS)
-	cd $(PKG_BUILDDIR) &&  DESTDIR=$(PKG_BUILDDIR)/output PREFIX=/ make -j4 install
+	cd $(PKG_BUILDDIR) &&  DESTDIR=$(PKG_BUILDDIR)/output PREFIX=/ make -j4 clean install
 
 	cp $(PKG_BUILDDIR)/output/lib/libmbedcrypto.a $(BINDIR)/libmbedcrypto.a
 	cp $(PKG_BUILDDIR)/output/lib/libopenthread-ftd.a $(BINDIR)/libopenthread.a
