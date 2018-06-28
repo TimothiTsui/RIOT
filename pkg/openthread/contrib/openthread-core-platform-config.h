@@ -35,6 +35,14 @@
 #define OPENTHREAD_CORE_PLATFORM_CONFIG_H_
 
 /**
+ * @def OPENTHREAD_CONFIG_ENABLE_SOFTWARE_ACK_TIMEOUT
+ *
+ * Define to 1 if you want to enable software ACK timeout logic.
+ *
+ */
+#define OPENTHREAD_CONFIG_ENABLE_SOFTWARE_ACK_TIMEOUT          1
+
+/**
  * @def OPENTHREAD_CONFIG_LOG_OUTPUT
  *
  * Selects if, and where the LOG output goes to.
@@ -64,7 +72,7 @@
  *
  */
 #ifndef OPENTHREAD_CONFIG_LOG_LEVEL
-#define OPENTHREAD_CONFIG_LOG_LEVEL OT_LOG_LEVEL_DEBG
+#define OPENTHREAD_CONFIG_LOG_LEVEL OT_LOG_LEVEL_CRIT
 #endif
 
 /**

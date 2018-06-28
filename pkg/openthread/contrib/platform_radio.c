@@ -29,7 +29,7 @@
 #include "openthread/platform/radio.h"
 #include "ot.h"
 
-#define ENABLE_DEBUG (1)
+#define ENABLE_DEBUG (0)
 #include "debug.h"
 
 #define RADIO_IEEE802154_FCS_LEN    (2U)
@@ -164,7 +164,7 @@ void openthread_radio_init(netdev_t *dev, uint8_t *tb, uint8_t *rb)
 
 void radio_process(otInstance *aInstance)
 {
-    (void) aInstance;
+    (void)aInstance;
 }
 
 /* Called upon NETDEV_EVENT_RX_COMPLETE event */
@@ -196,6 +196,8 @@ void recv_pkt(otInstance *aInstance, netdev_t *dev)
     /* Get RSSI from a radio driver. RSSI should be in [dBm] */
     Rssi = (int8_t)rx_info.rssi;
     sReceiveFrame.mInfo.mRxInfo.mRssi = Rssi;
+    /* Get LQI from a radio driver. LQI should be in [....] */
+    sReceiveFrame.mInfo.mRxInfo.mLqi = (int8_t)rx_info.lqi;
 
     DEBUG("Received message: len %d\n", (int ) sReceiveFrame.mLength);
     for(int i = 0; i < sReceiveFrame.mLength; ++i)
@@ -241,6 +243,7 @@ void send_pkt(otInstance *aInstance, netdev_t *dev, netdev_event_t event)
         break;
     }
 }
+
 
 /* OpenThread will call this for setting PAN ID */
 void otPlatRadioSetPanId(otInstance *aInstance, uint16_t panid)
@@ -388,26 +391,28 @@ otError otPlatRadioTransmit(otInstance *aInstance, otRadioFrame *aFrame)
     {
         error = OT_ERROR_NONE;
         sState = OT_RADIO_STATE_TRANSMIT;
-        //sTransmitError = OT_ERROR_NONE;
+
+        /*Set channel and power based on transmit frame */
+        DEBUG("otPlatRadioTransmit->channel: %i, length %d\n",
+                (int ) aFrame->mChannel, (int )aFrame->mLength);
+        for(int i = 0; i < aFrame->mLength; ++i)
+        {
+            DEBUG("%x ", aFrame->mPsdu[i]);
+        }
+        DEBUG("\n");
+
+        _set_channel(aFrame->mChannel);
+        _set_power(aFrame->mInfo.mRxInfo.mRssi);
+
+        otPlatRadioTxStarted(aInstance, aFrame);
+        /* send packet though netdev */
+        _dev->driver->send(_dev, &iolist);
+
+
+        otPlatRadioTxDone(aInstance, &sTransmitFrame, &sReceiveFrame,
+                OT_ERROR_NONE);
+        sState = OT_RADIO_STATE_RECEIVE;
     }
-
-    /*Set channel and power based on transmit frame */
-    DEBUG("otPlatRadioTransmit->channel: %i, length %d\n",
-            (int ) aFrame->mChannel, (int )aFrame->mLength);
-    for(int i = 0; i < aFrame->mLength; ++i)
-    {
-        DEBUG("%x ", aFrame->mPsdu[i]);
-    }
-    DEBUG("\n");
-
-    _set_channel(aFrame->mChannel);
-    _set_power(aFrame->mInfo.mRxInfo.mRssi);
-
-    otPlatRadioTxStarted(aInstance, aFrame);
-    /* send packet though netdev */
-    _dev->driver->send(_dev, &iolist);
-    otPlatRadioTxDone(aInstance, &sTransmitFrame, &sReceiveFrame, OT_ERROR_NONE);
-
     return error;
 }
 

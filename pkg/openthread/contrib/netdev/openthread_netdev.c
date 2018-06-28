@@ -125,8 +125,6 @@ static void *_openthread_event_loop(void *arg)
             dev->driver->isr(dev);
             DEBUG("Event loop: netdev message type event\n");
             break;
-        case OPENTHREAD_MSG_TYPE_RECV:
-            break;
         case OPENTHREAD_SERIAL_MSG_TYPE_EVENT:
             /* Tell OpenThread about the reception of a CLI command */
             buf = msg.content.ptr;

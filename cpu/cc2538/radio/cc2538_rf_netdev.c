@@ -28,7 +28,7 @@
 #include "cc2538_rf_netdev.h"
 #include "cc2538_rf_internal.h"
 
-#define ENABLE_DEBUG        (1)
+#define ENABLE_DEBUG        (0)
 #include "debug.h"
 
 #define _MAX_MHR_OVERHEAD   (25)
@@ -286,6 +286,7 @@ static int _recv(netdev_t *netdev, void *buf, size_t len, void *info){
     if(buf == NULL) {
         /* GNRC wants to know how much data we've got for it */
         pkt_len = rfcore_read_byte();
+        DEBUG("rfcore_read_byte\n");
 
         /* Make sure pkt_len is sane */
         if(pkt_len > CC2538_RF_MAX_DATA_LEN) {
@@ -316,6 +317,7 @@ static int _recv(netdev_t *netdev, void *buf, size_t len, void *info){
     netdev->stats.rx_count++;
     netdev->stats.rx_bytes += pkt_len;
 #endif
+    DEBUG("rfcore_read_fifo\n");
     rfcore_read_fifo(buf, pkt_len);
 
     if(info != NULL && RFCORE->XREG_RSSISTATbits.RSSI_VALID) {
