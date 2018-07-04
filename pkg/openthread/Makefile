@@ -1,16 +1,23 @@
 PKG_NAME=openthread
 PKG_URL=https://github.com/openthread/openthread.git
-PKG_VERSION=64fed1ed4deb2a5bbcac4624dcc9222f53583a7a
+PKG_VERSION=f5d895c812357af0682e5190966a1f2500da8d3d
 PKG_BUILDDIR ?= $(BINDIRBASE)/pkg/$(BOARD)/$(PKG_NAME)
+OPENTHREAD_DIR = $(RIOTBASE)/pkg/openthread
 
 $(info Compile OpenThread for FTD device)
-OPENTHREAD_ARGS+= --enable-cli-app=ftd --enable-application-coap  
+OPENTHREAD_ARGS+= --enable-cli-app=ftd --enable-application-coap
+OPENTHREAD_ARGS+=  --enable-diag --enable-debug
+#OPENTHREAD_ARGS+=  --enable-cert-log --enable-jam-detection
 
 $(info $$OPENTHREAD_ARGS is [$(OPENTHREAD_ARGS)])
 
 .PHONY: all
 
-OPENTHREAD_COMMON_FLAGS = -fdata-sections -ffunction-sections -Os
+CONFIG_FILE      = OPENTHREAD_PROJECT_CORE_CONFIG_FILE='\"openthread-core-platform-config.h\"'
+CONFIG_FILE_PATH = $(OPENTHREAD_DIR)/contrib/
+
+OPENTHREAD_COMMON_FLAGS = -fdata-sections -ffunction-sections -ggdb -Og -g3
+OPENTHREAD_COMMON_FLAGS += -D$(CONFIG_FILE) -I$(CONFIG_FILE_PATH) 
 OPENTHREAD_COMMON_FLAGS += -Wno-implicit-fallthrough
 
 all: git-download
@@ -24,12 +31,13 @@ all: git-download
 		LDFLAGS="$(OPENTHREAD_COMMON_FLAGS) $(CFLAGS_CPU) -nostartfiles -specs=nano.specs \
 		-specs=nosys.specs -Wl,--gc-sections -Wl,-Map=map.map " \
 		./configure --disable-docs --host=$(TARGET_ARCH) --target=$(TARGET_ARCH) \
-		--prefix=/ --enable-default-logging $(OPENTHREAD_ARGS)
-	cd $(PKG_BUILDDIR) &&  DESTDIR=$(PKG_BUILDDIR)/output PREFIX=/ make -j4 --no-print-directory install
+		--prefix=/ $(OPENTHREAD_ARGS)
+	cd $(PKG_BUILDDIR) &&  DESTDIR=$(PKG_BUILDDIR)/output PREFIX=/ make -j4 clean install
 
 	cp $(PKG_BUILDDIR)/output/lib/libmbedcrypto.a $(BINDIR)/libmbedcrypto.a
 	cp $(PKG_BUILDDIR)/output/lib/libopenthread-ftd.a $(BINDIR)/libopenthread.a
 	cp $(PKG_BUILDDIR)/output/lib/libopenthread-cli-ftd.a $(BINDIR)/libopenthread-cli.a
+	cp $(PKG_BUILDDIR)/output/lib/libopenthread-diag.a $(BINDIR)/libopenthread-diag.a
 	sed -ie 's/BASE/_BASE/g' $(PKG_BUILDDIR)/output/include/openthread/types.h
 
 include $(RIOTBASE)/pkg/pkg.mk

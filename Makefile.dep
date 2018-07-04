@@ -520,6 +520,9 @@ ifneq (,$(filter gnrc_pktbuf, $(USEMODULE)))
   ifeq (,$(filter gnrc_pktbuf_%, $(USEMODULE)))
     USEMODULE += gnrc_pktbuf_static
   endif
+  ifeq (gnrc_pktbuf_cmd,$(filter gnrc_pktbuf_%, $(USEMODULE)))
+    USEMODULE += gnrc_pktbuf_static
+  endif
   USEMODULE += gnrc_pkt
 endif
 
@@ -631,6 +634,10 @@ ifneq (,$(filter random,$(USEMODULE)))
     USEMODULE += tinymt32
   endif
 
+  ifneq (,$(filter prng_sha1prng,$(USEMODULE)))
+    USEMODULE += hashes
+  endif
+
   USEMODULE += luid
 endif
 
@@ -703,10 +710,6 @@ endif
 
 ifneq (,$(filter nanocoap_%,$(USEMODULE)))
   USEMODULE += nanocoap
-endif
-
-ifneq (,$(filter ccn-lite,$(USEPKG)))
-  USEMODULE += ccn-lite-utils
 endif
 
 ifneq (,$(filter fatfs_vfs,$(USEMODULE)))

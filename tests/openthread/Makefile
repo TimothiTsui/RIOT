@@ -3,7 +3,7 @@ APPLICATION = openthread
 # If no BOARD is found in the environment, use this default:
 BOARD ?= samr21-xpro
 
-BOARD_WHITELIST := samr21-xpro iotlab-m3 fox iotlab-a8-m3
+BOARD_WHITELIST := samr21-xpro iotlab-m3 fox iotlab-a8-m3 remote-revb
 
 # This has to be the absolute path to the RIOT base directory:
 RIOTBASE ?= $(CURDIR)/../..
@@ -16,6 +16,7 @@ USEMODULE += openthread_contrib
 USEMODULE += libmbedcrypto
 USEMODULE += libopenthread
 USEMODULE += libopenthread-cli
+USEMODULE += libopenthread-diag
 USEMODULE += xtimer
 
 ifneq (,$(filter samr21-xpro,$(BOARD)))
@@ -23,6 +24,10 @@ ifneq (,$(filter samr21-xpro,$(BOARD)))
 endif
 ifneq (,$(filter iotlab-m3 fox iotlab-a8-m3,$(BOARD)))
   DRIVER := at86rf231
+endif
+ifneq (,$(filter remote-revb,$(BOARD)))
+  DRIVER := cc2538_rf
+  DRIVER += netdev_ieee802154
 endif
 
 ifneq (,$(filter at86rf2%,$(DRIVER)))
@@ -33,9 +38,9 @@ endif
 USEMODULE += $(DRIVER)
 
 USEMODULE += random
-USEMODULE += shell
-USEMODULE += shell_commands
-USEMODULE += ps
+#USEMODULE += shell
+#USEMODULE += shell_commands
+#USEMODULE += ps
 USEMODULE += ipv6_addr
 
 
@@ -45,5 +50,6 @@ USEMODULE += cpp11-compat
 
 #Define PANID and CHANNEL used by default
 #CFLAGS += -DOPENTHREAD_PANID=0xbeef -DOPENTHREAD_CHANNEL=11
+CFLAGS += -ggdb -g3 -Og
 
 include $(RIOTBASE)/Makefile.include

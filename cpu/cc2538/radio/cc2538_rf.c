@@ -25,7 +25,7 @@
 #include "cc2538_rf.h"
 #include "cc2538_rf_netdev.h"
 
-#define ENABLE_DEBUG    (1)
+#define ENABLE_DEBUG    (0)
 #include "debug.h"
 
 #define CC2538_ACCEPT_FT_2_ACK     (1 << 5)
@@ -81,6 +81,9 @@ bool cc2538_channel_clear(void)
 void cc2538_init(void)
 {
     const init_pair_t *pair;
+
+    cc2538_off();
+    DEBUG("%s: Initialize the CC2538 radio device \n", __FUNCTION__);
 
     for (pair = init_table; pair->reg_addr != NULL; pair++) {
         *pair->reg_addr = pair->value;
@@ -148,6 +151,7 @@ bool cc2538_is_on(void)
 
 void cc2538_off(void)
 {
+    DEBUG("%s: Deactivate the CC2538 radio device \n", __FUNCTION__);
     /* Wait for ongoing TX to complete (e.g. this could be an outgoing ACK) */
     RFCORE_WAIT_UNTIL(RFCORE->XREG_FSMSTAT1bits.TX_ACTIVE == 0);
 
@@ -162,6 +166,7 @@ void cc2538_off(void)
 
 bool cc2538_on(void)
 {
+    DEBUG("%s: Activate the CC2538 radio device \n", __FUNCTION__);
     /* Flush RX FIFO */
     RFCORE_SFR_RFST = ISFLUSHRX;
 
@@ -173,6 +178,7 @@ bool cc2538_on(void)
 
 void cc2538_setup(cc2538_rf_t *dev)
 {
+    DEBUG("%s: Setup the CC2538 radio device \n", __FUNCTION__);
     netdev_t *netdev = (netdev_t *)dev;
 
     netdev->driver = &cc2538_rf_driver;

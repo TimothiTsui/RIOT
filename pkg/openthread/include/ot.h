@@ -58,6 +58,13 @@ typedef struct {
 } ot_job_t;
 
 /**
+ * @brief ...............................
+ *
+ * @param[in]  aInstance          pointer to an OpenThread instance
+ */
+void radio_process(otInstance *aInstance);
+
+/**
  * @brief Gets packet from driver and tells OpenThread about the reception.
  *
  * @param[in]  aInstance          pointer to an OpenThread instance
