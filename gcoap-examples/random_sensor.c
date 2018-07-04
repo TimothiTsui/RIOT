@@ -16,6 +16,8 @@
 #include "thread.h"
 #include "xtimer.h"
 #include "sensor.h"
+#include "net/gcoap.h"
+#include "od.h"
 
 #ifdef MODULE_HDC1000
 #include "hdc1000.h"
@@ -36,6 +38,10 @@ static tmp006_t dev_tmp006;
 #define SENSOR_NUM_SAMPLES      (10U)
 #define SENSOR_THREAD_STACKSIZE (3 * THREAD_STACKSIZE_DEFAULT)
 
+#define ADDR    "::1"
+#define PORT    "5683"
+#define PATH    "/lights"
+
 static int16_t samples_humidity[SENSOR_NUM_SAMPLES];
 static int16_t samples_temperature[SENSOR_NUM_SAMPLES];
 static mutex_t mutex;
@@ -51,12 +57,12 @@ typedef struct {
     uint16_t temp;
 } TEMP;
 
-
 SETTINGS value;
 TEMP reading;
 
 xtimer_t time;
 int pid;
+//static uint16_t req_count = 0;
 
 /**
  * @brief get avg temperature over N samples in Celcius (C) with factor 100
@@ -94,8 +100,8 @@ uint16_t sensor_get_temp(void){
 void sensor_set_refresh(uint16_t refresh){
     value.refresh = refresh;
     thread_wakeup(pid);
-    xtimer_set_wakeup(&time, refresh*1000000, thread_getpid());
-    printf("Set refresh: %u\n", value.refresh);
+    xtimer_set_wakeup(&time, refresh * 1000000, thread_getpid());
+    printf("Transmission rate reset: %u\n", value.refresh);
 }
 
 void sensor_set_accuracy(uint16_t accuracy){
@@ -178,16 +184,107 @@ static int _init(void){
     return 0;
 }
 
+//static void _resp_handler(unsigned req_state, coap_pkt_t* pdu,
+//        sock_udp_ep_t *remote){
+//    (void)remote; /* not interested in the source currently */
+//
+//    if(req_state == GCOAP_MEMO_TIMEOUT) {
+//        printf("gcoap: timeout for msg ID %02u\n", coap_get_id(pdu));
+//        return;
+//    }
+//    else if(req_state == GCOAP_MEMO_ERR) {
+//        printf("gcoap: error in response\n");
+//        return;
+//    }
+//
+//    char *class_str =
+//            (coap_get_code_class(pdu) == COAP_CLASS_SUCCESS) ?
+//                    "Success" : "Error";
+//    printf("gcoap: response %s, code %1u.%02u", class_str,
+//            coap_get_code_class(pdu), coap_get_code_detail(pdu));
+//    if(pdu->payload_len) {
+//        if(pdu->content_type == COAP_FORMAT_TEXT
+//                || pdu->content_type == COAP_FORMAT_LINK
+//                || coap_get_code_class(pdu) == COAP_CLASS_CLIENT_FAILURE
+//                || coap_get_code_class(pdu) == COAP_CLASS_SERVER_FAILURE) {
+//            /* Expecting diagnostic payload in failure cases */
+//            printf(", %u bytes\n%.*s\n", pdu->payload_len, pdu->payload_len,
+//                    (char *)pdu->payload);
+//        }
+//        else {
+//            printf(", %u bytes\n", pdu->payload_len);
+//            od_hex_dump(pdu->payload, pdu->payload_len, OD_WIDTH_DEFAULT);
+//        }
+//    }
+//    else {
+//        printf(", empty payload\n");
+//    }
+//}
+//
+//static size_t _send(uint8_t *buf, size_t len, char *addr_str, char *port_str){
+//    ipv6_addr_t addr;
+//    size_t bytes_sent;
+//    sock_udp_ep_t remote;
+//
+//    remote.family = AF_INET6;
+//    remote.netif = SOCK_ADDR_ANY_NETIF;
+//
+//    if(ipv6_addr_from_str(&addr, addr_str) == NULL) {
+//        puts("gcoap_cli: unable to parse destination address");
+//        return 0;
+//    }
+//    memcpy(&remote.addr.ipv6[0], &addr.u8[0], sizeof(addr.u8));
+//
+//    /* parse port */
+//    remote.port = (uint16_t)atoi(port_str);
+//    if(remote.port == 0) {
+//        puts("gcoap_cli: unable to parse destination port");
+//        return 0;
+//    }
+//
+//    bytes_sent = gcoap_req_send2(buf, len, &remote, _resp_handler);
+//    if(bytes_sent > 0) {
+//        req_count++;
+//    }
+//    return bytes_sent;
+//}
+
 void send_values(void){
-    //(void)arg;
+
+//    uint8_t buf[GCOAP_PDU_BUF_SIZE];
+//    coap_pkt_t pdu;
+//    size_t len;
+
     printf("Sending values\n");
-    char payload[50];
+    char payload[49];
+    memset(payload, '\0', 49);
     size_t payload_len = sprintf(payload,
             "{\"type\": \"temp\", \"ID\": \"7070\", \"Message\": \"%u\"}",
             sensor_get_temp());
+    //unsigned msg_type = COAP_TYPE_CON;
 
     printf("Payload: %s\n", payload);
-    /* Commenting for now due to testing */
+
+//    gcoap_req_init(&pdu, &buf[0], GCOAP_PDU_BUF_SIZE, COAP_METHOD_POST, PATH);
+//    coap_hdr_set_type(pdu.hdr, msg_type);
+//
+//    memcpy(pdu.payload, payload, strlen(payload));
+//    len = gcoap_finish(&pdu, strlen(payload), COAP_FORMAT_JSON);
+//
+//    if(!_send(&buf[0], len, ADDR, PORT)) {
+//        puts("gcoap_cli: msg send failed");
+//    }
+////
+//    uint8_t buf[GCOAP_PDU_BUF_SIZE];
+//    memcpy(pkt.payload, payload, payload_len);
+//    printf("Pkt payload: %s\n", pkt.payload);
+//
+//    int code = 2;
+//    int ret = gcoap_req_init(&pkt, &buf[0], GCOAP_PDU_BUF_SIZE, code, "/lights");
+//    printf("Ret val: %d\n", ret);
+//    coap_hdr_set_type(pkt.hdr, msg_type);
+
+    /* Commenting due to testing */
     char *request = (char*)malloc(sizeof(char) * (50 + payload_len));
     sprintf(request, "coap-client -m post coap://[::1]:5683/lights -e '%s'",
             payload);
@@ -206,9 +303,9 @@ static void *sensor_thread(void *arg){
     printf("Sensor thread starting\n");
     int count = 0;
     printf("PID sensor: %d\n", thread_getpid());
-    //xtimer_ticks32_t last_wakeup = xtimer_now();
-    //time.arg = NULL;
-    //time.callback = send_values;
+//xtimer_ticks32_t last_wakeup = xtimer_now();
+//time.arg = NULL;
+//time.callback = send_values;
     while(1) {
         printf("Reading values\n");
         /* get latest sensor data */
@@ -226,7 +323,7 @@ static void *sensor_thread(void *arg){
             //xtimer_periodic_wakeup(&last_wakeup, sensor_val*1000000);
             //thread_sleep();
             //time.target = sensor_val;
-            xtimer_set_wakeup(&time, sensor_val*1000000, thread_getpid());
+            xtimer_set_wakeup(&time, sensor_val * 1000000, thread_getpid());
             thread_sleep();
             //thread_wakeup(thread_getpid());
 
@@ -261,8 +358,8 @@ int sensor_init(void){
     }
     /* start sensor thread for periodic measurements */
     pid = thread_create(sensor_thread_stack, sizeof(sensor_thread_stack),
-            THREAD_PRIORITY_MAIN - 1, THREAD_CREATE_STACKTEST, sensor_thread, NULL,
-                    "sensor_thread");
+    THREAD_PRIORITY_MAIN - 1, THREAD_CREATE_STACKTEST, sensor_thread, NULL,
+            "sensor_thread");
     printf("PID: %d\n", pid);
 
     return pid;
