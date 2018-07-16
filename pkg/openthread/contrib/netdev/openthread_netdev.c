@@ -30,7 +30,7 @@
 #include "random.h"
 #include "ot.h"
 
-#define ENABLE_DEBUG (1)
+#define ENABLE_DEBUG (0)
 #include "debug.h"
 
 #define OPENTHREAD_QUEUE_LEN      (8)
@@ -111,32 +111,35 @@ static void *_openthread_event_loop(void *arg)
     ot_job_t *job;
     while(1)
     {
-        otTaskletsProcess(sInstance);
-        msg_receive(&msg);
-        switch(msg.type)
+
+        if(msg_try_receive(&msg) == 1)
         {
-        case OPENTHREAD_XTIMER_MSG_TYPE_EVENT:
-            /* Tell OpenThread a time event was received */
-            otPlatAlarmMilliFired(sInstance);
-            break;
-        case OPENTHREAD_NETDEV_MSG_TYPE_EVENT:
-            /* Received an event from driver */
-            dev = msg.content.ptr;
-            dev->driver->isr(dev);
-            DEBUG("Event loop: netdev message type event\n");
-            break;
-        case OPENTHREAD_SERIAL_MSG_TYPE_EVENT:
-            /* Tell OpenThread about the reception of a CLI command */
-            buf = msg.content.ptr;
-            otPlatUartReceived(buf, strlen((char *)buf));
-            break;
-        case OPENTHREAD_JOB_MSG_TYPE_EVENT:
-            job = msg.content.ptr;
-            reply.content.value = ot_exec_command(sInstance, job->command,
-                    job->arg, job->answer);
-            msg_reply(&msg, &reply);
-            DEBUG("Event loop: job message type event\n");
-            break;
+            msg_receive(&msg);
+            switch(msg.type)
+            {
+            case OPENTHREAD_XTIMER_MSG_TYPE_EVENT:
+                /* Tell OpenThread a time event was received */
+                otPlatAlarmMilliFired(sInstance);
+                break;
+            case OPENTHREAD_NETDEV_MSG_TYPE_EVENT:
+                /* Received an event from driver */
+                dev = msg.content.ptr;
+                dev->driver->isr(dev);
+                break;
+            case OPENTHREAD_SERIAL_MSG_TYPE_EVENT:
+                /* Tell OpenThread about the reception of a CLI command */
+                buf = msg.content.ptr;
+                otPlatUartReceived(buf, strlen((char *)buf));
+                break;
+            case OPENTHREAD_JOB_MSG_TYPE_EVENT:
+                job = msg.content.ptr;
+                reply.content.value = ot_exec_command(sInstance, job->command,
+                        job->arg, job->answer);
+                msg_reply(&msg, &reply);
+                break;
+            }
+            radio_process(sInstance);
+            otTaskletsProcess(sInstance);
         }
     }
 
@@ -202,8 +205,8 @@ int openthread_netdev_init(char *stack, int stacksize, char priority,
     netdev->driver->init(netdev);
     netdev->event_callback = _event_cb;
 
-//    netopt_enable_t enable = NETOPT_ENABLE;
-//    netdev->driver->set(netdev, NETOPT_TX_END_IRQ, &enable, sizeof(enable));
+    netopt_enable_t enable = NETOPT_ENABLE;
+    netdev->driver->set(netdev, NETOPT_TX_END_IRQ, &enable, sizeof(enable));
 
     _pid = thread_create(stack, stacksize, priority, THREAD_CREATE_STACKTEST,
             _openthread_event_loop, NULL, name);

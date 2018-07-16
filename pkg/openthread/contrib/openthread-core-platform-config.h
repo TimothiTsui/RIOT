@@ -34,13 +34,7 @@
 #ifndef OPENTHREAD_CORE_PLATFORM_CONFIG_H_
 #define OPENTHREAD_CORE_PLATFORM_CONFIG_H_
 
-/**
- * @def OPENTHREAD_CONFIG_ENABLE_SOFTWARE_ACK_TIMEOUT
- *
- * Define to 1 if you want to enable software ACK timeout logic.
- *
- */
-#define OPENTHREAD_CONFIG_ENABLE_SOFTWARE_ACK_TIMEOUT          1
+
 
 /**
  * @def OPENTHREAD_CONFIG_LOG_OUTPUT
@@ -276,28 +270,28 @@
 #define OPENTHREAD_CONFIG_PLAT_LOG_FUNCTION otPlatLog
 #endif
 
-/**
- * @def OPENTHREAD_CONFIG_ENABLE_SOFTWARE_ACK_TIMEOUT
- *
- * Define to 1 if you want to enable software ACK timeout logic.
- *
- */
-#define OPENTHREAD_CONFIG_ENABLE_SOFTWARE_ACK_TIMEOUT          1
-
-/**
- * @def OPENTHREAD_CONFIG_ENABLE_SOFTWARE_RETRANSMIT
- *
- * Define to 1 if you want to enable software retransmission logic.
- *
- */
-#define OPENTHREAD_CONFIG_ENABLE_SOFTWARE_RETRANSMIT           1
-
-/**
- * @def OPENTHREAD_CONFIG_ENABLE_SOFTWARE_ENERGY_SCAN
- *
- * Define to 1 if you want to enable software energy scanning logic.
- *
- */
-#define OPENTHREAD_CONFIG_ENABLE_SOFTWARE_ENERGY_SCAN          1
-
+///**
+// * @def OPENTHREAD_CONFIG_ENABLE_SOFTWARE_ACK_TIMEOUT
+// *
+// * Define to 1 if you want to enable software ACK timeout logic.
+// *
+// */
+//#define OPENTHREAD_CONFIG_ENABLE_SOFTWARE_ACK_TIMEOUT          1
+//
+///**
+// * @def OPENTHREAD_CONFIG_ENABLE_SOFTWARE_RETRANSMIT
+// *
+// * Define to 1 if you want to enable software retransmission logic.
+// *
+// */
+//#define OPENTHREAD_CONFIG_ENABLE_SOFTWARE_RETRANSMIT           1
+//
+///**
+// * @def OPENTHREAD_CONFIG_ENABLE_SOFTWARE_ENERGY_SCAN
+// *
+// * Define to 1 if you want to enable software energy scanning logic.
+// *
+// */
+//#define OPENTHREAD_CONFIG_ENABLE_SOFTWARE_ENERGY_SCAN          1
+//
 #endif  // OPENTHREAD_CORE_PLATFORM_CONFIG_H_

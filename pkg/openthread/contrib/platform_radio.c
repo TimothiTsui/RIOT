@@ -34,11 +34,28 @@
 
 #define RADIO_IEEE802154_FCS_LEN    (2U)
 
+#define RFCORE_XREG_FRMFILT0_FRAME_FILTER_EN    0x00000001  // Enables frame filtering
+
 static otRadioFrame sTransmitFrame;
 static otRadioFrame sReceiveFrame;
+static otError sTransmitError;
+static otError sReceiveError;
+
 static int8_t Rssi;
 static uint8_t sChannel = 0;
 static int16_t sTxPower = 0;
+
+enum
+{
+    IEEE802154_MIN_LENGTH = 5,
+    IEEE802154_MAX_LENGTH = 127,
+    IEEE802154_ACK_LENGTH = 5,
+    IEEE802154_FRAME_TYPE_MASK = 0x7,
+    IEEE802154_FRAME_TYPE_ACK = 0x2,
+    IEEE802154_FRAME_PENDING = 1 << 4,
+    IEEE802154_ACK_REQUEST = 1 << 5,
+    IEEE802154_DSN_OFFSET = 2,
+};
 
 static otRadioState sState = OT_RADIO_STATE_DISABLED;
 static bool sIsReceiverEnabled = false;
@@ -162,11 +179,6 @@ void openthread_radio_init(netdev_t *dev, uint8_t *tb, uint8_t *rb)
     }
 }
 
-void radio_process(otInstance *aInstance)
-{
-    (void)aInstance;
-}
-
 /* Called upon NETDEV_EVENT_RX_COMPLETE event */
 void recv_pkt(otInstance *aInstance, netdev_t *dev)
 {
@@ -190,8 +202,7 @@ void recv_pkt(otInstance *aInstance, netdev_t *dev)
     sReceiveFrame.mLength = len + RADIO_IEEE802154_FCS_LEN;
 
     /* Read received frame */
-    int res = dev->driver->recv(dev, (char *)sReceiveFrame.mPsdu, len,
-            &rx_info);
+    dev->driver->recv(dev, (char *)sReceiveFrame.mPsdu, len, &rx_info);
 
     /* Get RSSI from a radio driver. RSSI should be in [dBm] */
     Rssi = (int8_t)rx_info.rssi;
@@ -206,9 +217,9 @@ void recv_pkt(otInstance *aInstance, netdev_t *dev)
     }
     DEBUG("\n");
 
-    /* Tell OpenThread that receive has finished */
-    otPlatRadioReceiveDone(aInstance, &sReceiveFrame,
-            res > 0 ? OT_ERROR_NONE : OT_ERROR_ABORT);
+//    /* Tell OpenThread that receive has finished */
+//    otPlatRadioReceiveDone(aInstance, &sReceiveFrame,
+//            res > 0 ? OT_ERROR_NONE : OT_ERROR_ABORT);
 }
 
 /* Called upon TX event */
@@ -243,7 +254,6 @@ void send_pkt(otInstance *aInstance, netdev_t *dev, netdev_event_t event)
         break;
     }
 }
-
 
 /* OpenThread will call this for setting PAN ID */
 void otPlatRadioSetPanId(otInstance *aInstance, uint16_t panid)
@@ -391,6 +401,7 @@ otError otPlatRadioTransmit(otInstance *aInstance, otRadioFrame *aFrame)
     {
         error = OT_ERROR_NONE;
         sState = OT_RADIO_STATE_TRANSMIT;
+        sTransmitError = OT_ERROR_NONE;
 
         /*Set channel and power based on transmit frame */
         DEBUG("otPlatRadioTransmit->channel: %i, length %d\n",
@@ -407,13 +418,100 @@ otError otPlatRadioTransmit(otInstance *aInstance, otRadioFrame *aFrame)
         otPlatRadioTxStarted(aInstance, aFrame);
         /* send packet though netdev */
         _dev->driver->send(_dev, &iolist);
+//        otLogDebgPlat(aInstance, "Transmitted %d bytes", aFrame->mLength);
 
-
-        otPlatRadioTxDone(aInstance, &sTransmitFrame, &sReceiveFrame,
-                OT_ERROR_NONE);
-        sState = OT_RADIO_STATE_RECEIVE;
+//        if(sState == OT_RADIO_STATE_TRANSMIT)
+//        {
+//            if((sTransmitFrame.mPsdu[0] & IEEE802154_ACK_REQUEST) == 0)
+//            {
+//                sState = OT_RADIO_STATE_RECEIVE;
+//                otPlatRadioTxDone(aInstance, &sTransmitFrame, NULL,
+//                        OT_ERROR_NONE);
+//            }
+//            else if(sReceiveFrame.mLength == IEEE802154_ACK_LENGTH
+//                    && (sReceiveFrame.mPsdu[0] & IEEE802154_FRAME_TYPE_MASK)
+//                            == IEEE802154_FRAME_TYPE_ACK
+//                    && (sReceiveFrame.mPsdu[IEEE802154_DSN_OFFSET]
+//                            == sTransmitFrame.mPsdu[IEEE802154_DSN_OFFSET]))
+//            {
+//                sState = OT_RADIO_STATE_RECEIVE;
+//                otPlatRadioTxDone(aInstance, &sTransmitFrame, &sReceiveFrame,
+//                        OT_ERROR_NONE);
+//            }
+//        }
+//        sReceiveFrame.mLength = 0;
     }
     return error;
+}
+
+void radio_process(otInstance *aInstance)
+{
+    if((sState == OT_RADIO_STATE_RECEIVE && sReceiveFrame.mLength > 0)
+            || (sState == OT_RADIO_STATE_TRANSMIT
+                    && sReceiveFrame.mLength > IEEE802154_ACK_LENGTH))
+    {
+#if OPENTHREAD_ENABLE_DIAG
+
+        if (otPlatDiagModeGet())
+        {
+            otPlatDiagRadioReceiveDone(aInstance, &sReceiveFrame, sReceiveError);
+        }
+        else
+#endif
+        {
+            // signal MAC layer for each received frame if promiscous is enabled
+            // otherwise only signal MAC layer for non-ACK frame
+            if(((RFCORE_XREG_FRMFILT0 & RFCORE_XREG_FRMFILT0_FRAME_FILTER_EN)
+                    == 0) || (sReceiveFrame.mLength > IEEE802154_ACK_LENGTH))
+            {
+//                otLogDebgPlat(sInstance, "Received %d bytes",
+//                        sReceiveFrame.mLength);
+                otPlatRadioReceiveDone(aInstance, &sReceiveFrame,
+                        sReceiveError);
+            }
+        }
+    }
+
+    if(sState == OT_RADIO_STATE_TRANSMIT)
+    {
+        if(sTransmitError != OT_ERROR_NONE
+                || (sTransmitFrame.mPsdu[0] & IEEE802154_ACK_REQUEST) == 0)
+        {
+//            if(sTransmitError != OT_ERROR_NONE)
+//            {
+//                otLogDebgPlat(sInstance, "Transmit failed ErrorCode=%d",
+//                        sTransmitError);
+//            }
+
+            sState = OT_RADIO_STATE_RECEIVE;
+
+#if OPENTHREAD_ENABLE_DIAG
+
+            if (otPlatDiagModeGet())
+            {
+                otPlatDiagRadioTransmitDone(aInstance, &sTransmitFrame, sTransmitError);
+            }
+            else
+#endif
+            {
+                otPlatRadioTxDone(aInstance, &sTransmitFrame, NULL,
+                        sTransmitError);
+            }
+        }
+        else if(sReceiveFrame.mLength == IEEE802154_ACK_LENGTH
+                && (sReceiveFrame.mPsdu[0] & IEEE802154_FRAME_TYPE_MASK)
+                        == IEEE802154_FRAME_TYPE_ACK
+                && (sReceiveFrame.mPsdu[IEEE802154_DSN_OFFSET]
+                        == sTransmitFrame.mPsdu[IEEE802154_DSN_OFFSET]))
+        {
+            sState = OT_RADIO_STATE_RECEIVE;
+
+            otPlatRadioTxDone(aInstance, &sTransmitFrame, &sReceiveFrame,
+                    sTransmitError);
+        }
+    }
+
+    sReceiveFrame.mLength = 0;
 }
 
 /* OpenThread will call this for getting the radio caps */
@@ -522,5 +620,5 @@ void otPlatRadioGetIeeeEui64(otInstance *aInstance, uint8_t *aIeee64Eui64)
 int8_t otPlatRadioGetReceiveSensitivity(otInstance *aInstance)
 {
     (void)aInstance;
-    return -100;
+    return -97;
 }

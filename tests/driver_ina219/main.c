@@ -152,7 +152,7 @@ int main(void){
         /* Read shunt resistor voltage, in millivolts */
         ina219_read_shunt(&dev, &val);
         puts("shunt: ");
-        print_float((val * 0.01), 2);
+        print_float((val * 0.001), 2);
         puts(" mV ");
 
         /* Read VBUS voltage, in volts */

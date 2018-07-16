@@ -1,6 +1,6 @@
 PKG_NAME=openthread
 PKG_URL=https://github.com/openthread/openthread.git
-PKG_VERSION=f5d895c812357af0682e5190966a1f2500da8d3d
+PKG_VERSION=c925b42941dc2bfc31161903e6754ff03a94489c
 PKG_BUILDDIR ?= $(BINDIRBASE)/pkg/$(BOARD)/$(PKG_NAME)
 OPENTHREAD_DIR = $(RIOTBASE)/pkg/openthread
 
