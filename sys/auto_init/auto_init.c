@@ -84,7 +84,11 @@
 #include "ndn-riot/ndn.h"
 #endif
 
-#define ENABLE_DEBUG (1)
+#ifdef MODULE_ASYMCUTE
+#include "net/asymcute.h"
+#endif
+
+#define ENABLE_DEBUG (0)
 #include "debug.h"
 
 void auto_init(void)
@@ -164,6 +168,10 @@ void auto_init(void)
     DEBUG("Auto init rdcli_simple module\n");
     extern void rdcli_simple_run(void);
     rdcli_simple_run();
+#endif
+#ifdef MODULE_ASYMCUTE
+    DEBUG("Auto init Asymcute\n");
+    asymcute_handler_run();
 #endif
 
 /* initialize network devices */

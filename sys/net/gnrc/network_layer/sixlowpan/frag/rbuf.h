@@ -65,7 +65,6 @@ typedef struct {
     rbuf_int_t *ints;                   /**< intervals of the fragment */
     uint32_t arrival;                   /**< time in microseconds of arrival of
                                          *   last received fragment */
-    uint16_t cur_size;                  /**< the datagram's current size */
 } rbuf_t;
 
 /**
@@ -84,6 +83,11 @@ typedef struct {
  */
 void rbuf_add(gnrc_netif_hdr_t *netif_hdr, gnrc_pktsnip_t *frag,
               size_t frag_size, size_t offset);
+
+/**
+ * @brief   Checks timeouts and removes entries if necessary
+ */
+void rbuf_gc(void);
 
 #ifdef __cplusplus
 }
