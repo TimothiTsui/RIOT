@@ -12,7 +12,7 @@
  *
  * @file
  * @brief       Device driver implementation for Texas Instruments INA219
- *              Zerø-Drift High
+ *              Zerï¿½-Drift High
  *              Side, Bi-Directional CURRENT/POWER MONITOR with Two-Wire
  *              Interface
  *

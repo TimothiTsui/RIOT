@@ -30,7 +30,7 @@
 #include "xtimer.h"
 #include <max17043.h>
 
-#define SLEEP    (100 * 300000U)
+#define SLEEP    (100 * 10000U)
 
 int main(void){
     max17043_t dev;

@@ -108,7 +108,7 @@
 #define CALIBRATION   (10240)
 #define CURRENT_DEVIDER_MA (25)
 #define POWER_MULTIPLIER_MW (1)
-#define SLEEP    (100 * 100000U)
+#define SLEEP    (100 * 10000U)
 
 int main(void){
 
@@ -179,6 +179,7 @@ int main(void){
         puts(" mW\n");
 
         xtimer_usleep(SLEEP);
+        puts(" test\n");
     }
 
     return 0;
