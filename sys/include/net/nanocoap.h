@@ -175,22 +175,41 @@ extern "C" {
 /**
  * @brief   Nanocoap-specific value to indicate no format specified
  */
-#define COAP_FORMAT_NONE        (65535)
+#define COAP_FORMAT_NONE        (UINT16_MAX)
 
 /**
- * @name    Nanocoap specific maximum values
+ * @defgroup net_nanocoap_conf    Nanocoap compile configurations
+ * @ingroup  net_nanocoap
+ * @ingroup  config
  * @{
  */
+/** @brief   Maximum number of Options in a message */
+#ifndef NANOCOAP_NOPTS_MAX
 #define NANOCOAP_NOPTS_MAX          (16)
-#define NANOCOAP_URI_MAX            (64)
-#define NANOCOAP_BLOCK_SIZE_EXP_MAX  (6)  /**< Maximum size for a blockwise
-                                            *  transfer as power of 2 */
-/** @} */
-
-#ifdef MODULE_GCOAP
-#define NANOCOAP_URL_MAX        NANOCOAP_URI_MAX
-#define NANOCOAP_QS_MAX         (64)
 #endif
+
+/**
+ * @brief    Maximum length of a resource path string read from or written to
+ *           a message
+ */
+#ifndef NANOCOAP_URI_MAX
+#define NANOCOAP_URI_MAX            (64)
+#endif
+
+/**
+ * @brief    Maximum size for a blockwise transfer as a power of 2
+ */
+#ifndef NANOCOAP_BLOCK_SIZE_EXP_MAX
+#define NANOCOAP_BLOCK_SIZE_EXP_MAX  (6)
+#endif
+
+#if defined(MODULE_GCOAP) || defined(DOXYGEN)
+/** @brief   Maximum length of a query string written to a message */
+#ifndef NANOCOAP_QS_MAX
+#define NANOCOAP_QS_MAX             (64)
+#endif
+#endif
+/** @} */
 
 /**
  * @name coap_opt_finish() flag parameter values
@@ -211,7 +230,6 @@ typedef struct __attribute__((packed)) {
     uint8_t ver_t_tkl;          /**< version, token, token length           */
     uint8_t code;               /**< CoAP code (e.g.m 205)                  */
     uint16_t id;                /**< Req/resp ID                            */
-    uint8_t data[];             /**< convenience pointer to payload start   */
 } coap_hdr_t;
 
 /**
@@ -233,9 +251,6 @@ typedef struct {
     uint16_t options_len;                       /**< length of options array */
     coap_optpos_t options[NANOCOAP_NOPTS_MAX];  /**< option offset array     */
 #ifdef MODULE_GCOAP
-    uint8_t url[NANOCOAP_URI_MAX];              /**< parsed request URL      */
-    uint8_t qs[NANOCOAP_QS_MAX];                /**< parsed query string     */
-    uint16_t content_type;                      /**< content type            */
     uint32_t observe_value;                     /**< observe value           */
 #endif
 } coap_pkt_t;
@@ -949,6 +964,18 @@ static inline unsigned coap_get_code(coap_pkt_t *pkt)
 static inline unsigned coap_get_id(coap_pkt_t *pkt)
 {
     return ntohs(pkt->hdr->id);
+}
+
+/**
+ * @brief   Get the start of data after the header
+ *
+ * @param[in]   hdr   Header of CoAP packet in contiguous memory
+ *
+ * @returns     pointer to first byte after the header
+ */
+static inline uint8_t *coap_hdr_data_ptr(coap_hdr_t *hdr)
+{
+    return ((uint8_t *)hdr) + sizeof(coap_hdr_t);
 }
 
 /**

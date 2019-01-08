@@ -178,6 +178,11 @@ void auto_init(void)
     DEBUG("Auto init Asymcute\n");
     asymcute_handler_run();
 #endif
+#ifdef MODULE_NIMBLE
+    DEBUG("Auto init NimBLE\n");
+    extern void nimble_riot_init(void);
+    nimble_riot_init();
+#endif
 
 /* initialize network devices */
 #ifdef MODULE_AUTO_INIT_GNRC_NETIF
@@ -299,6 +304,10 @@ void auto_init(void)
 
 /* initialize sensors and actuators */
 #ifdef MODULE_SHT1X
+    /* The sht1x module needs to be initialized regardless of SAUL being used,
+     * as the shell commands rely on auto-initialization. auto_init_sht1x also
+     * performs SAUL registration, but only if module auto_init_saul is used.
+     */
     DEBUG("Auto init SHT1X module (SHT10/SHT11/SHT15 sensor driver).\n");
     extern void auto_init_sht1x(void);
     auto_init_sht1x();
@@ -338,6 +347,10 @@ void auto_init(void)
 #ifdef MODULE_BMX055
     extern void auto_init_bmx055(void);
     auto_init_bmx055();
+#endif
+#ifdef MODULE_CCS811
+    extern void auto_init_ccs811(void);
+    auto_init_ccs811();
 #endif
 #ifdef MODULE_DHT
     extern void auto_init_dht(void);
@@ -431,9 +444,9 @@ void auto_init(void)
     extern void auto_init_pulse_counter(void);
     auto_init_pulse_counter();
 #endif
-#ifdef MODULE_SHT1X
-    extern void auto_init_sht1x(void);
-    auto_init_sht1x();
+#ifdef MODULE_SHT3X
+    extern void auto_init_sht3x(void);
+    auto_init_sht3x();
 #endif
 #ifdef MODULE_SI114X
     extern void auto_init_si114x(void);

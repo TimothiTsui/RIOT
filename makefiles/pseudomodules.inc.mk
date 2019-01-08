@@ -8,6 +8,7 @@ PSEUDOMODULES += conn_can_isotp_multi
 PSEUDOMODULES += cord_ep_standalone
 PSEUDOMODULES += cord_epsim_standalone
 PSEUDOMODULES += core_%
+PSEUDOMODULES += cortexm_fpu
 PSEUDOMODULES += ecc_%
 PSEUDOMODULES += emb6_router
 PSEUDOMODULES += event_%
@@ -24,6 +25,7 @@ PSEUDOMODULES += gnrc_neterr
 PSEUDOMODULES += gnrc_netapi_callbacks
 PSEUDOMODULES += gnrc_netapi_mbox
 PSEUDOMODULES += gnrc_pktbuf_cmd
+PSEUDOMODULES += gnrc_sixloenc
 PSEUDOMODULES += gnrc_sixlowpan_border_router_default
 PSEUDOMODULES += gnrc_sixlowpan_default
 PSEUDOMODULES += gnrc_sixlowpan_iphc_nhc
@@ -46,6 +48,7 @@ PSEUDOMODULES += netstats
 PSEUDOMODULES += netstats_l2
 PSEUDOMODULES += netstats_ipv6
 PSEUDOMODULES += netstats_rpl
+PSEUDOMODULES += nimble
 PSEUDOMODULES += newlib
 PSEUDOMODULES += newlib_gnu_source
 PSEUDOMODULES += newlib_nano
@@ -54,6 +57,7 @@ PSEUDOMODULES += pktqueue
 PSEUDOMODULES += printf_float
 PSEUDOMODULES += prng
 PSEUDOMODULES += prng_%
+PSEUDOMODULES += riotboot_%
 PSEUDOMODULES += saul_adc
 PSEUDOMODULES += saul_default
 PSEUDOMODULES += saul_gpio
@@ -78,6 +82,9 @@ PSEUDOMODULES += bme280
 PSEUDOMODULES += adc081c
 PSEUDOMODULES += adc101c
 PSEUDOMODULES += adc121c
+
+# full featured version of CCS811 driver as pseudo module
+PSEUDOMODULES += ccs811_full
 
 # include variants of SX127X drivers as pseudo modules
 PSEUDOMODULES += sx1272
@@ -125,5 +132,10 @@ PSEUDOMODULES += skald_eddystone
 
 # define optimized read function of DS18 driver as a pseudo module
 PSEUDOMODULES += ds18_optimized
+
+# By using this pseudomodule, T tables will be precalculated.
+PSEUDOMODULES += crypto_aes_precalculated
+# This pseudomodule causes a loop in AES to be unrolled (more flash, less CPU)
+PSEUDOMODULES += crypto_aes_unroll
 
 # Packages may also add modules to PSEUDOMODULES in their `Makefile.include`.

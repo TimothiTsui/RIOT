@@ -106,6 +106,12 @@ int gnrc_netif_get_from_netdev(gnrc_netif_t *netif, gnrc_netapi_opt_t *opt)
 
     gnrc_netif_acquire(netif);
     switch (opt->opt) {
+        case NETOPT_6LO:
+            assert(opt->data_len == sizeof(netopt_enable_t));
+            *((netopt_enable_t *)opt->data) =
+                    (netopt_enable_t)gnrc_netif_is_6ln(netif);
+            res = sizeof(netopt_enable_t);
+            break;
         case NETOPT_HOP_LIMIT:
             assert(opt->data_len == sizeof(uint8_t));
             *((uint8_t *)opt->data) = netif->cur_hl;
@@ -807,87 +813,25 @@ int gnrc_netif_ipv6_group_idx(gnrc_netif_t *netif, const ipv6_addr_t *addr)
     return idx;
 }
 
-#if defined(MODULE_NETDEV_IEEE802154) || defined(MODULE_CC110X) || \
-    defined(MODULE_NRFMIN) || defined(MODULE_XBEE)
-static void _create_iid_from_short(const gnrc_netif_t *netif, eui64_t *eui64)
-{
-    const unsigned offset = sizeof(eui64_t) - netif->l2addr_len;
-
-    assert(netif->l2addr_len <= 3);
-    memset(eui64->uint8, 0, sizeof(eui64->uint8));
-    eui64->uint8[3] = 0xff;
-    eui64->uint8[4] = 0xfe;
-    memcpy(&eui64->uint8[offset], netif->l2addr, netif->l2addr_len);
-}
-#endif /* defined(MODULE_NETDEV_IEEE802154) || defined(MODULE_CC110X) ||
-        * defined(MODULE_NRFMIN) || defined(MODULE_XBEE) */
-
 int gnrc_netif_ipv6_get_iid(gnrc_netif_t *netif, eui64_t *eui64)
 {
 #if GNRC_NETIF_L2ADDR_MAXLEN > 0
     if (netif->flags & GNRC_NETIF_FLAGS_HAS_L2ADDR) {
-        switch (netif->device_type) {
-#ifdef MODULE_NETDEV_ETH
-            case NETDEV_TYPE_ETHERNET:
-                assert(netif->l2addr_len == ETHERNET_ADDR_LEN);
-                eui64->uint8[0] = netif->l2addr[0] ^ 0x02;
-                eui64->uint8[1] = netif->l2addr[1];
-                eui64->uint8[2] = netif->l2addr[2];
-                eui64->uint8[3] = 0xff;
-                eui64->uint8[4] = 0xfe;
-                eui64->uint8[5] = netif->l2addr[3];
-                eui64->uint8[6] = netif->l2addr[4];
-                eui64->uint8[7] = netif->l2addr[5];
-                return 0;
-#endif
-#if defined(MODULE_NETDEV_IEEE802154) || defined(MODULE_XBEE)
-            case NETDEV_TYPE_IEEE802154:
-                switch (netif->l2addr_len) {
-                    case IEEE802154_SHORT_ADDRESS_LEN:
-                        _create_iid_from_short(netif, eui64);
-                        return 0;
-                    case IEEE802154_LONG_ADDRESS_LEN:
-                        memcpy(eui64, netif->l2addr, sizeof(eui64_t));
-                        eui64->uint8[0] ^= 0x02;
-                        return 0;
-                    default:
-                        /* this should not happen */
-                        assert(false);
-                        break;
-                }
-                break;
-#endif
-#ifdef MODULE_NORDIC_SOFTDEVICE_BLE
-            case NETDEV_TYPE_BLE:
-                assert(netif->l2addr_len == sizeof(eui64_t));
-                memcpy(eui64, netif->l2addr, sizeof(eui64_t));
-                eui64->uint8[0] ^= 0x02;
-                return 0;
-#endif
-#if defined(MODULE_CC110X) || defined(MODULE_NRFMIN)
-            case NETDEV_TYPE_CC110X:
-            case NETDEV_TYPE_NRFMIN:
-                _create_iid_from_short(netif, eui64);
-                return 0;
-#endif
-#if defined(MODULE_ESP_NOW)
-            case NETDEV_TYPE_RAW:
-                eui64->uint8[0] = netif->l2addr[0] ^ 0x02;
-                eui64->uint8[1] = netif->l2addr[1];
-                eui64->uint8[2] = netif->l2addr[2];
-                eui64->uint8[3] = 0xff;
-                eui64->uint8[4] = 0xfe;
-                eui64->uint8[5] = netif->l2addr[3];
-                eui64->uint8[6] = netif->l2addr[4];
-                eui64->uint8[7] = netif->l2addr[5];
-                return 0;
-#endif
-            default:
-                (void)eui64;
-                break;
+        /* the device driver abstraction should be able to provide us with the
+         * IPV6_IID, so we try this first */
+        int res = netif->dev->driver->get(netif->dev, NETOPT_IPV6_IID,
+                                          eui64, sizeof(eui64_t));
+        if (res == sizeof(eui64_t)) {
+            return 0;
+        }
+        res = gnrc_netif_ipv6_iid_from_addr(netif,
+                                            netif->l2addr, netif->l2addr_len,
+                                            eui64);
+        if (res > 0) {
+            return 0;
         }
     }
-#endif
+#endif /* GNRC_NETIF_L2ADDR_MAXLEN > 0 */
     return -ENOTSUP;
 }
 
@@ -1170,10 +1114,14 @@ static ipv6_addr_t *_src_addr_selection(gnrc_netif_t *netif,
 bool gnrc_netif_is_6ln(const gnrc_netif_t *netif)
 {
     switch (netif->device_type) {
+#ifdef MODULE_GNRC_SIXLOENC
+        case NETDEV_TYPE_ETHERNET:
+#endif
         case NETDEV_TYPE_IEEE802154:
         case NETDEV_TYPE_CC110X:
         case NETDEV_TYPE_BLE:
         case NETDEV_TYPE_NRFMIN:
+        case NETDEV_TYPE_ESP_NOW:
             return true;
         default:
             return false;
@@ -1232,12 +1180,16 @@ static void _init_from_device(gnrc_netif_t *netif)
     assert(res == sizeof(tmp));
     netif->device_type = (uint8_t)tmp;
     switch (netif->device_type) {
-#if defined(MODULE_NETDEV_IEEE802154) || defined(MODULE_NRFMIN) || defined(MODULE_XBEE)
+#if defined(MODULE_NETDEV_IEEE802154) || defined(MODULE_NRFMIN) || \
+    defined(MODULE_XBEE) || defined(MODULE_ESP_NOW) || \
+    defined(MODULE_GNRC_SIXLOENC)
         case NETDEV_TYPE_IEEE802154:
         case NETDEV_TYPE_NRFMIN:
 #ifdef MODULE_GNRC_SIXLOWPAN_IPHC
             netif->flags |= GNRC_NETIF_FLAGS_6LO_HC;
 #endif
+            /* intentionally falls through */
+        case NETDEV_TYPE_ESP_NOW:
 #ifdef MODULE_GNRC_IPV6
             res = dev->driver->get(dev, NETOPT_MAX_PACKET_SIZE, &tmp, sizeof(tmp));
             assert(res == sizeof(tmp));
@@ -1254,6 +1206,9 @@ static void _init_from_device(gnrc_netif_t *netif)
         case NETDEV_TYPE_ETHERNET:
 #ifdef MODULE_GNRC_IPV6
             netif->ipv6.mtu = ETHERNET_DATA_LEN;
+#endif
+#if defined(MODULE_GNRC_SIXLOWPAN_IPHC) && defined(MODULE_GNRC_SIXLOENC)
+            netif->flags |= GNRC_NETIF_FLAGS_6LO_HC;
 #endif
             break;
 #endif
