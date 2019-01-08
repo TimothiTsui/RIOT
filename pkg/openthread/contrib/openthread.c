@@ -18,7 +18,11 @@
 
 #include <assert.h>
 
+<<<<<<< HEAD
 //#include "openthread/platform/alarm.h"
+=======
+#include "openthread/platform/alarm-milli.h"
+>>>>>>> branch 'master' of https://github.com/RIOT-OS/RIOT.git
 #include "openthread/platform/uart.h"
 #include "ot.h"
 #include "random.h"
@@ -49,16 +53,20 @@
 static at86rf2xx_t at86rf2xx_dev;
 #endif
 
+<<<<<<< HEAD
 #ifdef MODULE_CC2538_RF
 static cc2538_rf_t cc2538_rf_dev;
 #endif
 
 #define OPENTHREAD_NETDEV_BUFLEN (ETHERNET_MAX_LEN)
 
+=======
+>>>>>>> branch 'master' of https://github.com/RIOT-OS/RIOT.git
 static uint8_t rx_buf[OPENTHREAD_NETDEV_BUFLEN];
 static uint8_t tx_buf[OPENTHREAD_NETDEV_BUFLEN];
 static char ot_thread_stack[2 * THREAD_STACKSIZE_MAIN];
 
+<<<<<<< HEAD
 
 /* init and run OpeanThread's UART simulation (stdio) */
 void openthread_uart_run(void){
@@ -77,6 +85,10 @@ void openthread_uart_run(void){
 }
 
 void openthread_bootstrap(void){
+=======
+void openthread_bootstrap(void)
+{
+>>>>>>> branch 'master' of https://github.com/RIOT-OS/RIOT.git
     /* init random */
     ot_random_init();
 

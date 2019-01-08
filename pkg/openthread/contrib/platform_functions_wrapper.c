@@ -264,8 +264,8 @@ OT_COMMAND ot_state(otInstance* ot_instance, void* arg, void* answer) {
     (void)arg;
 
     if (answer != NULL) {
-        uint8_t state = otThreadGetDeviceRole(ot_instance);
-        *((uint8_t *) answer) = state;
+        otDeviceRole state = otThreadGetDeviceRole(ot_instance);
+        *((otDeviceRole *) answer) = state;
         DEBUG("state: ");
         switch (state) {
             case OT_DEVICE_ROLE_DISABLED:

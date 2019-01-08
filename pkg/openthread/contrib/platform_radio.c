@@ -26,6 +26,9 @@
 #include "net/ethertype.h"
 #include "net/ieee802154.h"
 #include "net/netdev/ieee802154.h"
+#include "openthread/config.h"
+#include "openthread/openthread.h"
+#include "openthread/platform/diag.h"
 #include "openthread/platform/radio.h"
 #include "ot.h"
 
@@ -34,6 +37,7 @@
 
 #define RADIO_IEEE802154_FCS_LEN    (2U)
 
+<<<<<<< HEAD
 #define RFCORE_XREG_FRMFILT0_FRAME_FILTER_EN    0x00000001  // Enables frame filtering
 
 static otRadioFrame sTransmitFrame;
@@ -41,6 +45,10 @@ static otRadioFrame sReceiveFrame;
 static otError sTransmitError;
 static otError sReceiveError;
 
+=======
+static otRadioFrame sTransmitFrame;
+static otRadioFrame sReceiveFrame;
+>>>>>>> branch 'master' of https://github.com/RIOT-OS/RIOT.git
 static int8_t Rssi;
 static uint8_t sChannel = 0;
 static int16_t sTxPower = 0;
@@ -89,6 +97,13 @@ static int _set_power(int16_t power)
 
 /* get transmission power */
 static int16_t _get_power(void)
+{
+    int16_t power;
+    _dev->driver->get(_dev, NETOPT_TX_POWER, &power, sizeof(int16_t));
+    return power;
+}
+
+static int _get_power(void)
 {
     int16_t power;
     _dev->driver->get(_dev, NETOPT_TX_POWER, &power, sizeof(int16_t));
@@ -144,7 +159,16 @@ static netopt_state_t _get_state(void)
     return state;
 }
 
+<<<<<<< HEAD
 /* sets device state to SLEEP/OFF (radio disabled) */
+=======
+static void _set_off(void)
+{
+    _set_state(NETOPT_STATE_OFF);
+}
+
+/* sets device state to SLEEP */
+>>>>>>> branch 'master' of https://github.com/RIOT-OS/RIOT.git
 static void _set_sleep(void)
 {
     if(sIsReceiverEnabled)
@@ -206,6 +230,7 @@ void recv_pkt(otInstance *aInstance, netdev_t *dev)
 
     /* Get RSSI from a radio driver. RSSI should be in [dBm] */
     Rssi = (int8_t)rx_info.rssi;
+<<<<<<< HEAD
     sReceiveFrame.mInfo.mRxInfo.mRssi = Rssi;
     /* Get LQI from a radio driver. LQI should be in [....] */
     sReceiveFrame.mInfo.mRxInfo.mLqi = (int8_t)rx_info.lqi;
@@ -214,12 +239,24 @@ void recv_pkt(otInstance *aInstance, netdev_t *dev)
     for(int i = 0; i < sReceiveFrame.mLength; ++i)
     {
         DEBUG("%x ", sReceiveFrame.mPsdu[i]);
+=======
+    if (ENABLE_DEBUG) {
+        DEBUG("Received message: len %d\n", (int) sReceiveFrame.mLength);
+        for (int i = 0; i < sReceiveFrame.mLength; ++i) {
+            DEBUG("%x ", sReceiveFrame.mPsdu[i]);
+        }
+        DEBUG("\n");
+>>>>>>> branch 'master' of https://github.com/RIOT-OS/RIOT.git
     }
-    DEBUG("\n");
 
+<<<<<<< HEAD
 //    /* Tell OpenThread that receive has finished */
 //    otPlatRadioReceiveDone(aInstance, &sReceiveFrame,
 //            res > 0 ? OT_ERROR_NONE : OT_ERROR_ABORT);
+=======
+    /* Tell OpenThread that receive has finished */
+    otPlatRadioReceiveDone(aInstance, res > 0 ? &sReceiveFrame : NULL, res > 0 ? OT_ERROR_NONE : OT_ERROR_ABORT);
+>>>>>>> branch 'master' of https://github.com/RIOT-OS/RIOT.git
 }
 
 /* Called upon TX event */
@@ -230,6 +267,7 @@ void send_pkt(otInstance *aInstance, netdev_t *dev, netdev_event_t event)
     DEBUG("openthread: send_pkt()\n");
 
     /* Tell OpenThread transmission is done depending on the NETDEV event */
+<<<<<<< HEAD
     switch(event)
     {
     case NETDEV_EVENT_TX_COMPLETE:
@@ -252,6 +290,27 @@ void send_pkt(otInstance *aInstance, netdev_t *dev, netdev_event_t event)
         break;
     default:
         break;
+=======
+    switch (event) {
+        case NETDEV_EVENT_TX_COMPLETE:
+            DEBUG("openthread: NETDEV_EVENT_TX_COMPLETE\n");
+            otPlatRadioTxDone(aInstance, &sTransmitFrame, NULL, OT_ERROR_NONE);
+            break;
+        case NETDEV_EVENT_TX_COMPLETE_DATA_PENDING:
+            DEBUG("openthread: NETDEV_EVENT_TX_COMPLETE_DATA_PENDING\n");
+            otPlatRadioTxDone(aInstance, &sTransmitFrame, NULL, OT_ERROR_NONE);
+            break;
+        case NETDEV_EVENT_TX_NOACK:
+            DEBUG("openthread: NETDEV_EVENT_TX_NOACK\n");
+            otPlatRadioTxDone(aInstance, &sTransmitFrame, NULL, OT_ERROR_NO_ACK);
+            break;
+        case NETDEV_EVENT_TX_MEDIUM_BUSY:
+            DEBUG("openthread: NETDEV_EVENT_TX_MEDIUM_BUSY\n");
+            otPlatRadioTxDone(aInstance, &sTransmitFrame, NULL, OT_ERROR_CHANNEL_ACCESS_FAILURE);
+            break;
+        default:
+            break;
+>>>>>>> branch 'master' of https://github.com/RIOT-OS/RIOT.git
     }
 }
 
@@ -270,27 +329,44 @@ void otPlatRadioSetExtendedAddress(otInstance *aInstance,
     (void)aInstance;
 
     DEBUG("openthread: otPlatRadioSetExtendedAddress\n");
+<<<<<<< HEAD
     uint8_t reversed_addr[IEEE802154_LONG_ADDRESS_LEN];
     for(unsigned i = 0; i < IEEE802154_LONG_ADDRESS_LEN; i++)
     {
         reversed_addr[i] = aExtendedAddress->m8[IEEE802154_LONG_ADDRESS_LEN - 1
                 - i];
+=======
+    char reversed_addr[IEEE802154_LONG_ADDRESS_LEN];
+    for (unsigned i = 0; i < IEEE802154_LONG_ADDRESS_LEN; i++) {
+        reversed_addr[i] = (uint8_t) ((uint8_t *)aExtendedAddress)[IEEE802154_LONG_ADDRESS_LEN - 1 - i];
+>>>>>>> branch 'master' of https://github.com/RIOT-OS/RIOT.git
     }
-    _set_long_addr(reversed_addr);
+    if (ENABLE_DEBUG) {
+        for (unsigned i = 0; i < IEEE802154_LONG_ADDRESS_LEN; ++i) {
+            DEBUG("%x ", (uint8_t) ((uint8_t *)reversed_addr)[i]);
+        }
+        DEBUG("\n");
+    }
+    _set_long_addr((uint8_t*) reversed_addr);
 }
 
 /* OpenThread will call this for setting short address */
 void otPlatRadioSetShortAddress(otInstance *aInstance, uint16_t aShortAddress)
 {
     (void)aInstance;
+<<<<<<< HEAD
     DEBUG("openthread: otPlatRadioSetShortAddress: setting address to %04x\n",
             aShortAddress);
+=======
+    DEBUG("openthread: otPlatRadioSetShortAddress: setting address to %04x\n", aShortAddress);
+>>>>>>> branch 'master' of https://github.com/RIOT-OS/RIOT.git
     _set_addr(((aShortAddress & 0xff) << 8) | ((aShortAddress >> 8) & 0xff));
 }
 
 /* OpenThread will call this for enabling the radio */
 otError otPlatRadioEnable(otInstance *aInstance)
 {
+<<<<<<< HEAD
     if(!otPlatRadioIsEnabled(aInstance))
     {
         DEBUG("%s: State=OT_RADIO_STATE_SLEEP\n", __FUNCTION__);
@@ -307,24 +383,63 @@ otError otPlatRadioDisable(otInstance *aInstance)
     {
         DEBUG("%s: State=OT_RADIO_STATE_DISABLED\n", __FUNCTION__);
         sState = OT_RADIO_STATE_DISABLED;
+=======
+    DEBUG("openthread: otPlatRadioEnable\n");
+    (void)aInstance;
+
+    if (!otPlatRadioIsEnabled(aInstance)) {
+        _set_sleep();
+>>>>>>> branch 'master' of https://github.com/RIOT-OS/RIOT.git
     }
 
     return OT_ERROR_NONE;
+<<<<<<< HEAD
+=======
+}
+
+/* OpenThread will call this for disabling the radio */
+otError otPlatRadioDisable(otInstance *aInstance)
+{
+    DEBUG("openthread: otPlatRadioDisable\n");
+    (void)aInstance;
+
+    if (otPlatRadioIsEnabled(aInstance)) {
+        _set_off();
+    }
+
+    return OT_ERROR_NONE;
+>>>>>>> branch 'master' of https://github.com/RIOT-OS/RIOT.git
 }
 
 bool otPlatRadioIsEnabled(otInstance *aInstance)
 {
+<<<<<<< HEAD
     DEBUG("%s\n", __FUNCTION__);
     (void)aInstance;
     return (sState != OT_RADIO_STATE_DISABLED) ? true : false;
+=======
+    DEBUG("otPlatRadioIsEnabled\n");
+    (void)aInstance;
+    netopt_state_t state = _get_state();
+    if (state == NETOPT_STATE_OFF) {
+        return false;
+    } else {
+        return true;
+    }
+>>>>>>> branch 'master' of https://github.com/RIOT-OS/RIOT.git
 }
 
 /* OpenThread will call this for setting device state to SLEEP */
 otError otPlatRadioSleep(otInstance *aInstance)
 {
+<<<<<<< HEAD
     otError error = OT_ERROR_INVALID_STATE;
+=======
+    DEBUG("otPlatRadioSleep\n");
+>>>>>>> branch 'master' of https://github.com/RIOT-OS/RIOT.git
     (void)aInstance;
 
+<<<<<<< HEAD
     if(sState == OT_RADIO_STATE_SLEEP || sState == OT_RADIO_STATE_RECEIVE)
     {
         DEBUG("%s: State=OT_RADIO_STATE_SLEEP\n", __FUNCTION__);
@@ -333,14 +448,23 @@ otError otPlatRadioSleep(otInstance *aInstance)
         _set_sleep();
     }
     return error;
+=======
+    _set_sleep();
+    return OT_ERROR_NONE;
+>>>>>>> branch 'master' of https://github.com/RIOT-OS/RIOT.git
 }
 
 /*OpenThread will call this for waiting the reception of a packet */
 otError otPlatRadioReceive(otInstance *aInstance, uint8_t aChannel)
 {
+<<<<<<< HEAD
     otError error = OT_ERROR_INVALID_STATE;
+=======
+    DEBUG("openthread: otPlatRadioReceive. Channel: %i\n", aChannel);
+>>>>>>> branch 'master' of https://github.com/RIOT-OS/RIOT.git
     (void)aInstance;
 
+<<<<<<< HEAD
     if(sState != OT_RADIO_STATE_DISABLED)
     {
         DEBUG("%s(channel %u): State=OT_RADIO_STATE_RECEIVE\n", __FUNCTION__,
@@ -354,13 +478,23 @@ otError otPlatRadioReceive(otInstance *aInstance, uint8_t aChannel)
     }
 
     return error;
+=======
+    _set_idle();
+    _set_channel(aChannel);
+    sReceiveFrame.mChannel = aChannel;
+    return OT_ERROR_NONE;
+>>>>>>> branch 'master' of https://github.com/RIOT-OS/RIOT.git
 }
 
 /* OpenThread will call this function to get the transmit buffer */
 otRadioFrame *otPlatRadioGetTransmitBuffer(otInstance *aInstance)
 {
     (void)aInstance;
+<<<<<<< HEAD
     DEBUG("%s\n", __FUNCTION__);
+=======
+    DEBUG("openthread: otPlatRadioGetTransmitBuffer\n");
+>>>>>>> branch 'master' of https://github.com/RIOT-OS/RIOT.git
     return &sTransmitFrame;
 }
 
@@ -383,8 +517,32 @@ otError otPlatRadioGetTransmitPower(otInstance *aInstance, int8_t *aPower)
     return OT_ERROR_NONE;
 }
 
+otError otPlatRadioGetTransmitPower(otInstance *aInstance, int8_t *aPower)
+{
+    (void)aInstance;
+    if (aPower == NULL) {
+        return OT_ERROR_INVALID_ARGS;
+    }
+
+    *aPower = _get_power();
+
+    return OT_ERROR_NONE;
+}
+
+otError otPlatRadioSetTransmitPower(otInstance *aInstance, int8_t aPower)
+{
+    (void)aInstance;
+    _set_power(aPower);
+
+    return OT_ERROR_NONE;
+}
+
 /* OpenThread will call this for transmitting a packet*/
+<<<<<<< HEAD
 otError otPlatRadioTransmit(otInstance *aInstance, otRadioFrame *aFrame)
+=======
+otError otPlatRadioTransmit(otInstance *aInstance, otRadioFrame *aPacket)
+>>>>>>> branch 'master' of https://github.com/RIOT-OS/RIOT.git
 {
     otError error = OT_ERROR_INVALID_STATE;
     (void)aInstance;
@@ -397,6 +555,7 @@ otError otPlatRadioTransmit(otInstance *aInstance, otRadioFrame *aFrame)
     {.iol_base = aFrame->mPsdu, .iol_len = (aFrame->mLength
             - RADIO_IEEE802154_FCS_LEN)};
 
+<<<<<<< HEAD
     if(sState == OT_RADIO_STATE_RECEIVE)
     {
         error = OT_ERROR_NONE;
@@ -440,10 +599,25 @@ otError otPlatRadioTransmit(otInstance *aInstance, otRadioFrame *aFrame)
 //            }
 //        }
 //        sReceiveFrame.mLength = 0;
+=======
+    /*Set channel and power based on transmit frame */
+    if (ENABLE_DEBUG) {
+        DEBUG("otPlatRadioTransmit->channel: %i, length %d\n",
+              (int) aPacket->mChannel, (int)aPacket->mLength);
+        for (size_t i = 0; i < aPacket->mLength; ++i) {
+            DEBUG("%x ", aPacket->mPsdu[i]);
+        }
+        DEBUG("\n");
+>>>>>>> branch 'master' of https://github.com/RIOT-OS/RIOT.git
     }
+<<<<<<< HEAD
     return error;
 }
+=======
+    _set_channel(aPacket->mChannel);
+>>>>>>> branch 'master' of https://github.com/RIOT-OS/RIOT.git
 
+<<<<<<< HEAD
 void radio_process(otInstance *aInstance)
 {
     if((sState == OT_RADIO_STATE_RECEIVE && sReceiveFrame.mLength > 0)
@@ -451,7 +625,13 @@ void radio_process(otInstance *aInstance)
                     && sReceiveFrame.mLength > IEEE802154_ACK_LENGTH))
     {
 #if OPENTHREAD_ENABLE_DIAG
+=======
+    /* send packet though netdev */
+    _dev->driver->send(_dev, &iolist);
+    otPlatRadioTxStarted(aInstance, aPacket);
+>>>>>>> branch 'master' of https://github.com/RIOT-OS/RIOT.git
 
+<<<<<<< HEAD
         if (otPlatDiagModeGet())
         {
             otPlatDiagRadioReceiveDone(aInstance, &sReceiveFrame, sReceiveError);
@@ -512,6 +692,9 @@ void radio_process(otInstance *aInstance)
     }
 
     sReceiveFrame.mLength = 0;
+=======
+    return OT_ERROR_NONE;
+>>>>>>> branch 'master' of https://github.com/RIOT-OS/RIOT.git
 }
 
 /* OpenThread will call this for getting the radio caps */
@@ -520,7 +703,11 @@ otRadioCaps otPlatRadioGetCaps(otInstance *aInstance)
     (void)aInstance;
     DEBUG("openthread: otPlatRadioGetCaps\n");
     /* all drivers should handle ACK, including call of NETDEV_EVENT_TX_NOACK */
+<<<<<<< HEAD
     return OT_RADIO_CAPS_NONE;
+=======
+    return OT_RADIO_CAPS_TRANSMIT_RETRIES | OT_RADIO_CAPS_ACK_TIMEOUT;
+>>>>>>> branch 'master' of https://github.com/RIOT-OS/RIOT.git
 }
 
 /* OpenThread will call this for getting the state of promiscuous mode */
@@ -553,8 +740,12 @@ void otPlatRadioEnableSrcMatch(otInstance *aInstance, bool aEnable)
     (void)aEnable;
 }
 
+<<<<<<< HEAD
 otError otPlatRadioAddSrcMatchShortEntry(otInstance *aInstance,
         const uint16_t aShortAddress)
+=======
+otError otPlatRadioAddSrcMatchShortEntry(otInstance *aInstance, const uint16_t aShortAddress)
+>>>>>>> branch 'master' of https://github.com/RIOT-OS/RIOT.git
 {
     DEBUG("otPlatRadioAddSrcMatchShortEntry\n");
     (void)aInstance;
@@ -562,8 +753,12 @@ otError otPlatRadioAddSrcMatchShortEntry(otInstance *aInstance,
     return OT_ERROR_NONE;
 }
 
+<<<<<<< HEAD
 otError otPlatRadioAddSrcMatchExtEntry(otInstance *aInstance,
         const otExtAddress *aExtAddress)
+=======
+otError otPlatRadioAddSrcMatchExtEntry(otInstance *aInstance, const uint8_t *aExtAddress)
+>>>>>>> branch 'master' of https://github.com/RIOT-OS/RIOT.git
 {
     DEBUG("otPlatRadioAddSrcMatchExtEntry\n");
     (void)aInstance;
@@ -571,8 +766,12 @@ otError otPlatRadioAddSrcMatchExtEntry(otInstance *aInstance,
     return OT_ERROR_NONE;
 }
 
+<<<<<<< HEAD
 otError otPlatRadioClearSrcMatchShortEntry(otInstance *aInstance,
         const uint16_t aShortAddress)
+=======
+otError otPlatRadioClearSrcMatchShortEntry(otInstance *aInstance, const uint16_t aShortAddress)
+>>>>>>> branch 'master' of https://github.com/RIOT-OS/RIOT.git
 {
     DEBUG("otPlatRadioClearSrcMatchShortEntry\n");
     (void)aInstance;
@@ -580,8 +779,12 @@ otError otPlatRadioClearSrcMatchShortEntry(otInstance *aInstance,
     return OT_ERROR_NONE;
 }
 
+<<<<<<< HEAD
 otError otPlatRadioClearSrcMatchExtEntry(otInstance *aInstance,
         const otExtAddress *aExtAddress)
+=======
+otError otPlatRadioClearSrcMatchExtEntry(otInstance *aInstance, const uint8_t *aExtAddress)
+>>>>>>> branch 'master' of https://github.com/RIOT-OS/RIOT.git
 {
     DEBUG("otPlatRadioClearSrcMatchExtEntry\n");
     (void)aInstance;
@@ -601,8 +804,12 @@ void otPlatRadioClearSrcMatchExtEntries(otInstance *aInstance)
     (void)aInstance;
 }
 
+<<<<<<< HEAD
 otError otPlatRadioEnergyScan(otInstance *aInstance, uint8_t aScanChannel,
         uint16_t aScanDuration)
+=======
+otError otPlatRadioEnergyScan(otInstance *aInstance, uint8_t aScanChannel, uint16_t aScanDuration)
+>>>>>>> branch 'master' of https://github.com/RIOT-OS/RIOT.git
 {
     DEBUG("otPlatRadioEnergyScan\n");
     (void)aInstance;

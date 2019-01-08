@@ -31,8 +31,6 @@
 #define ENABLE_DEBUG        (0)
 #include "debug.h"
 
-#define _MAX_MHR_OVERHEAD   (25)
-
 /* Reference pointer for the IRQ handler */
 static netdev_t *_dev;
 

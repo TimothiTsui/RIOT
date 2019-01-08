@@ -13,6 +13,7 @@
  * @brief       Netdev adoption for OpenThread
  *
  * @author      Jose Ignacio Alamos <jialamos@uc.cl>
+ * @author      Baptiste Clenet <bapclenet@gmail.com>
  * @}
  */
 
@@ -39,6 +40,7 @@ static msg_t _queue[OPENTHREAD_QUEUE_LEN];
 static kernel_pid_t _pid;
 static otInstance *sInstance;
 
+<<<<<<< HEAD
 /**
  * @name    Default configuration for OpenThread network
  * @{
@@ -53,6 +55,9 @@ static otInstance *sInstance;
 
 uint8_t ot_call_command(char* command, void *arg, void* answer)
 {
+=======
+uint8_t ot_call_command(char* command, void *arg, void* answer) {
+>>>>>>> branch 'master' of https://github.com/RIOT-OS/RIOT.git
     ot_job_t job;
 
     job.command = command;
@@ -67,9 +72,14 @@ uint8_t ot_call_command(char* command, void *arg, void* answer)
 }
 
 /* OpenThread will call this when switching state from empty tasklet to non-empty tasklet. */
+<<<<<<< HEAD
 void otTaskletsSignalPending(otInstance *aInstance)
 {
     otTaskletsProcess(aInstance);
+=======
+void otTaskletsSignalPending(otInstance *aInstance) {
+    (void) aInstance;
+>>>>>>> branch 'master' of https://github.com/RIOT-OS/RIOT.git
 }
 
 static void *_openthread_event_loop(void *arg)
@@ -87,7 +97,9 @@ static void *_openthread_event_loop(void *arg)
     netdev_t *dev;
     msg_t msg, reply;
 
+#if defined(MODULE_OPENTHREAD_CLI_FTD) || defined(MODULE_OPENTHREAD_CLI_MTD)
     otCliUartInit(sInstance);
+<<<<<<< HEAD
 
 #if OPENTHREAD_ENABLE_DIAG
     otDiagInit(sInstance);
@@ -95,6 +107,8 @@ static void *_openthread_event_loop(void *arg)
 
     /* Autostart */
 
+=======
+>>>>>>> branch 'master' of https://github.com/RIOT-OS/RIOT.git
     /* Init default parameters */
     otPanId panid = OPENTHREAD_PANID;
     uint8_t channel = OPENTHREAD_CHANNEL;
@@ -104,11 +118,20 @@ static void *_openthread_event_loop(void *arg)
     otIp6SetEnabled(sInstance, true);
     /* Start Thread protocol operation */
     otThreadSetEnabled(sInstance, true);
+#endif
 
+<<<<<<< HEAD
     /* .... */
 
     uint8_t *buf;
+=======
+#if OPENTHREAD_ENABLE_DIAG
+    diagInit(sInstance);
+#endif
+
+>>>>>>> branch 'master' of https://github.com/RIOT-OS/RIOT.git
     ot_job_t *job;
+<<<<<<< HEAD
     while(1)
     {
 
@@ -140,6 +163,35 @@ static void *_openthread_event_loop(void *arg)
             }
             radio_process(sInstance);
             otTaskletsProcess(sInstance);
+=======
+    serial_msg_t* serialBuffer;
+    while (1) {
+        otTaskletsProcess(sInstance);
+        if (otTaskletsArePending(sInstance) == false) {
+            msg_receive(&msg);
+            switch (msg.type) {
+                case OPENTHREAD_XTIMER_MSG_TYPE_EVENT:
+                    /* Tell OpenThread a time event was received */
+                    otPlatAlarmMilliFired(sInstance);
+                    break;
+                case OPENTHREAD_NETDEV_MSG_TYPE_EVENT:
+                    /* Received an event from driver */
+                    dev = msg.content.ptr;
+                    dev->driver->isr(dev);
+                    break;
+                case OPENTHREAD_SERIAL_MSG_TYPE_EVENT:
+                    /* Tell OpenThread about the reception of a CLI command */
+                    serialBuffer = (serial_msg_t*)msg.content.ptr;
+                    otPlatUartReceived((uint8_t*) serialBuffer->buf,serialBuffer->length);
+                    serialBuffer->serial_buffer_status = OPENTHREAD_SERIAL_BUFFER_STATUS_FREE;
+                    break;
+                case OPENTHREAD_JOB_MSG_TYPE_EVENT:
+                    job = msg.content.ptr;
+                    reply.content.value = ot_exec_command(sInstance, job->command, job->arg, job->answer);
+                    msg_reply(&msg, &reply);
+                    break;
+            }
+>>>>>>> branch 'master' of https://github.com/RIOT-OS/RIOT.git
         }
     }
 
