@@ -51,7 +51,7 @@ static int max17043_read_reg(const max17043_t *dev, uint8_t reg, uint16_t *out)
     int status = 0;
 
     i2c_acquire(dev->i2c);
-    status = i2c_read_regs(dev->i2c, dev->addr, reg, &tmp.c[0], 2);
+    status = i2c_read_regs(dev->i2c, dev->addr, reg, &tmp.c[0], 2, 0);
     i2c_release(dev->i2c);
 
     if (status != 2) {
@@ -75,7 +75,7 @@ static int max17043_write_reg(const max17043_t *dev, uint8_t reg, uint16_t in)
     tmp.u16 = htons(in);
 
     i2c_acquire(dev->i2c);
-    status = i2c_write_regs(dev->i2c, dev->addr, reg, &tmp.c[0], 2);
+    status = i2c_write_regs(dev->i2c, dev->addr, reg, &tmp.c[0], 2, 0);
     i2c_release(dev->i2c);
 
     if (status != 2) {

@@ -41,9 +41,7 @@ int main(void){
 
     puts("MAX17043 sensor driver test application\n");
     printf("Initializing I2C_%i... ", TEST_MAX17043_I2C);
-    if(i2c_init_master(TEST_MAX17043_I2C, I2C_SPEED_FAST) < 0) {
-        return -1;
-    }
+
 
     printf("Initializing MAX17043 sensor at I2C_%i, address 0x%02x... ",
     TEST_MAX17043_I2C, TEST_MAX17043_ADDR);
