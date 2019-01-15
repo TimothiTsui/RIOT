@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 University of Applied Sciences Emden / Leer
+ * Copyright (C) 2019 Igor Knippenberg
  *
  * This file is subject to the terms and conditions of the GNU Lesser
  * General Public License v2.1. See the file LICENSE in the top level
@@ -11,25 +11,24 @@
  * @{
  *
  * @file
- * @brief       Test application for the max17043 sensor driver
+ * @brief       Test application for the Atlas Scientific pH OEM sensor driver
  *
- * @author      Dhruv Verma <dhruv2scs@gmail.com>
  * @author      Igor Knippenberg <igor.knippenberg@gmail.com>
  *
  * @}
  */
 
-#ifndef TEST_MAX17043_I2C
-#error "TEST_MAX17043_I2C not defined"
+#ifndef TEST_PH_OEM_I2C
+#error "TEST_PH_OEM_I2C not defined"
 #endif
-#ifndef TEST_MAX17043_ADDR
-#error "TEST_MAX17043_ADDR not defined"
+#ifndef TEST_PH_OEM_ADDR
+#error "TEST_PH_OEM_ADDR not defined"
 #endif
 
 #include <fmt.h>
 
 #include "xtimer.h"
-#include <max17043.h>
+#include <ph_oem.h>
 
 #define SLEEP    (100 * 10000U)
 

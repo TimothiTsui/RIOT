@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 University of Applied Sciences Emden / Leer
+ * Copyright (C) 2015 Eistec AB
  *
  * This file is subject to the terms and conditions of the GNU Lesser
  * General Public License v2.1. See the file LICENSE in the top level
@@ -7,21 +7,18 @@
  */
 
 /**
- * @defgroup    drivers_max17043 MAX17043 host-side fuel gauge
- * @ingroup     drivers_sensors
- * @brief       Device driver for the Maxim MAX17043, an ultra-compact, low-cost,
- *              host-side fuel-gauge system for lithium-ion (Li+) batteries
- *              in handheld and portable equipment
+ * @ingroup     drivers_max17043
  * @{
  *
  * @file
- * @brief       Driver for Maxim MAX17043 fuel gauge sensor
-
+ * @brief       Device driver implementation for Texas Instruments max17043 High
+ *              or Low Side, Bi-Directional CURRENT/POWER MONITOR with Two-Wire
+ *              Interface
  *
- * @author      Dhruv Verma <dhruv2scs@gmail.com>
- * @author      Igor Knippenberg <igor.knippenberg@gmail.com>
+ * @author      Joakim Nohlgård <joakim.nohlgard@eistec.se>
+ *
+ * @}
  */
-
 
 #include <stdint.h>
 #include <fmt.h>
@@ -29,7 +26,8 @@
 #include "max17043.h"
 #include "periph/i2c.h"
 #include "byteorder.h"
-#include "include/max17043-regs.h"
+
+#include "include/ph_oem-regs.h"
 
 #define ENABLE_DEBUG    (0)
 #include "debug.h"

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Eistec AB
+ * Copyright (C) 2018 University of Applied Sciences Emden / Leer
  *
  * This file is subject to the terms and conditions of the GNU Lesser
  * General Public License v2.1. See the file LICENSE in the top level
@@ -11,11 +11,10 @@
  * @{
  *
  * @file
- * @brief       Register definitions for Texas Instruments max17043 High or Low
- *              Side, Bi-Directional CURRENT/POWER MONITOR with Two-Wire
- *              Interface
+ * @brief       Register definitions for Maxim MAX17043 fuel gauge
  *
  * @author      Dhruv Verma <dhruv2scs@gmail.com>
+ * @author      Igor Knippenberg <igor.knippenberg@gmail.com>
  */
 
 #ifndef max17043_REGS_H
