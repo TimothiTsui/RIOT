@@ -9,13 +9,13 @@
 /**
  * @defgroup    drivers_ina219 INA219 current/power monitor
  * @ingroup     drivers_sensors
- * @brief       Device driver for Texas Instruments INA219 Zerø-Drift High
+ * @brief       Device driver for Texas Instruments INA219 Zero-Drift High
  *              Side, Bi-Directional CURRENT/POWER MONITOR with Two-Wire
  *              Interface
  * @{
  *
  * @file
- * @brief       Device driver for Texas Instruments INA219 Zerø-Drift High
+ * @brief       Device driver for Texas Instruments INA219 Zero-Drift High
  *              Side, Bi-Directional CURRENT/POWER MONITOR with Two-Wire
  *              Interface
  *

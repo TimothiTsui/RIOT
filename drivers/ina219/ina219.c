@@ -26,7 +26,8 @@
 #include "ina219.h"
 #include "periph/i2c.h"
 #include "byteorder.h"
-#include "include/ina219-regs.h"
+
+#include "include/ina219_regs.h"
 
 #define ENABLE_DEBUG    (0)
 #include "debug.h"

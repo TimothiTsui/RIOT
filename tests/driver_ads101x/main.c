@@ -24,6 +24,7 @@
 #include "xtimer.h"
 #include "timex.h"
 #include "ads101x.h"
+
 #include "ads101x_params.h"
 #include "ads101x_regs.h"
 

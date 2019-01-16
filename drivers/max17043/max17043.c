@@ -29,7 +29,8 @@
 #include "max17043.h"
 #include "periph/i2c.h"
 #include "byteorder.h"
-#include "include/max17043-regs.h"
+
+#include "include/max17043_regs.h"
 
 #define ENABLE_DEBUG    (0)
 #include "debug.h"

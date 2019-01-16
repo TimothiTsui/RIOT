@@ -23,11 +23,11 @@
 #include <stdint.h>
 #include <fmt.h>
 #include <bitfield.h>
-#include "max17043.h"
+#include "ph_oem.h"
 #include "periph/i2c.h"
 #include "byteorder.h"
 
-#include "include/ph_oem-regs.h"
+#include "include/ph_oem_regs.h"
 
 #define ENABLE_DEBUG    (0)
 #include "debug.h"
