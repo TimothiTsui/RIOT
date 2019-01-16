@@ -18,17 +18,13 @@
  * @}
  */
 
-#ifndef TEST_PH_OEM_I2C
-#error "TEST_PH_OEM_I2C not defined"
-#endif
-#ifndef TEST_PH_OEM_ADDR
-#error "TEST_PH_OEM_ADDR not defined"
-#endif
 
 #include <fmt.h>
-
 #include "xtimer.h"
-#include <ph_oem.h>
+#include "ph_oem.h"
+
+#include "ph_oem_params.h"
+#include "ph_oem_regs.h"
 
 #define SLEEP    (100 * 10000U)
 
