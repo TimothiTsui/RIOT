@@ -1,10 +1,6 @@
 include ../Makefile.tests_common
 
-#FEATURES_REQUIRED = periph_i2c
-
 USEMODULE += ph_oem
-#USEMODULE += xtimer
-#USEMODULE += fmt
 
 ## set default device parameters in case they are undefined
 #PH_OEM_PARAM_I2C  ?= I2C_DEV\(0\)

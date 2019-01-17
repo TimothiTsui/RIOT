@@ -191,6 +191,10 @@ ifneq (,$(filter hts221,$(USEMODULE)))
   FEATURES_REQUIRED += periph_i2c
 endif
 
+ifneq (,$(filter ina219,$(USEMODULE)))
+  FEATURES_REQUIRED += periph_i2c
+endif
+
 ifneq (,$(filter ina220,$(USEMODULE)))
   FEATURES_REQUIRED += periph_i2c
 endif
@@ -346,6 +350,11 @@ endif
 ifneq (,$(filter pcd8544,$(USEMODULE)))
   FEATURES_REQUIRED += periph_gpio
   FEATURES_REQUIRED += periph_spi
+  USEMODULE += xtimer
+endif
+
+ifneq (,$(filter ph_oem,$(USEMODULE)))
+  FEATURES_REQUIRED += periph_i2c
   USEMODULE += xtimer
 endif
 

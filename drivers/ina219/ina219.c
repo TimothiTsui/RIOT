@@ -24,7 +24,7 @@
 #include <stdint.h>
 
 #include "ina219.h"
-#include <ina219-regs.h>
+#include "ina219-regs.h"
 #include "periph/i2c.h"
 #include "byteorder.h"
 

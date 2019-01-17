@@ -19,7 +19,6 @@
  */
 
 //#include <fmt.h>
-
 #include "xtimer.h"
 #include "timex.h"
 #include "ph_oem.h"
@@ -27,21 +26,22 @@
 #include "ph_oem_params.h"
 #include "ph_oem_regs.h"
 
-#define SLEEP    (100 * US_PER_MS)
+#define SLEEP    (5000 * US_PER_MS)
 
 static ph_oem_t dev;
 
-int main(void){
+int main(void)
+{
+    int16_t data;
+    uint8_t state = 0x00;
+    uint8_t count = 0;
 
-//    int16_t data;
+    puts("Atlas Scientific pH OEM sensor driver test application");
 
-    puts("Atlas Scientific pH OEM sensor driver test application\n");
-    printf("Initializing I2C_%i... ", PH_OEM_PARAM_I2C);
+    printf("Initializing pH OEM sensor at I2C_%i, address 0x%02x... \n",
+           PH_OEM_PARAM_I2C, PH_OEM_PARAM_ADDR);
 
-    printf("Initializing pH OEM sensor at I2C_%i, address 0x%02x... ",
-    PH_OEM_PARAM_I2C, PH_OEM_PARAM_ADDR);
-
-    if(ph_oem_init(&dev, ph_oem_params) == PH_OEM_OK) {
+    if (ph_oem_init(&dev, ph_oem_params) == PH_OEM_OK) {
         puts("[OK]\n");
     }
     else {
@@ -49,22 +49,28 @@ int main(void){
         return -1;
     }
 
-//    while(1) {
-        /* Read state of charge. MSB is percent,
-         * LSB is percent_decimal. LSB 1/256 = 0.003906 precision */
-//        max17043_read_soc(&dev, &percent, &percent_decimal);
-//        puts("State of charge:");
-//        print_float(percent + (percent_decimal * 0.003906), 3);
-//        puts("% \n");
-//
-//        /* Read cell voltage, in millivolts */
-////        max17043_read_cell_voltage(&dev, &voltage);
-////        printf("Voltage:\n");
-////        printf("%dmV \n\n", voltage);
-//        xtimer_usleep(SLEEP);
-//    }
+    /* Read Firmware Version. */
+    ph_oem_read_firmware_version(&dev, &data);
+    printf("pH OEM firmware version: %d\n", data);
 
-    //max17043_set_sleep(&dev);
+    while (1) {
+        if (count < 5) {
+            if (state == 0x00) {
+                if (ph_oem_set_led_on(&dev, 0x01) == PH_OEM_OK) {
+                    puts("pH OEM LED turned on\n");
+                    state = 0x01;
+                }
+            }
+            else if (state == 0x01) {
+                if (ph_oem_set_led_on(&dev, 0x00) == PH_OEM_OK) {
+                    puts("pH OEM LED turned off\n");
+                    state = 0x00;
+                }
+            }
+            count++;
+        }
+        xtimer_usleep(SLEEP);
+    }
 
     return 0;
 }

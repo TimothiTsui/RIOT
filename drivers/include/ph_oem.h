@@ -56,7 +56,8 @@ enum {
     PH_OEM_OK       = 0,    /**< everything was fine */
     PH_OEM_NOI2C    = -1,   /**< I2C communication failed */
     PH_OEM_NODEV    = -2,   /**< no PH_OEM device found on the bus */
-    PH_OEM_NODATA   = -3    /**< no data available */
+    PH_OEM_NODATA   = -3,   /**< no data available */
+    PH_OEM_NOT_PH   = -4    /**< not an Atlas Scientific pH OEM device */
 };
 
 /**
@@ -87,14 +88,46 @@ typedef struct ph_oem {
 int ph_oem_init(ph_oem_t *dev, const ph_oem_params_t *params);
 
 /**
- * @brief   Read the device type value
+ * @brief   Read the firmware version register value
  *
  * @param[in] dev   device descriptor
  * @param[out] raw  read value
  *
  * @return zero on successful read, non zero on error
  */
-int ph_oem_read_device_type(const ph_oem_t *dev, int16_t *device_type);
+int ph_oem_read_firmware_version(const ph_oem_t *dev, int16_t *firmware_version);
+
+/**
+ * @brief   Sets the unlock register to be able to change the I2C address
+ *
+ * @param[in] dev   device descriptor
+ *
+ * @return zero on successful read, non zero on error
+ */
+int ph_oem_set_unlock(const ph_oem_t *dev);
+
+/**
+ * @brief   Sets a new address for the pH OEM device
+ *
+ * @param[in] dev   device descriptor
+ * @param[in] addr  new address for the device. Range: 0x01 - 0x7f
+ *
+ * @return zero on successful read, non zero on error
+ */
+int ph_oem_set_i2c_address(const ph_oem_t *dev, uint8_t addr);
+
+/**
+ * @brief   Sets the led on if state true, or off if state false.
+ *
+ * @param[in] dev   device descriptor
+ * @param[in] state True  = Blinking each time a reading is taken
+ *                  False = off
+ *
+ * @return zero on successful read, non zero on error
+ */
+int ph_oem_set_led_on(const ph_oem_t *dev, uint8_t state);
+
+
 
 #ifdef __cplusplus
 }

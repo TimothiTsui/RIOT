@@ -11,7 +11,7 @@
  * @{
  *
  * @file
- * @brief       Register definitions for Texas Instruments INA219 Zerø-Drift High
+ * @brief       Register definitions for Texas Instruments INA219 Zerï¿½-Drift High
  *              Side, Bi-Directional CURRENT/POWER MONITOR with Two-Wire
  *              Interface
  *

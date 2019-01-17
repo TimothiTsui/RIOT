@@ -19,7 +19,7 @@
 #ifndef PH_OEM_PARAMS_H
 #define PH_OEM_PARAMS_H
 
-#include "board.h"
+#include "board.h" /* THIS INCLUDE IS MANDATORY */
 #include "saul_reg.h"
 #include "ph_oem.h"
 #include "ph_oem_regs.h"
