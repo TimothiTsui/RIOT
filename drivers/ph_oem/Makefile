@@ -1,3 +1,3 @@
-MODULE = PH_OEM
+#MODULE = PH_OEM
 
 include $(RIOTBASE)/Makefile.base

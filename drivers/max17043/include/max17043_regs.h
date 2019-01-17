@@ -17,8 +17,8 @@
  * @author      Igor Knippenberg <igor.knippenberg@gmail.com>
  */
 
-#ifndef max17043_REGS_H
-#define max17043_REGS_H
+#ifndef MAX17043_REGS_H
+#define MAX17043_REGS_H
 
 
 #ifdef __cplusplus
@@ -47,5 +47,5 @@ typedef enum max17043_reg {
 }
 #endif
 
-#endif /* max17043_REGS_H */
+#endif /* MAX17043_REGS_H */
 /** @} */

@@ -91,11 +91,7 @@ enum {
     SAUL_SENSE_PRESS    = 0x89,     /**< sensor: pressure */
     SAUL_SENSE_ANALOG   = 0x8a,     /**< sensor: raw analog value */
     SAUL_SENSE_UV       = 0x8b,     /**< sensor: UV index */
-
     SAUL_SENSE_OBJTEMP  = 0x8c,     /**< sensor: object temperature */
-
-    SAUL_SENSE_PH       = 0x8c,      /**< sensor: pH */
-
     SAUL_SENSE_COUNT    = 0x8d,     /**< sensor: pulse counter */
     SAUL_SENSE_DISTANCE = 0x8e,     /**< sensor: distance */
     SAUL_SENSE_CO2      = 0x8f,     /**< sensor: CO2 Gas */
@@ -103,6 +99,7 @@ enum {
     SAUL_SENSE_OCCUP    = 0x91,     /**< sensor: occupancy */
     SAUL_SENSE_PROXIMITY= 0x92,     /**< sensor: proximity */
     SAUL_SENSE_RSSI     = 0x93,     /**< sensor: RSSI */
+    SAUL_SENSE_PH       = 0x94,     /**< sensor: pH */
     SAUL_CLASS_ANY      = 0xff      /**< any device - wildcard */
     /* extend this list as needed... */
 };

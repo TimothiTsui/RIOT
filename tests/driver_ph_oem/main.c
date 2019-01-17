@@ -18,73 +18,51 @@
  * @}
  */
 
+//#include <fmt.h>
 
-#include <fmt.h>
 #include "xtimer.h"
+#include "timex.h"
 #include "ph_oem.h"
 
 #include "ph_oem_params.h"
 #include "ph_oem_regs.h"
 
-#define SLEEP    (100 * 10000U)
+#define SLEEP    (100 * US_PER_MS)
+
+static ph_oem_t dev;
 
 int main(void){
-    max17043_t dev;
 
-    uint8_t percent;
-    uint8_t percent_decimal;
-    uint16_t voltage;
+//    int16_t data;
 
-    puts("MAX17043 sensor driver test application\n");
-    printf("Initializing I2C_%i... ", TEST_MAX17043_I2C);
+    puts("Atlas Scientific pH OEM sensor driver test application\n");
+    printf("Initializing I2C_%i... ", PH_OEM_PARAM_I2C);
 
+    printf("Initializing pH OEM sensor at I2C_%i, address 0x%02x... ",
+    PH_OEM_PARAM_I2C, PH_OEM_PARAM_ADDR);
 
-    printf("Initializing MAX17043 sensor at I2C_%i, address 0x%02x... ",
-    TEST_MAX17043_I2C, TEST_MAX17043_ADDR);
-    if(max17043_init(&dev, TEST_MAX17043_I2C, TEST_MAX17043_ADDR) == 0) {
+    if(ph_oem_init(&dev, ph_oem_params) == PH_OEM_OK) {
         puts("[OK]\n");
     }
     else {
         puts("[Failed]");
-        return 1;
+        return -1;
     }
 
-//    /* Power-On reset */
-//    int ret_val = max17043_reset(&dev);
-//
-//    if(ret_val == -1) {
-//        puts("write failed");
-//    }
-//    else {
-//        printf("write success: %d\n", ret_val);
-//    }
-//
-//    xtimer_usleep(SLEEP);
-//
-//    /* Making a quick start */
-//    ret_val = max17043_set_quick_start(&dev);
-//
-//    if(ret_val == -1) {
-//        puts("write failed");
-//    }
-//    else {
-//        printf("write success: %d\n", ret_val);
-//    }
-
-    while(1) {
+//    while(1) {
         /* Read state of charge. MSB is percent,
          * LSB is percent_decimal. LSB 1/256 = 0.003906 precision */
-        max17043_read_soc(&dev, &percent, &percent_decimal);
-        puts("State of charge:");
-        print_float(percent + (percent_decimal * 0.003906), 3);
-        puts("% \n");
-
-        /* Read cell voltage, in millivolts */
-        max17043_read_cell_voltage(&dev, &voltage);
-        printf("Voltage:\n");
-        printf("%dmV \n\n", voltage);
-        xtimer_usleep(SLEEP);
-    }
+//        max17043_read_soc(&dev, &percent, &percent_decimal);
+//        puts("State of charge:");
+//        print_float(percent + (percent_decimal * 0.003906), 3);
+//        puts("% \n");
+//
+//        /* Read cell voltage, in millivolts */
+////        max17043_read_cell_voltage(&dev, &voltage);
+////        printf("Voltage:\n");
+////        printf("%dmV \n\n", voltage);
+//        xtimer_usleep(SLEEP);
+//    }
 
     //max17043_set_sleep(&dev);
 

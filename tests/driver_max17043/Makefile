@@ -5,6 +5,7 @@ FEATURES_REQUIRED = periph_i2c
 USEMODULE += max17043
 USEMODULE += xtimer
 USEMODULE += fmt
+USEMODULE += gnrc_netdev_default
 
 # set default device parameters in case they are undefined
 TEST_MAX17043_I2C  ?= I2C_DEV\(0\)

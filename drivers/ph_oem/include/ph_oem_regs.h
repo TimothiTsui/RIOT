@@ -28,6 +28,7 @@ extern "C" {
  * @brief Atlas Scientific pH OEM register addresses
  *
  * All registers in the pH OEM are 8 bit wide and transmitted MSB first.
+ *
  */
 typedef enum ph_oem_reg {
     /** Device Information */
@@ -42,13 +43,13 @@ typedef enum ph_oem_reg {
     PH_OEM_REG_HIBERNATE                = 0x06, /**< Active/hibernate register (read/write) */
     PH_OEM_REG_NEW_READING              = 0x07, /**< New reading available register (read/write)  */
     /** Calibration */
-    PH_OEM_REG_CALIBRATION_BASE         = 0x08, /**< Calibration value register base address, order= MSB, high byte, low byte, LSB (0x08-0x0B) (read/write) */
+    PH_OEM_REG_CALIBRATION_BASE         = 0x08, /**< Calibration value register base address. Register order is: MSB, high byte, low byte, LSB (0x08-0x0B) (read/write) */
     PH_OEM_REG_CALIBRATION_REQUEST      = 0x0C, /**< Calibration request register (read/write) */
     PH_OEM_REG_CALIBRATION_CONFIRM      = 0x0D, /**< Calibration confirm register (read/write) */
     /** Compensation */
-    PH_OEM_REG_TEMP_COMPENSATION_BASE   = 0x0E, /**< Temperature compensation register base address, order= MSB, high byte, low byte, LSB (0x0E-0x11) (read/write) */
+    PH_OEM_REG_TEMP_COMPENSATION_BASE   = 0x0E, /**< Temperature compensation register base address. Register order is: MSB, high byte, low byte, LSB (0x0E-0x11) (read/write) */
     /** Confirmation */
-    PH_OEM_REG_TEMP_CONFIRMATION_BASE   = 0x12, /**< Temperature confirm register base address, order= MSB, high byte, low byte, LSB (0x12-0x15) (read only) */
+    PH_OEM_REG_TEMP_CONFIRMATION_BASE   = 0x12, /**< Temperature confirm register base address. Register order is: MSB, high byte, low byte, LSB (0x12-0x15) (read only) */
     /** Sensor Data */
     PH_OEM_REG_PH_READING_BASE          = 0x16, /**< pH reading register base address, order= MSB, high byte, low byte, LSB (0x16-0x19) (read only) */
 

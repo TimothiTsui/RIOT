@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Eistec AB
+ * Copyright (C) 2019 Igor Knippenberg
  *
  * This file is subject to the terms and conditions of the GNU Lesser
  * General Public License v2.1. See the file LICENSE in the top level
@@ -7,128 +7,87 @@
  */
 
 /**
- * @ingroup     drivers_max17043
+ * @ingroup     drivers_ph_oem
  * @{
  *
  * @file
- * @brief       Device driver implementation for Texas Instruments max17043 High
- *              or Low Side, Bi-Directional CURRENT/POWER MONITOR with Two-Wire
- *              Interface
+ * @brief       pH OEM device driver
  *
- * @author      Joakim Nohlgård <joakim.nohlgard@eistec.se>
- *
+ * @author      Igor Knippenberg <igor.knippenberg@gmail.com> *
  * @}
  */
 
-#include <stdint.h>
-#include <fmt.h>
-#include <bitfield.h>
-#include "ph_oem.h"
+//#include "stdint.h"
+//#include "fmt.h"
+//#include "bitfield.h"
+//#include "byteorder.h"
+#include "assert.h"
 #include "periph/i2c.h"
-#include "byteorder.h"
+#include "periph/gpio.h"
 
-#include "include/ph_oem_regs.h"
+#include "ph_oem.h"
+#include "ph_oem_params.h"
+#include "ph_oem_regs.h"
 
 #define ENABLE_DEBUG    (0)
 #include "debug.h"
 
-/** @brief Read one 16 bit register from a max17043 device and swap byte order, if necessary. */
+#define I2C (dev->params.i2c)
+#define ADDR (dev->params.addr)
 
-int max17043_init(max17043_t *dev, i2c_t i2c, uint8_t address){
-    /* write device descriptor */
-    dev->i2c = i2c;
-    dev->addr = address;
+//static int _ph_oem_init_test(i2c_t i2c, uint8_t addr);
+//
 
-    return 0;
-}
 
-/** @brief Read one 16 bit register from a INA219 device and swap byte order, if necessary.*/
-static int max17043_read_reg(const max17043_t *dev, uint8_t reg, uint16_t *out)
+int ph_oem_init(ph_oem_t *dev, const ph_oem_params_t *params)
 {
-    union {
-        uint8_t c[2];
-        uint16_t u16;
-    } tmp = { .u16 = 0 };
-    int status = 0;
+    assert(dev && params);
 
-    i2c_acquire(dev->i2c);
-    status = i2c_read_regs(dev->i2c, dev->addr, reg, &tmp.c[0], 2, 0);
-    i2c_release(dev->i2c);
+    dev->params = *params;
 
-    if (status != 2) {
-        return -1;
-    }
-
-    *out = ntohs(tmp.u16);
-
-    return 0;
+    //return _ph_oem_init_test(I2C, ADDR);
+    return PH_OEM_OK;
 }
 
-/** @brief Write one 16 bit register to a INA219 device and swap byte order, if necessary. */
-static int max17043_write_reg(const max17043_t *dev, uint8_t reg, uint16_t in)
-{
-    union {
-        uint8_t c[2];
-        uint16_t u16;
-    } tmp = { .u16 = 0 };
-    int status = 0;
+//static int _ph_oem_init_test(i2c_t i2c, uint8_t addr)
+//{
+//    uint8_t regs[2];
+//
+//    i2c_acquire(i2c);
+//
+//    /* Register read test */
+//    if (i2c_read_regs(i2c, addr, ADS101X_CONF_ADDR, &regs, 2, 0x0) < 0) {
+//        DEBUG("[ads101x] init - error: unable to read reg %x\n",
+//              ADS101X_CONF_ADDR);
+//        i2c_release(i2c);
+//        return ADS101X_NODEV;
+//    }
+//
+//    regs[1] = (regs[1] & ~ADS101X_DATAR_MASK) | ADS101X_DATAR_3300;
+//
+//    /* Register write test */
+//    if (i2c_write_regs(i2c, addr, ADS101X_CONF_ADDR, &regs, 2, 0x0) < 0) {
+//        DEBUG("[ads101x] init - error: unable to write reg %x\n",
+//              ADS101X_CONF_ADDR);
+//        i2c_release(i2c);
+//        return ADS101X_NODEV;
+//    }
+//
+//    i2c_read_regs(i2c, addr, ADS101X_CONF_ADDR, &regs, 2, 0x0);
+//
+//    i2c_release(i2c);
+//
+//    /* Write should have actually written the register */
+//    if ((regs[1] & ADS101X_DATAR_MASK) != ADS101X_DATAR_3300) {
+//        DEBUG("[ads101x] init - error: unable to set reg (reg=%x)\n", regs[1]);
+//        return ADS101X_NODEV;
+//    }
 
-    tmp.u16 = htons(in);
+//    return PH_OEM_OK;
+//}
 
-    i2c_acquire(dev->i2c);
-    status = i2c_write_regs(dev->i2c, dev->addr, reg, &tmp.c[0], 2, 0);
-    i2c_release(dev->i2c);
-
-    if (status != 2) {
-        return -1;
-    }
-
-    return 0;
-}
-
-int max17043_read_soc(const max17043_t *dev, uint8_t *soc, uint8_t *soc_decimal){
-    uint16_t result;
-    int status = max17043_read_reg(dev, MAX17043_REG_SOC, &result);
-    printf("soc raw 16bit: %x\n", result);
-    *soc = (result & 0xFF00) >> 8;
-    *soc_decimal = (result & 0x00FF);
-    return status;
-}
-
-int max17043_read_cell_voltage(const max17043_t *dev, uint16_t *vcell){
-    int status = max17043_read_reg(dev, MAX17043_REG_VCELL, vcell);
-
-    *vcell = (*vcell >> 4) * 1.25;
-
-    return status;
-}
-
-int max17043_set_quick_start(const max17043_t *dev){
-    return max17043_write_reg(dev, MAX17043_REG_MODE, MAX17043_MODE_QUICK_START);
-}
-
-int max17043_reset(const max17043_t *dev)
-{
-    return max17043_write_reg(dev, MAX17043_REG_COMMAND, 0x5400);
-
-}
-
-int max17043_set_sleep(const max17043_t *dev){
-    uint16_t config;
-    max17043_read_reg(dev, MAX17043_REG_CONFIG, &config);
-    printf("Config value: %x\n", config);
-
-    config ^= 1 << 7;
-
-    if(max17043_write_reg(dev, MAX17043_REG_CONFIG, config) == -1){
-        printf("Write error config");
-    }
-    else{
-        max17043_read_reg(dev, MAX17043_REG_CONFIG, &config);
-        printf("Write successful: %x\n", config);
-    }
-    return 0;
-}
-
-
-
+//int ph_oem_read_device_type(const ph_oem_t *dev, int16_t *device_type)
+//{
+//
+//    return PH_OEM_OK;
+//}

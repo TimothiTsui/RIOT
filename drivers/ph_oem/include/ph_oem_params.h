@@ -19,8 +19,8 @@
 #ifndef PH_OEM_PARAMS_H
 #define PH_OEM_PARAMS_H
 
-//#include "board.h"
-//#include "saul_reg.h"
+#include "board.h"
+#include "saul_reg.h"
 #include "ph_oem.h"
 #include "ph_oem_regs.h"
 
@@ -51,13 +51,24 @@ extern "C" {
                               .interrupt_pin = PH_OEM_PARAM_INTERRUPT_PIN,  \
                               .enable_pin = PH_OEM_PARAM_EN_PIN }
 #endif
-
+#ifndef PH_OEM_SAUL_INFO
+#define PH_OEM_SAUL_INFO       { .name = "ph_oem" }
+#endif
+/** @} */
 /**
  * @brief   pH OEM defaults if not defined for a board or application
  */
 static const ph_oem_params_t ph_oem_params[] =
 {
     PH_OEM_PARAMS
+};
+
+/**
+ * @brief   Additional meta information to keep in the SAUL registry
+ */
+static const saul_reg_info_t ph_oem_saul_info[] =
+{
+        PH_OEM_SAUL_INFO
 };
 
 #ifdef __cplusplus

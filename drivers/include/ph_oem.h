@@ -15,11 +15,18 @@
  *
  * @file
  * @brief       pH OEM device driver
- * The sensor can be used with multiple configurations, for example with
- * interrupt and enable pin, only interrupt or enable pin, or the default
- * configuration with none of these pins.
- * The configurations are seperated into 4 devices.The enable pin is a custom
- * PCB functionality and not included in the factory default sensor.
+ * The Atlas Scientific pH OEM sensor can be used with multiple configurations,
+ * for example with interrupt and enable pin, only interrupt or enable pin,
+ * or the default configuration with none of these pins. Per default both these
+ * pins are mapped to GPIO_UNDEF if not otherwise defined.
+ *
+ * The enable pin is a custom PCB functionality and not included in the factory
+ * default sensor.
+ *
+ * The Sensor has no integrated temperature sensor and requires another device
+ * to provide the temperature for compensation.
+ *
+ *
  *
  * @author      Igor Knippenberg <igor.knippenberg@gmail.com>
  */
@@ -27,16 +34,15 @@
 #ifndef PH_OEM_H
 #define PH_OEM_H
 
-#include <stdint.h>
-
-#include "periph/i2c.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+#include "periph/i2c.h"
+#include "periph/gpio.h"
+
 /**
- * @brief   Atlas Scientific pH OEM default SMBus/I2C address
+ * @brief    pH OEM default SMBus/I2C address
  *
  */
 #ifndef PH_OEM_I2C_ADDRESS
@@ -47,14 +53,14 @@ extern "C" {
  * @brief   Named return values
  */
 enum {
-    PH_OEM_OK      = 0,    /**< everything was fine */
-    PH_OEM_NOI2C   = -1,   /**< I2C communication failed */
-    PH_OEM_NODEV   = -2,   /**< no PH_OEM device found on the bus */
-    PH_OEM_NODATA  = -3    /**< no data available */
+    PH_OEM_OK       = 0,    /**< everything was fine */
+    PH_OEM_NOI2C    = -1,   /**< I2C communication failed */
+    PH_OEM_NODEV    = -2,   /**< no PH_OEM device found on the bus */
+    PH_OEM_NODATA   = -3    /**< no data available */
 };
 
 /**
- * @brief  Atlas Scientfic pH OEM sensor interrupt + enable params
+ * @brief   pH OEM sensor params
  */
 typedef struct ph_oem_params {
     i2c_t i2c;              /**< I2C device the sensor is connected to */
@@ -64,98 +70,35 @@ typedef struct ph_oem_params {
 } ph_oem_params_t;
 
 /**
- * @brief   pH_OEM device descriptor
+ * @brief   pH OEM device descriptor
  */
 typedef struct ph_oem {
     ph_oem_params_t params;     /**< device driver configuration */
 } ph_oem_t;
 
 /**
- * @brief   Initialize a current sensor
+ * @brief   Initialize an pH OEM sensor
  *
- * @param[out] dev          device descriptor of sensor to initialize
- * @param[in]  i2c          I2C bus the sensor is connected to
- * @param[in]  address      I2C slave address of the sensor
+ * @param[in,out] dev  device descriptor
+ * @param[in] params   device configuration
  *
- * @return                  0 on success
- * @return                  <0 on error
+ * @return zero on successful initialization, non zero on error
  */
-int ina219_init(ina219_t *dev, i2c_t i2c, uint8_t address);
+int ph_oem_init(ph_oem_t *dev, const ph_oem_params_t *params);
 
 /**
- * @brief   Write to calibration register
+ * @brief   Read the device type value
  *
- * @param[in]  dev          device descriptor of sensor to configure
- * @param[in]  calibration  calibration register settings, see data sheet
+ * @param[in] dev   device descriptor
+ * @param[out] raw  read value
  *
- * @return                  0 on success
- * @return                  <0 on error
+ * @return zero on successful read, non zero on error
  */
-int ina219_set_calibration(const ina219_t *dev, uint16_t calibration);
-
-/**
- * @brief   Write to configuration register
- *
- * @param[in]  dev          device descriptor of sensor to configure
- * @param[in]  config       configuration register settings, see data sheet
- *
- * @return                  0 on success
- * @return                  <0 on error
- */
-int ina219_set_config(const ina219_t *dev, uint16_t config);
-
-/**
- * @brief   Read shunt voltage
- *
- * @param[in]  dev          device descriptor of sensor
- * @param[out] voltage      measured voltage across shunt resistor
- *
- * @return                  0 on success
- * @return                  <0 on error
- */
-int ina219_read_shunt(const ina219_t *dev, int16_t *voltage);
-
-/**
- * @brief   Read bus voltage register
- *
- * The bus voltage can be found in the most significant bits of the bus voltage
- * register, the lower three bits are flags/reserved.
- *
- * See the device data sheet for details.
- *
- * @param[in]  dev          device descriptor of sensor
- * @param[out] voltage      measured bus voltage
- *
- * @return                  0 on success
- * @return                  <0 on error
- */
-int ina219_read_bus(const ina219_t *dev, int16_t *voltage);
-
-/**
- * @brief   Read shunt current
- *
- * @param[in]  dev          device descriptor of sensor
- * @param[out] current      measured current through shunt resistor
- *
- * @return                  0 on success
- * @return                  <0 on error
- */
-int ina219_read_current(const ina219_t *dev, int16_t *current);
-
-/**
- * @brief   Read power consumption
- *
- * @param[in]  dev          device descriptor of sensor
- * @param[out] power        measured power consumption
- *
- * @return                  0 on success
- * @return                  <0 on error
- */
-int ina219_read_power(const ina219_t *dev, int16_t *power);
+int ph_oem_read_device_type(const ph_oem_t *dev, int16_t *device_type);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* INA219_H */
+#endif /* PH_OEM_H */
 /** @} */
