@@ -56,13 +56,13 @@ int main(void)
     while (1) {
         if (count < 5) {
             if (state == 0x00) {
-                if (ph_oem_set_led_on(&dev, 0x01) == PH_OEM_OK) {
+                if (ph_oem_set_led_on(&dev, PH_OEM_LED_ON) == PH_OEM_OK) {
                     puts("pH OEM LED turned on\n");
                     state = 0x01;
                 }
             }
             else if (state == 0x01) {
-                if (ph_oem_set_led_on(&dev, 0x00) == PH_OEM_OK) {
+                if (ph_oem_set_led_on(&dev, PH_OEM_LED_OFF) == PH_OEM_OK) {
                     puts("pH OEM LED turned off\n");
                     state = 0x00;
                 }
