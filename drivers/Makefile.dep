@@ -354,6 +354,7 @@ ifneq (,$(filter pcd8544,$(USEMODULE)))
 endif
 
 ifneq (,$(filter ph_oem,$(USEMODULE)))
+  FEATURES_REQUIRED += periph_gpio_irq
   FEATURES_REQUIRED += periph_i2c
   USEMODULE += xtimer
 endif

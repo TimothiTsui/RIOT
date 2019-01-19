@@ -30,6 +30,12 @@
 
 static ph_oem_t dev;
 
+static void interrupt_pin_cb(void *arg)
+{
+    (void)arg;
+    puts("\n[New Reading!]");
+}
+
 int main(void)
 {
     int16_t data;
