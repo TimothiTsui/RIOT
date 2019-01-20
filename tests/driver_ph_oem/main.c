@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Igor Knippenberg
+ * Copyright (C) 2019 University of Applied Sciences Emden / Leer
  *
  * This file is subject to the terms and conditions of the GNU Lesser
  * General Public License v2.1. See the file LICENSE in the top level
@@ -26,25 +26,25 @@
 #include "ph_oem_params.h"
 #include "ph_oem_regs.h"
 
-#define SLEEP    (5000 * US_PER_MS)
+#define SLEEP    (1000 * US_PER_MS)
 
 static ph_oem_t dev;
 
-static void interrupt_pin_cb(void *arg)
-{
-    (void)arg;
-    puts("\n[New Reading!]");
-}
+//static void interrupt_pin_cb(void *arg)
+//{
+//    (void)arg;
+//    puts("\n[New Reading!]");
+//}
 
 int main(void)
 {
     int16_t data;
-    uint8_t state = 0x00;
-    uint8_t count = 0;
+//    uint8_t state = 0x00;
+//    uint8_t count = 0;
 
     puts("Atlas Scientific pH OEM sensor driver test application");
 
-    printf("Initializing pH OEM sensor at I2C_%i, address 0x%02x... \n",
+    printf("Initializing pH OEM sensor at I2C_%i, address 0x%02x...",
            PH_OEM_PARAM_I2C, PH_OEM_PARAM_ADDR);
 
     if (ph_oem_init(&dev, ph_oem_params) == PH_OEM_OK) {
@@ -60,22 +60,25 @@ int main(void)
     printf("pH OEM firmware version: %d\n", data);
 
     while (1) {
-        if (count < 5) {
-            if (state == 0x00) {
-                if (ph_oem_set_led_on(&dev, PH_OEM_LED_ON) == PH_OEM_OK) {
-                    puts("pH OEM LED turned on\n");
-                    state = 0x01;
-                }
-            }
-            else if (state == 0x01) {
-                if (ph_oem_set_led_on(&dev, PH_OEM_LED_OFF) == PH_OEM_OK) {
-                    puts("pH OEM LED turned off\n");
-                    state = 0x00;
-                }
-            }
-            count++;
-        }
-        xtimer_usleep(SLEEP);
+//        if (count < 5) {
+//            if (state == 0x00) {
+//                if (ph_oem_set_led_state(&dev, PH_OEM_LED_ON) == PH_OEM_OK) {
+//                    puts("pH OEM LED turned on\n");
+//                    state = 0x01;
+//                }
+//            }
+//            else if (state == 0x01) {
+//                if (ph_oem_set_led_state(&dev, PH_OEM_LED_OFF) == PH_OEM_OK) {
+//                    puts("pH OEM LED turned off\n");
+//                    state = 0x00;
+//                }
+//            }
+//            count++;
+//        }
+
+
+    	ph_oem_read_ph(&dev, &data);
+        xtimer_sleep(60);
     }
 
     return 0;

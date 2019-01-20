@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Igor Knippenberg
+ * Copyright (C) 2019 University of Applied Sciences Emden / Leer
  *
  * This file is subject to the terms and conditions of the GNU Lesser
  * General Public License v2.1. See the file LICENSE in the top level
@@ -102,6 +102,21 @@ typedef enum {
 } ph_oem_calibration_option_t;
 
 /**
+ * @brief   Amount of readings taken for measuring the pH value.
+ * 			For example: 8 samples means that 8 readings will be taken to calculate
+ * 			the average value. Every reading takes around 420ms
+ *
+ */
+typedef enum {
+    PH_OEM_AVG_1_SAMPLE    = 1, /**< 1 sample taken */
+	PH_OEM_AVG_2_SAMPLES   = 2, /**< 2 samples taken and averaged*/
+	PH_OEM_AVG_4_SAMPLES   = 4, /**< 4 samples taken and averaged*/
+	PH_OEM_AVG_8_SAMPLES   = 8,	/**< 8 samples taken and averaged*/
+} ph_oem_avg_samples_t;
+
+
+
+/**
  * @brief   pH OEM sensor params
  */
 typedef struct ph_oem_params {
@@ -198,12 +213,41 @@ int ph_oem_set_interrupt(const ph_oem_t *dev, ph_oem_irq_option_t option);
  *          @ref PH_OEM_REG_LED register
  *
  * @param[in] dev   device descriptor
- * @param[in] state @ref PH_OEM_LED_ON  = On and blinking each time a reading is taken<br>
- *                  @ref PH_OEM_LED_OFF = LED off
+ * @param[in] state @ref ph_oem_led_state_t
  *
  * @return zero on successful read, non zero on error
  */
 int ph_oem_set_led_state(const ph_oem_t *dev, ph_oem_led_state_t state);
+
+/**
+ * @brief   Enables/disables the device by putting a high or low signal on
+ * 			the GPIO @ref ph_oem_params_t.enable_pin
+ *
+ * 			By default the enable pin is defined as @ref GPIO_UNDEF
+ * 			if not otherwise defined in the makefile of the application.
+ *
+ * 			The enable pin is a custom PCB feature and not integrated into the
+ * 			sensor by default. Your circuit needs an enable pin which controls
+ * 			some form of power switch. This function is used to turn off the
+ * 			sensor completely, because even the default @ref PH_OEM_HIBERNATE
+ * 			feature consumes about 3.0mA at 3.3V with the LED turned off, which
+ * 			is way to high for battery powered devices.
+ *
+ * 			Recommended process:
+ * 			Enable the device with
+ * 			@ref ph_oem_enable_device "ph_oem_enable_device(true)",
+ * 			setup the configurations you need (which are not saved after the
+ * 			device was turned off), call @ref ph_oem_read_ph to get the pH value
+ * 			and then turn the device off again with calling
+ * 			@ref ph_oem_enable_device "ph_oem_enable_device(false)"
+ *
+ * @param[in] dev     device descriptor
+ * @param[in] enabled True  = Device enabled <br>
+ * 					  False = Device disabled
+ *
+ * @return zero on successful read, non zero on error
+ */
+int ph_oem_enable_device(const ph_oem_t *dev, bool enabled);
 
 /**
  * @brief   Sets the device state (active/hibernate) of the pH OEM sensor by
