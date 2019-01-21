@@ -39,16 +39,14 @@ static ph_oem_t dev;
 int main(void)
 {
     int16_t data;
-//    uint8_t state = 0x00;
-//    uint8_t count = 0;
 
-    puts("Atlas Scientific pH OEM sensor driver test application");
+    puts("Atlas Scientific pH OEM sensor driver test application\n");
 
     printf("Initializing pH OEM sensor at I2C_%i, address 0x%02x...",
            PH_OEM_PARAM_I2C, PH_OEM_PARAM_ADDR);
 
     if (ph_oem_init(&dev, ph_oem_params) == PH_OEM_OK) {
-        puts("[OK]\n");
+        puts("[OK]");
     }
     else {
         puts("[Failed]");
@@ -59,26 +57,21 @@ int main(void)
     ph_oem_read_firmware_version(&dev, &data);
     printf("pH OEM firmware version: %d\n", data);
 
+    /* Test LED state by turning LED of and on again */
+    if (ph_oem_set_led_state(&dev, PH_OEM_LED_OFF) == PH_OEM_OK) {
+        puts("pH OEM LED turned off");
+    }
+    xtimer_sleep(2);
+    if (ph_oem_set_led_state(&dev, PH_OEM_LED_ON) == PH_OEM_OK) {
+        puts("pH OEM LED turned on");
+    }
+    xtimer_sleep(1);
+
     while (1) {
-//        if (count < 5) {
-//            if (state == 0x00) {
-//                if (ph_oem_set_led_state(&dev, PH_OEM_LED_ON) == PH_OEM_OK) {
-//                    puts("pH OEM LED turned on\n");
-//                    state = 0x01;
-//                }
-//            }
-//            else if (state == 0x01) {
-//                if (ph_oem_set_led_state(&dev, PH_OEM_LED_OFF) == PH_OEM_OK) {
-//                    puts("pH OEM LED turned off\n");
-//                    state = 0x00;
-//                }
-//            }
-//            count++;
-//        }
-
-
-    	ph_oem_read_ph(&dev, &data);
-        xtimer_sleep(60);
+        ph_oem_start_new_reading(&dev);
+        ph_oem_read_ph(&dev, &data);
+        printf("pH value raw: %d\n", data);
+        xtimer_sleep(5);
     }
 
     return 0;

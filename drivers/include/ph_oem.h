@@ -22,6 +22,12 @@
  * or the default configuration with none of these pins. Per default both these
  * pins are mapped to @ref GPIO_UNDEF if not otherwise defined.
  *
+ * If you use an electrical isolation for most accurate readings
+ * e.g. with the ADM3260, keep in mind that its not recommended to use the
+ * interrupt pin without also isolating it somehow. The preferred method,
+ * if not using an isolation on the interrupt line, would be polling. In this case
+ * leave the interrupt pin undefined.
+ *
  * The enable pin is a custom PCB feature and not included in the factory
  * default sensor.
  *
@@ -30,7 +36,8 @@
  *
  * Once the pH OEM is powered on it will be ready to receive commands and take
  * readings after 1ms. Communication is done using SMBus/I2C protocol at speeds
- * of 10-100 kHz.
+ * of 10-100 kHz. Set your I2C speed to @ref I2C_SPEED_LOW or
+ * @ref I2C_SPEED_NORMAL
  *
  * @author      Igor Knippenberg <igor.knippenberg@gmail.com>
  */
@@ -60,19 +67,20 @@ extern "C"
 typedef enum {
     PH_OEM_OK                   = 0,        /**< Everything was fine */
     PH_OEM_NOI2C                = -1,       /**< I2C communication failed */
-    PH_OEM_NODEV                = -2,       /**< No PH_OEM device found on the bus */
+    PH_OEM_NODEV                = -2,       /**< No device found on the bus */
     PH_OEM_NODATA               = -3,       /**< No data available */
-    PH_OEM_NOT_PH               = -4,       /**< Not an Atlas Scientific pH OEM device */
-    PH_OEM_INTERRUPT_GPIO_UNDEF = -5,       /**< Interrupt pin is @ref GPIO_UNDEF */
-    PH_OEM_ENABLE_GPIO_UNDEF    = -6        /**< Enable pin is @ref GPIO_UNDEF */
+	PH_OEM_WRITE_ERR            = -4,       /**< Writing to device failed */
+    PH_OEM_NOT_PH               = -6,       /**< Not an Atlas Scientific pH OEM device */
+    PH_OEM_INTERRUPT_GPIO_UNDEF = -7,       /**< Interrupt pin is @ref GPIO_UNDEF */
+    PH_OEM_ENABLE_GPIO_UNDEF    = -8        /**< Enable pin is @ref GPIO_UNDEF */
 } ph_oem_named_returns_t;
 
 /**
  * @brief   LED state values
  */
 typedef enum {
-    PH_OEM_LED_ON   = true,                 /**< LED on state */
-    PH_OEM_LED_OFF  = false,                /**< LED off state */
+    PH_OEM_LED_ON   = 0x01,                 /**< LED on state */
+    PH_OEM_LED_OFF  = 0x00,                /**< LED off state */
 } ph_oem_led_state_t;
 
 /**
@@ -171,7 +179,7 @@ int ph_oem_read_firmware_version(const ph_oem_t *dev,
  * @param[in] dev   device descriptor
  * @param[in] addr  new address for the device. Range: 0x01 - 0x7f
  *
- * @return zero on successful read, non zero on error
+ * @return zero on successful write, non zero on error
  */
 int ph_oem_set_i2c_address(const ph_oem_t *dev, uint8_t addr);
 
@@ -215,7 +223,7 @@ int ph_oem_set_interrupt(const ph_oem_t *dev, ph_oem_irq_option_t option);
  * @param[in] dev   device descriptor
  * @param[in] state @ref ph_oem_led_state_t
  *
- * @return zero on successful read, non zero on error
+ * @return zero on successful write, non zero on error
  */
 int ph_oem_set_led_state(const ph_oem_t *dev, ph_oem_led_state_t state);
 
@@ -245,7 +253,7 @@ int ph_oem_set_led_state(const ph_oem_t *dev, ph_oem_led_state_t state);
  * @param[in] enabled True  = Device enabled <br>
  * 					  False = Device disabled
  *
- * @return zero on successful read, non zero on error
+ * @return zero on successful write, non zero on error
  */
 int ph_oem_enable_device(const ph_oem_t *dev, bool enabled);
 
@@ -282,7 +290,7 @@ int ph_oem_set_device_state(const ph_oem_t *dev, ph_oem_device_state_t state);
  * @return zero when new reading available, -1 when no new reading available,
  *  non zero or -1 on error
  */
-int ph_oem_new_reading_available(const ph_oem_t *dev);
+int ph_oem_start_new_reading(const ph_oem_t *dev);
 
 /**
  * @brief   Clears all calibrations previously done
@@ -321,7 +329,7 @@ int ph_oem_set_calibration(const ph_oem_t *dev, uint16_t calibration_value,
  * @param[out] calibration_state   calibration state reflected by bits 0 - 2 <br>
  *                                 (0 = low, 1 = mid, 2 = high)
  *
- * @return zero if successfully cleared, non zero on error
+ * @return zero on successful set, non zero on error
  */
 int ph_oem_read_calibration_reg(const ph_oem_t *dev, int16_t *calibration_state);
 
@@ -350,14 +358,14 @@ int ph_oem_set_compensation(const ph_oem_t *dev,
  *          reading is set to the correct temperature.
  *
  *          Divide the read temperature value by 100 to get the floating point
- *          e.g. temperature raw = 3426 / 100 = 34.26 *
+ *          e.g. temperature raw = 3426 / 100 = 34.26
  *
  * @param[in]  dev                       device descriptor
  * @param[out] temperature_compensation  raw temperature compensation value <br>
  *                                       Devide by 100 for floating point <br>
  *                                       e.g 3426 / 100 = 34.26
  *
- * @return zero if successfully cleared, non zero on error
+ * @return zero if successfully read, non zero on error
  */
 int ph_oem_read_compensation(const ph_oem_t *dev,
                              int16_t *temperature_compensation);
@@ -369,15 +377,12 @@ int ph_oem_read_compensation(const ph_oem_t *dev,
  *          Divide the raw pH value by 1000 to get the floating point
  *          e.g. pH raw = 8347 / 1000 = 8.347
  *
- *          The temperature compensation will not be retained if the power is cut
- *
- *
  * @param[in]  dev        device descriptor
  * @param[out] ph_value   raw pH value <br>
  *                        Devide by 1000 for floating point <br>
  *                        e.g 8347 / 1000 = 8.347
  *
- * @return zero if successfully cleared, non zero on error
+ * @return zero if successfully read, non zero on error
  */
 int ph_oem_read_ph(const ph_oem_t *dev,
                              int16_t *ph_value);

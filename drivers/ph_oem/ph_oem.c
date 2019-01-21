@@ -82,19 +82,20 @@ int ph_oem_read_firmware_version(const ph_oem_t *dev, int16_t *firmware_version)
 
     i2c_acquire(I2C);
 
-    if (i2c_read_regs(I2C, ADDR, PH_OEM_REG_FIRMWARE_VERSION, &reg_value, 1,
-                      0x0) < 0) {
+    DEBUG("[ph_oem debug] Reading firmware version...");
+    if (i2c_read_reg(I2C, ADDR, PH_OEM_REG_FIRMWARE_VERSION, &reg_value, 0x0)
+        < 0) {
+        DEBUG("[Failed]\n");
         i2c_release(I2C);
         return PH_OEM_NODATA;
     }
-
+    DEBUG("[OK]\n");
     i2c_release(I2C);
 
     *firmware_version = (int16_t) reg_value;
 
     return PH_OEM_OK;
 }
-
 
 //int ph_oem_set_i2c_address(const ph_oem_t *dev, uint8_t addr)
 //{
@@ -118,7 +119,13 @@ int ph_oem_set_led_state(const ph_oem_t *dev, ph_oem_led_state_t state)
 {
 
     i2c_acquire(I2C);
-    i2c_write_regs(I2C, ADDR, PH_OEM_REG_LED, &state, 1, 0x0);
+    DEBUG("[ph_oem debug] Set LED state to %d...", state);
+    if (i2c_write_reg(I2C, ADDR, PH_OEM_REG_LED, state, 0x0) < 0) {
+        DEBUG("[Failed]\n");
+        i2c_release(I2C);
+        return PH_OEM_WRITE_ERR;
+    }
+    DEBUG("[OK]\n");
 
     i2c_release(I2C);
 
@@ -135,10 +142,50 @@ int ph_oem_set_led_state(const ph_oem_t *dev, ph_oem_led_state_t state)
 //	return PH_OEM_OK;
 //}
 //
-//int ph_oem_new_reading_available(const ph_oem_t *dev) {
-//
-//	return PH_OEM_OK;
-//}
+int ph_oem_start_new_reading(const ph_oem_t *dev)
+{
+    int8_t new_reading_available = 0;
+    int i2c_status;
+
+    i2c_acquire(I2C);
+    DEBUG("[ph_oem debug] Start reading...");
+    i2c_status = i2c_write_reg(I2C, ADDR, PH_OEM_REG_HIBERNATE, PH_OEM_ACTIVE,
+                               0x0);
+
+    if (i2c_status < 0) {
+        DEBUG("[Failed]\n");
+        i2c_release(I2C);
+        return i2c_status;
+    }
+    DEBUG("[OK]\n");
+
+    DEBUG("[ph_oem debug] Waiting for reading to be taken...");
+    do {
+        i2c_status = i2c_read_reg(I2C, ADDR, PH_OEM_REG_NEW_READING,
+                                  &new_reading_available, 0x0);
+    } while (new_reading_available == 0);
+
+    if (i2c_status < 0) {
+        DEBUG("[Failed]\n");
+        i2c_release(I2C);
+        return i2c_status;
+    }
+    i2c_write_reg(I2C, ADDR, PH_OEM_REG_NEW_READING,
+                                   0x00, 0x0);
+    DEBUG("[OK]\n");
+
+    DEBUG("[ph_oem debug] Stop reading...");
+    i2c_status = i2c_write_reg(I2C, ADDR, PH_OEM_REG_HIBERNATE,
+                               PH_OEM_HIBERNATE, 0x0);
+    if (i2c_status < 0) {
+        DEBUG("[Failed]\n");
+        i2c_release(I2C);
+        return i2c_status;
+    }
+    DEBUG("[OK]\n");
+
+    return PH_OEM_OK;
+}
 //
 ///**
 // * @brief   Sets the @ref PH_OEM_REG_CALIBRATION_BASE register to the value
@@ -183,30 +230,21 @@ int ph_oem_set_led_state(const ph_oem_t *dev, ph_oem_led_state_t state)
 //	return PH_OEM_OK;
 //}
 
-int ph_oem_read_ph(const ph_oem_t *dev,
-                   int16_t *ph_value)
+int ph_oem_read_ph(const ph_oem_t *dev, int16_t *ph_value)
 {
     uint8_t reg_value[4];
+    int i2c_status;
 
-    i2c_acquire(I2C);
-    DEBUG("[ph_oem] ACTIVE\n");
-    i2c_write_reg(I2C, ADDR, PH_OEM_REG_HIBERNATE, PH_OEM_ACTIVE, 0x0);
-
-    xtimer_usleep(500 * US_PER_MS);
-
-    if (i2c_read_regs(I2C, ADDR, PH_OEM_REG_PH_READING_BASE, &reg_value, 4,
-                      0) < 0) {
-        DEBUG("[ph_oem] HIBERNATE\n");
-        i2c_write_reg(I2C, ADDR, PH_OEM_REG_HIBERNATE, PH_OEM_HIBERNATE, 0x0);
+    DEBUG("[ph_oem debug] Getting pH value...");
+    i2c_status = i2c_read_regs(I2C, ADDR, PH_OEM_REG_PH_READING_BASE,
+                               &reg_value, 4, 0);
+    if (i2c_status < 0) {
+        DEBUG("[Failed]\n");
         i2c_release(I2C);
-        return PH_OEM_NODATA;
+        return i2c_status;
     }
-
-    *ph_value = (int16_t)(reg_value[2] << 8) | (int16_t)(reg_value[3]);
-    DEBUG("[ph_oem] pH value raw %d\n", *ph_value);
-
-    DEBUG("[ph_oem] HIBERNATE\n\n");
-    i2c_write_reg(I2C, ADDR, PH_OEM_REG_HIBERNATE, PH_OEM_HIBERNATE, 0x0);
+    DEBUG("[OK]\n");
+    *ph_value = (int16_t) (reg_value[2] << 8) | (int16_t) (reg_value[3]);
 
     i2c_release(I2C);
 
