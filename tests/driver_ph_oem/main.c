@@ -18,15 +18,13 @@
  * @}
  */
 
-//#include <fmt.h>
+#include <fmt.h>
 #include "xtimer.h"
 #include "timex.h"
-#include "ph_oem.h"
 
+#include "ph_oem.h"
 #include "ph_oem_params.h"
 #include "ph_oem_regs.h"
-
-#define SLEEP    (1000 * US_PER_MS)
 
 static ph_oem_t dev;
 
@@ -44,6 +42,7 @@ int main(void)
 
     printf("Initializing pH OEM sensor at I2C_%i, address 0x%02x...",
            PH_OEM_PARAM_I2C, PH_OEM_PARAM_ADDR);
+    xtimer_sleep(2);
 
     if (ph_oem_init(&dev, ph_oem_params) == PH_OEM_OK) {
         puts("[OK]");
@@ -54,24 +53,94 @@ int main(void)
     }
 
     /* Read Firmware Version. */
-    ph_oem_read_firmware_version(&dev, &data);
-    printf("pH OEM firmware version: %d\n", data);
+    if (ph_oem_read_firmware_version(&dev, &data) == PH_OEM_OK) {
+        printf("pH OEM firmware version: %d\n", data);
+    }
 
-    /* Test LED state by turning LED of and on again */
+    /* Test LED state by turning LED off and on again */
     if (ph_oem_set_led_state(&dev, PH_OEM_LED_OFF) == PH_OEM_OK) {
         puts("pH OEM LED turned off");
+        xtimer_sleep(2);
     }
-    xtimer_sleep(2);
     if (ph_oem_set_led_state(&dev, PH_OEM_LED_ON) == PH_OEM_OK) {
         puts("pH OEM LED turned on");
     }
-    xtimer_sleep(1);
+
+    /* Test changing pH OEM I2C address to 0x66 and back to 0x65 in the sensor as
+     * well as ph_oem_t dev
+     */
+    if (ph_oem_set_i2c_address(&dev, 0x66) == PH_OEM_OK) {
+        printf("pH OEM I2C address changed to %x\n", dev.params.addr);
+        xtimer_sleep(1);
+    }
+    if (ph_oem_set_i2c_address(&dev, 0x65) == PH_OEM_OK) {
+        printf("pH OEM I2C address changed to %x\n", dev.params.addr);
+        xtimer_sleep(2);
+    }
+
+    /* Test calibration and if they are correctly applied in the pH OEM */
+//    ph_oem_clear_calibration(&dev);
+    ph_oem_read_calibration_state(&dev, &data);
+    printf("Calibration state value is: %d\n", data);
+//
+//    ph_oem_set_calibration(&dev, 7002, PH_OEM_CALIBRATE_MID_POINT);
+//    ph_oem_read_calibration_state(&dev, &data);
+//    printf("Calibration state value is: %d\n", data);
+//
+//    ph_oem_set_calibration(&dev, 3000, PH_OEM_CALIBRATE_LOW_POINT);
+//    ph_oem_read_calibration_state(&dev, &data);
+//    printf("Calibration state value is: %d\n", data);
+//
+//    ph_oem_set_calibration(&dev, 10000, PH_OEM_CALIBRATE_HIGH_POINT);
+//    ph_oem_read_calibration_state(&dev, &data);
+//    printf("Calibration state value is: %d\n", data);
+//
+//    ph_oem_set_calibration(&dev, 7002, PH_OEM_CALIBRATE_MID_POINT);
+//    ph_oem_read_calibration_state(&dev, &data);
+//    printf("Calibration state value is: %d\n", data);
+//
+//    ph_oem_clear_calibration(&dev);
+//	ph_oem_read_calibration_state(&dev, &data);
+//	printf("Calibration state value is: %d\n", data);
+//
 
     while (1) {
-        ph_oem_start_new_reading(&dev);
-        ph_oem_read_ph(&dev, &data);
-        printf("pH value raw: %d\n", data);
-        xtimer_sleep(5);
+        /* After powering on the device, it takes a while for the pH circuit
+         * to stabilize. In my tests the value stabilized after around 10 minutes.
+         * Its probably only a good idea to turn the device off, if you need
+         * a reading every couple hour or so. Best would be to leave the sensor
+         * enabled and in hibernate mode.
+         */
+//        if (ph_oem_enable_device(&dev, true) == PH_OEM_OK) {
+//            puts("pH OEM device turned on");
+//            puts("Waiting 80 seconds for pH reading to stabilize...");
+//            xtimer_sleep(120);
+//        }
+
+        float avg;
+        for (int i = 0; i < 20; i++) {
+            ph_oem_set_compensation(&dev, 2100);
+            ph_oem_start_new_reading(&dev);
+            ph_oem_read_ph(&dev, &data);
+            printf("i = %d pH value raw: %d\n", i, data);
+            avg += data;
+
+            ph_oem_read_compensation(&dev, &data);
+            printf("Reading was taken at a temperature of %d\n", data);
+
+        }
+        avg = (avg / 20) / 1000;
+
+        printf("pH value avg float:\n");
+        print_float(avg, 3);
+        printf("\n");
+
+//        if (ph_oem_enable_device(&dev, false) == PH_OEM_OK) {
+//            puts("pH OEM device turned off");
+//        }
+
+
+        xtimer_sleep(240);
     }
 
     return 0;
