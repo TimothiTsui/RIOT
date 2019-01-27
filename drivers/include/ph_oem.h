@@ -90,8 +90,8 @@ typedef enum {
  * @brief   Device state values
  */
 typedef enum {
-    PH_OEM_ACTIVE       = 0x01, /**< Device active state */
-    PH_OEM_HIBERNATE    = 0x00, /**< Device hibernate state */
+    PH_OEM_TAKE_READINGS    = 0x01, /**< Device active state */
+    PH_OEM_STOP_READINGS    = 0x00, /**< Device hibernate state */
 } ph_oem_device_state_t;
 /**
  * @brief   Interrupt pin option values
@@ -187,8 +187,8 @@ int ph_oem_set_i2c_address(ph_oem_t *dev, uint8_t addr);
  *
  * @return zero on successful write, non zero on error
  */
-int ph_oem_enable_interrupt(const ph_oem_t *dev, ph_oem_interrupt_pin_cb_t cb,
-                            void *arg);
+int ph_oem_enable_interrupt(ph_oem_t *dev, ph_oem_interrupt_pin_cb_t cb,
+                            void *arg, ph_oem_irq_option_t option);
 
 /**
  * @brief   Set the behavior of interrupt pin 7 of the pH OEM by setting the
@@ -208,7 +208,7 @@ int ph_oem_enable_interrupt(const ph_oem_t *dev, ph_oem_interrupt_pin_cb_t cb,
  *
  * @return zero on successful write, non zero on error
  */
-int ph_oem_set_interrupt(const ph_oem_t *dev, ph_oem_irq_option_t option);
+int ph_oem_set_interrupt_pin(const ph_oem_t *dev, ph_oem_irq_option_t option);
 
 /**
  * @brief   Set the LED state of the pH OEM sensor by writing to the

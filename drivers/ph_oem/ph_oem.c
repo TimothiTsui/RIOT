@@ -37,7 +37,7 @@
 #define ADDR (dev->params.addr)
 #define EN_PIN (dev->params.enable_pin)
 
-static int _ph_oem_init_test(const ph_oem_t *dev);
+static int ph_oem_init_test(const ph_oem_t *dev);
 
 int ph_oem_init(ph_oem_t *dev, const ph_oem_params_t *params)
 {
@@ -45,10 +45,10 @@ int ph_oem_init(ph_oem_t *dev, const ph_oem_params_t *params)
 
     dev->params = *params;
 
-    return _ph_oem_init_test(dev);
+    return ph_oem_init_test(dev);
 }
 
-static int _ph_oem_init_test(const ph_oem_t *dev)
+static int ph_oem_init_test(const ph_oem_t *dev)
 {
     uint8_t reg_data;
     int i2c_status;
@@ -144,17 +144,63 @@ int ph_oem_set_i2c_address(ph_oem_t *dev, uint8_t addr)
 
     return PH_OEM_OK;
 }
-//
-//int ph_oem_enable_interrupt(const ph_oem_t *dev, ph_oem_interrupt_pin_cb_t cb,
-//                            void *arg){
-//	return PH_OEM_OK;
-//}
-//
-//int ph_oem_set_interrupt(const ph_oem_t *dev, ph_oem_irq_option_t option)
-//{
-//
-//    return PH_OEM_OK;
-//}
+
+int ph_oem_enable_interrupt(ph_oem_t *dev, ph_oem_interrupt_pin_cb_t cb,
+                            void *arg, ph_oem_irq_option_t option)
+{
+    if (dev->params.interrupt_pin == GPIO_UNDEF) {
+        return PH_OEM_INTERRUPT_GPIO_UNDEF;
+    }
+
+    DEBUG("enable interrupt");
+    int gpio_flank;
+    int gpio_mode;
+
+    dev->arg = arg;
+    dev->cb = cb;
+
+    switch (option) {
+        case PH_OEM_IRQ_DISABLED:
+            gpio_flank = -1;
+            break;
+        case PH_OEM_IRQ_FALLING:
+            gpio_flank = GPIO_FALLING;
+            gpio_mode = GPIO_IN_PU;
+            break;
+        case PH_OEM_IRQ_RISING:
+            gpio_flank = GPIO_RISING;
+            gpio_mode = GPIO_IN_PD;
+            break;
+        case PH_OEM_IRQ_BOTH:
+            gpio_flank = GPIO_BOTH;
+            gpio_mode = GPIO_IN_PU;
+            break;
+    }
+
+    if (gpio_flank < 3) {
+        gpio_init_int(dev->params.interrupt_pin, gpio_mode, gpio_flank, cb, arg);
+    }
+
+    return PH_OEM_OK;
+}
+
+int ph_oem_set_interrupt_pin(const ph_oem_t *dev, ph_oem_irq_option_t option)
+{
+    i2c_acquire(I2C);
+    uint8_t reg;
+
+    if (i2c_write_reg(I2C, ADDR, PH_OEM_REG_INTERRUPT, option, 0x0) < 0) {
+        DEBUG("[ph_oem debug] Setting interrupt pin to option %d failed.", option);
+        i2c_release(I2C);
+        return PH_OEM_WRITE_ERR;
+    }
+    i2c_read_reg(I2C, ADDR, PH_OEM_REG_INTERRUPT,
+                 &reg, 0x0);
+
+    i2c_release(I2C);
+
+    return PH_OEM_OK;
+}
 
 int ph_oem_set_led_state(const ph_oem_t *dev, ph_oem_led_state_t state)
 {
@@ -230,16 +276,17 @@ int ph_oem_start_new_reading(const ph_oem_t *dev)
 {
     int i2c_status;
 
-    if ((i2c_status = ph_oem_set_device_state(dev, PH_OEM_ACTIVE)) < 0) {
+    if ((i2c_status = ph_oem_set_device_state(dev, PH_OEM_TAKE_READINGS)) < 0) {
         return i2c_status;
     }
 
+    /* if interrupt pin undefined, poll for till new reading was taken */
     if (dev->params.interrupt_pin == GPIO_UNDEF) {
         if ((i2c_status = ph_oem_new_reading_available(dev)) < 0) {
             return i2c_status;
         }
 
-        if ((i2c_status = ph_oem_set_device_state(dev, PH_OEM_HIBERNATE)) < 0) {
+        if ((i2c_status = ph_oem_set_device_state(dev, PH_OEM_STOP_READINGS)) < 0) {
             return i2c_status;
         }
     }
@@ -354,7 +401,6 @@ int ph_oem_read_calibration_state(const ph_oem_t *dev, int16_t *calibration_stat
 int ph_oem_set_compensation(const ph_oem_t *dev,
                             uint16_t temperature_compensation)
 {
-
     uint8_t reg_value[4];
 
     reg_value[0] = 0x00;
@@ -365,12 +411,11 @@ int ph_oem_set_compensation(const ph_oem_t *dev,
     i2c_acquire(I2C);
 
     if (i2c_write_regs(I2C, ADDR, PH_OEM_REG_TEMP_COMPENSATION_BASE, &reg_value, 4, 0) < 0) {
-        DEBUG("[ph_oem debug] Setting temperature compensation of device to %d failed",
+        DEBUG("[ph_oem debug] Setting temperature compensation of device to %d failed\n",
               temperature_compensation);
         i2c_release(I2C);
         return PH_OEM_WRITE_ERR;
     }
-
     i2c_release(I2C);
 
     return PH_OEM_OK;
@@ -379,7 +424,6 @@ int ph_oem_set_compensation(const ph_oem_t *dev,
 int ph_oem_read_compensation(const ph_oem_t *dev,
                              int16_t *temperature_compensation)
 {
-
     uint8_t reg_value[4];
 
     i2c_acquire(I2C);

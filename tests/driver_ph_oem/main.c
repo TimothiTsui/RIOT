@@ -28,10 +28,29 @@
 
 static ph_oem_t dev;
 
+#define PH_OEM_IRQ_FLANK (PH_OEM_IRQ_RISING)
+
 //static void interrupt_pin_cb(void *arg)
 //{
-//    (void)arg;
-//    puts("\n[New Reading!]");
+//    (void) arg;
+//    int16_t data;
+//    puts("[IRQ]");
+//
+//    /* put device back to hibernate to stop reading */
+//    ph_oem_set_device_state(&dev, PH_OEM_STOP_READINGS);
+//
+//    /* reset interrupt flank in case of falling or rising flank */
+//    if (PH_OEM_IRQ_FLANK != PH_OEM_IRQ_BOTH) {
+//        ph_oem_set_interrupt_pin(&dev, PH_OEM_IRQ_FLANK);
+//    }
+//
+//
+//    ph_oem_read_ph(&dev, &data);
+//    printf("pH value raw: %d\n", data);
+//
+//    if (ph_oem_enable_device(&dev, false) == PH_OEM_OK) {
+//        //puts("pH OEM device turned off\n");
+//    }
 //}
 
 int main(void)
@@ -52,74 +71,107 @@ int main(void)
         return -1;
     }
 
-    /* Read Firmware Version. */
-    if (ph_oem_read_firmware_version(&dev, &data) == PH_OEM_OK) {
-        printf("pH OEM firmware version: %d\n", data);
-    }
-
-    /* Test LED state by turning LED off and on again */
-    if (ph_oem_set_led_state(&dev, PH_OEM_LED_OFF) == PH_OEM_OK) {
-        puts("pH OEM LED turned off");
-        xtimer_sleep(2);
-    }
-    if (ph_oem_set_led_state(&dev, PH_OEM_LED_ON) == PH_OEM_OK) {
-        puts("pH OEM LED turned on");
-    }
+//    /* Read Firmware Version. */
+//    if (ph_oem_read_firmware_version(&dev, &data) == PH_OEM_OK) {
+//        printf("pH OEM firmware version: %d\n", data);
+//    }
+//
+//    /* Test LED state by turning LED off and on again */
+//    if (ph_oem_set_led_state(&dev, PH_OEM_LED_OFF) == PH_OEM_OK) {
+//        puts("pH OEM LED turned off");
+//        xtimer_sleep(2);
+//    }
+//    if (ph_oem_set_led_state(&dev, PH_OEM_LED_ON) == PH_OEM_OK) {
+//        puts("pH OEM LED turned on");
+//    }
 
     /* Test changing pH OEM I2C address to 0x66 and back to 0x65 in the sensor as
      * well as ph_oem_t dev
      */
-    if (ph_oem_set_i2c_address(&dev, 0x66) == PH_OEM_OK) {
-        printf("pH OEM I2C address changed to %x\n", dev.params.addr);
-        xtimer_sleep(1);
-    }
-    if (ph_oem_set_i2c_address(&dev, 0x65) == PH_OEM_OK) {
-        printf("pH OEM I2C address changed to %x\n", dev.params.addr);
-        xtimer_sleep(2);
-    }
+//    if (ph_oem_set_i2c_address(&dev, 0x66) == PH_OEM_OK) {
+//        printf("pH OEM I2C address changed to %x\n", dev.params.addr);
+//        xtimer_sleep(1);
+//    }
+//    if (ph_oem_set_i2c_address(&dev, 0x65) == PH_OEM_OK) {
+//        printf("pH OEM I2C address changed to %x\n", dev.params.addr);
+//        xtimer_sleep(2);
+//    }
 
-    /* Test calibration and if they are correctly applied in the pH OEM */
-//    ph_oem_clear_calibration(&dev);
-    ph_oem_read_calibration_state(&dev, &data);
-    printf("Calibration state value is: %d\n", data);
-//
-//    ph_oem_set_calibration(&dev, 7002, PH_OEM_CALIBRATE_MID_POINT);
-//    ph_oem_read_calibration_state(&dev, &data);
-//    printf("Calibration state value is: %d\n", data);
-//
-//    ph_oem_set_calibration(&dev, 3000, PH_OEM_CALIBRATE_LOW_POINT);
-//    ph_oem_read_calibration_state(&dev, &data);
-//    printf("Calibration state value is: %d\n", data);
-//
-//    ph_oem_set_calibration(&dev, 10000, PH_OEM_CALIBRATE_HIGH_POINT);
-//    ph_oem_read_calibration_state(&dev, &data);
-//    printf("Calibration state value is: %d\n", data);
-//
-//    ph_oem_set_calibration(&dev, 7002, PH_OEM_CALIBRATE_MID_POINT);
-//    ph_oem_read_calibration_state(&dev, &data);
-//    printf("Calibration state value is: %d\n", data);
-//
-//    ph_oem_clear_calibration(&dev);
-//	ph_oem_read_calibration_state(&dev, &data);
-//	printf("Calibration state value is: %d\n", data);
-//
 
+    ph_oem_set_compensation(&dev, 2150);
+//    xtimer_sleep(300);
+//    /* Test calibration and if they are correctly applied in the pH OEM */
+//    ph_oem_clear_calibration(&dev);
+//    ph_oem_read_calibration_state(&dev, &data);
+//    printf("Calibration state value is: %d\n", data);
+//
+//    ph_oem_set_calibration(&dev, 6870, PH_OEM_CALIBRATE_MID_POINT);
+//    ph_oem_read_calibration_state(&dev, &data);
+//    printf("Calibration state value is: %d\n", data);
+//
+//    ph_oem_set_calibration(&dev, 4000, PH_OEM_CALIBRATE_LOW_POINT);
+//    ph_oem_read_calibration_state(&dev, &data);
+//    printf("Calibration state value is: %d\n", data);
+//
+//    ph_oem_set_calibration(&dev, 9210, PH_OEM_CALIBRATE_HIGH_POINT);
+//    ph_oem_read_calibration_state(&dev, &data);
+//    printf("Calibration state value is: %d\n", data);
+
+    /* Setting up and enabling the interrupt pin of the pH OEM */
+//    printf("Setting interrupt pin to option %x...", PH_OEM_IRQ_FLANK);
+//    if (ph_oem_set_interrupt_pin(&dev, PH_OEM_IRQ_FLANK) == PH_OEM_OK) {
+//        puts("[OK]");
+//    }
+//    else {
+//        puts("[Failed]");
+//        return -1;
+//    }
+//
+//    printf("Enabling interrupt pin... ");
+//    if (ph_oem_enable_interrupt(&dev, interrupt_pin_cb, NULL, PH_OEM_IRQ_FLANK)
+//        == PH_OEM_OK) {
+//        puts("[OK]");
+//    }
+//    else {
+//        puts("[Failed]");
+//        return -1;
+//    }
+
+//    ph_oem_start_new_reading(&dev);
+//    ph_oem_set_interrupt_pin(&dev, PH_OEM_IRQ_FLANK);
+
+
+    int count = 0;
     while (1) {
+    	printf("Reading number: %d\n", count);
         /* After powering on the device, it takes a while for the pH circuit
          * to stabilize. In my tests the value stabilized after around 10 minutes.
          * Its probably only a good idea to turn the device off, if you need
          * a reading every couple hour or so. Best would be to leave the sensor
          * enabled and in hibernate mode.
          */
-//        if (ph_oem_enable_device(&dev, true) == PH_OEM_OK) {
-//            puts("pH OEM device turned on");
-//            puts("Waiting 80 seconds for pH reading to stabilize...");
-//            xtimer_sleep(120);
+        if (ph_oem_enable_device(&dev, true) == PH_OEM_OK) {
+            puts("pH OEM device turned on");
+            puts("Waiting 10 seconds for pH reading to stabilize...");
+
+            xtimer_sleep(60);
+        }
+
+        ph_oem_set_compensation(&dev, 2150);
+
+
+//        printf("Setting interrupt pin to option %x...", PH_OEM_IRQ_FLANK);
+//        if (ph_oem_set_interrupt_pin(&dev, PH_OEM_IRQ_FLANK) == PH_OEM_OK) {
+//            puts("[OK]");
+//        }
+//        else {
+//            puts("[Failed]");
+//            return -1;
 //        }
 
         float avg;
         for (int i = 0; i < 20; i++) {
-            ph_oem_set_compensation(&dev, 2100);
+
             ph_oem_start_new_reading(&dev);
             ph_oem_read_ph(&dev, &data);
             printf("i = %d pH value raw: %d\n", i, data);
@@ -135,13 +187,26 @@ int main(void)
         print_float(avg, 3);
         printf("\n");
 
-//        if (ph_oem_enable_device(&dev, false) == PH_OEM_OK) {
-//            puts("pH OEM device turned off");
-//        }
+//    	xtimer_sleep(10);
+//        puts("\n[main] initiate reading");
+//        ph_oem_start_new_reading(&dev);
+//        ph_oem_read_ph(&dev, &data);
+//        printf("pH value raw: %d\n", data);
+//
+//        ph_oem_read_compensation(&dev, &data);
+//        printf("Reading was taken at a temperature of %d\n", data);
 
+        if (ph_oem_enable_device(&dev, false) == PH_OEM_OK) {
+            puts("pH OEM device turned off");
+        }
 
-        xtimer_sleep(240);
+        count++;
+
+        if(count == 30){
+        	return 0;
+        }
+
+        xtimer_sleep(60);
     }
-
     return 0;
 }
