@@ -95,6 +95,7 @@ enum {
     UNIT_V,         /**< Volts */
     UNIT_GS,        /**< gauss */
     UNIT_DBM,       /**< decibel-milliwatts */
+	UNIT_COULOMB,   /**< coulomb */
 	/* electrochemical */
 	UNIT_PH,         /**< pH  */
     /* pressure */
@@ -111,7 +112,9 @@ enum {
     UNIT_PPB,       /**< part per billion */
     /* aggregate values */
     UNIT_TIME,      /**< the three dimensions contain sec, min, and hours */
-    UNIT_DATE       /**< the 3 dimensions contain days, months and years */
+    UNIT_DATE,      /**< the 3 dimensions contain days, months and years */
+    /* mass concentration */
+    UNIT_GPM3       /**< grams per cubic meters */
     /* extend this list as needed */
 };
 

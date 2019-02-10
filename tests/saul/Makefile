@@ -8,4 +8,7 @@ USEMODULE += xtimer
 
 CFLAGS += -DLOG_LEVEL=LOG_ALL
 
+# Too little flash:
+BOARD_INSUFFICIENT_MEMORY := arduino-duemilanove arduino-uno
+
 include $(RIOTBASE)/Makefile.include

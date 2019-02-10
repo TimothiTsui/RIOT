@@ -56,8 +56,11 @@ const char *saul_class_to_str(const uint8_t class_id)
         case SAUL_SENSE_PROXIMITY: return "SENSE_PROXIMITY";
         case SAUL_SENSE_RSSI:      return "SENSE_RSSI";
         case SAUL_SENSE_PH:        return "SENSE_PH";
-        case SAUL_CLASS_ANY:       return "CLASS_ANY";
+        case SAUL_SENSE_CHARGE:    return "SENSE_CHARGE";
+        case SAUL_SENSE_CURRENT:   return "SENSE_CURRENT";
         case SAUL_SENSE_OCCUP:     return "SENSE_OCCUP";
+        case SAUL_SENSE_PM:        return "SENSE_PM";
+        case SAUL_CLASS_ANY:       return "CLASS_ANY";
         default:                   return "CLASS_UNKNOWN";
     }
 }

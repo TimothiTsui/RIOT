@@ -416,6 +416,10 @@ void auto_init(void)
     extern void auto_init_lsm6dsl(void);
     auto_init_lsm6dsl();
 #endif
+#ifdef MODULE_LTC4150
+    extern void auto_init_ltc4150(void);
+    auto_init_ltc4150();
+ #endif
 #ifdef MODULE_MAG3110
     extern void auto_init_mag3110(void);
     auto_init_mag3110();
@@ -448,9 +452,17 @@ void auto_init(void)
     extern void auto_init_pulse_counter(void);
     auto_init_pulse_counter();
 #endif
+#ifdef MODULE_SHT2X
+    extern void auto_init_sht2x(void);
+    auto_init_sht2x();
+#endif
 #ifdef MODULE_SHT3X
     extern void auto_init_sht3x(void);
     auto_init_sht3x();
+#endif
+#ifdef MODULE_SDS011
+    extern void auto_init_sds011(void);
+    auto_init_sds011();
 #endif
 #ifdef MODULE_SI114X
     extern void auto_init_si114x(void);
