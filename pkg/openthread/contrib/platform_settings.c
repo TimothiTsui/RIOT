@@ -64,10 +64,6 @@ otError otPlatSettingsSet(otInstance *aInstance, uint16_t aKey, const uint8_t *a
     (void)aKey;
     (void)aValue;
     (void)aValueLength;
-<<<<<<< HEAD
-
-=======
->>>>>>> branch 'master' of https://github.com/RIOT-OS/RIOT.git
     return OT_ERROR_NONE;
 }
 
@@ -77,10 +73,6 @@ otError otPlatSettingsAdd(otInstance *aInstance, uint16_t aKey, const uint8_t *a
     (void)aKey;
     (void)aValue;
     (void)aValueLength;
-<<<<<<< HEAD
-
-=======
->>>>>>> branch 'master' of https://github.com/RIOT-OS/RIOT.git
     return OT_ERROR_NONE;
 }
 
@@ -89,10 +81,6 @@ otError otPlatSettingsDelete(otInstance *aInstance, uint16_t aKey, int aIndex)
     (void)aInstance;
     (void)aKey;
     (void)aIndex;
-<<<<<<< HEAD
-
-=======
->>>>>>> branch 'master' of https://github.com/RIOT-OS/RIOT.git
     return OT_ERROR_NONE;
 }
 

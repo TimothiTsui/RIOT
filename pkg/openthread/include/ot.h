@@ -96,13 +96,6 @@ typedef struct {
 } ot_job_t;
 
 /**
- * @brief ...............................
- *
- * @param[in]  aInstance          pointer to an OpenThread instance
- */
-void radio_process(otInstance *aInstance);
-
-/**
  * @brief Gets packet from driver and tells OpenThread about the reception.
  *
  * @param[in]  aInstance          pointer to an OpenThread instance
@@ -124,14 +117,12 @@ void send_pkt(otInstance *aInstance, netdev_t *dev, netdev_event_t event);
  */
 void openthread_bootstrap(void);
 
-//void openthread_set_netdev(netdev_t *dev);
-
 /**
  * @brief   Init OpenThread radio
  *
  * @param[in]  dev                pointer to a netdev interface
  * @param[in]  tb                 pointer to the TX buffer designed for OpenThread
- * @param[in]  rb                 pointer to the RX buffer designed for OpenThread
+ * @param[in]  rb                 pointer to the RX buffer designed for Open_Thread
  */
 void openthread_radio_init(netdev_t *dev, uint8_t *tb, uint8_t *rb);
 

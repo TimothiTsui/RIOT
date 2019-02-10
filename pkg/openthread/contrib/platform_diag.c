@@ -18,54 +18,24 @@
 
 #include <stdbool.h>
 #include <stdio.h>
-#include <string.h>
-#include "openthread/platform/diag.h"
 
 static bool sDiagMode = false;
 
-void otPlatDiagProcess(otInstance *aInstance, int argc, char *argv[],
-        char *aOutput, size_t aOutputMaxLen){
-    // Add more plarform specific diagnostics features here.
-    snprintf(aOutput, aOutputMaxLen, "diag feature '%s' is not supported\r\n",
-            argv[0]);
-
+void otPlatDiagProcess(int argc, char *argv[], char *aOutput, size_t aOutputMaxLen)
+{
+    /* add more plarform specific diagnostics features here */
     (void)argc;
-    (void)aInstance;
+    (void)argv;
+    (void)aOutput;
+    (void)aOutputMaxLen;
 }
 
-//void otPlatDiagProcess(int argc, char *argv[], char *aOutput, size_t aOutputMaxLen)
-//{
-//    /* add more plarform specific diagnostics features here */
-//    (void)argc;
-//    (void)argv;
-//    (void)aOutput;
-//    (void)aOutputMaxLen;
-//
-//}
-
-void otPlatDiagModeSet(bool aMode){
+void otPlatDiagModeSet(bool aMode)
+{
     sDiagMode = aMode;
 }
 
-bool otPlatDiagModeGet(void){
+bool otPlatDiagModeGet(void)
+{
     return sDiagMode;
-}
-
-void otPlatDiagChannelSet(uint8_t aChannel){
-    (void)aChannel;
-}
-
-void otPlatDiagTxPowerSet(int8_t aTxPower){
-    (void)aTxPower;
-}
-
-void otPlatDiagRadioReceived(otInstance *aInstance, otRadioFrame *aFrame,
-        otError aError){
-    (void)aInstance;
-    (void)aFrame;
-    (void)aError;
-}
-
-void otPlatDiagAlarmCallback(otInstance *aInstance){
-    (void)aInstance;
 }

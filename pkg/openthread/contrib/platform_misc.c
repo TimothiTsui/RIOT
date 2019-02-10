@@ -36,12 +36,9 @@ otPlatResetReason otPlatGetResetReason(otInstance *aInstance)
     (void)aInstance;
     /* TODO: Write me! */
     return OT_PLAT_RESET_REASON_POWER_ON;
-<<<<<<< HEAD
-=======
 }
 
 void otPlatWakeHost(void)
 {
     /* TODO: implement an operation to wake the host from sleep state. */
->>>>>>> branch 'master' of https://github.com/RIOT-OS/RIOT.git
 }

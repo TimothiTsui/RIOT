@@ -18,24 +18,16 @@
 
 #include <assert.h>
 
-<<<<<<< HEAD
-//#include "openthread/platform/alarm.h"
-=======
 #include "openthread/platform/alarm-milli.h"
->>>>>>> branch 'master' of https://github.com/RIOT-OS/RIOT.git
 #include "openthread/platform/uart.h"
 #include "ot.h"
 #include "random.h"
 #include "thread.h"
 #include "xtimer.h"
-//
+
 #ifdef MODULE_AT86RF2XX
 #include "at86rf2xx.h"
 #include "at86rf2xx_params.h"
-#endif
-
-#ifdef MODULE_CC2538_RF
-#include "cc2538_rf.h"
 #endif
 
 #define ENABLE_DEBUG (0)
@@ -45,50 +37,16 @@
 #define OPENTHREAD_NETIF_NUMOF        (sizeof(at86rf2xx_params) / sizeof(at86rf2xx_params[0]))
 #endif
 
-#ifdef MODULE_CC2538_RF
-#define OPENTHREAD_NETIF_NUMOF        (1U)
-#endif
-
 #ifdef MODULE_AT86RF2XX
 static at86rf2xx_t at86rf2xx_dev;
 #endif
 
-<<<<<<< HEAD
-#ifdef MODULE_CC2538_RF
-static cc2538_rf_t cc2538_rf_dev;
-#endif
-
-#define OPENTHREAD_NETDEV_BUFLEN (ETHERNET_MAX_LEN)
-
-=======
->>>>>>> branch 'master' of https://github.com/RIOT-OS/RIOT.git
 static uint8_t rx_buf[OPENTHREAD_NETDEV_BUFLEN];
 static uint8_t tx_buf[OPENTHREAD_NETDEV_BUFLEN];
 static char ot_thread_stack[2 * THREAD_STACKSIZE_MAIN];
 
-<<<<<<< HEAD
-
-/* init and run OpeanThread's UART simulation (stdio) */
-void openthread_uart_run(void){
-    char buf[256];
-    msg_t msg;
-
-    msg.type = OPENTHREAD_SERIAL_MSG_TYPE_EVENT;
-    msg.content.ptr = buf;
-
-    buf[1] = 0;
-    while(1) {
-        char c = getchar();
-        buf[0] = c;
-        msg_send(&msg, openthread_get_pid());
-    }
-}
-
-void openthread_bootstrap(void){
-=======
 void openthread_bootstrap(void)
 {
->>>>>>> branch 'master' of https://github.com/RIOT-OS/RIOT.git
     /* init random */
     ot_random_init();
 
@@ -98,12 +56,6 @@ void openthread_bootstrap(void)
     netdev_t *netdev = (netdev_t *) &at86rf2xx_dev;
 #endif
 
-#ifdef MODULE_CC2538_RF
-    cc2538_setup(&cc2538_rf_dev);
-    netdev_t *netdev = (netdev_t *)&cc2538_rf_dev;
-#endif
-
     openthread_radio_init(netdev, tx_buf, rx_buf);
-    openthread_netdev_init(ot_thread_stack, sizeof(ot_thread_stack),
-    THREAD_PRIORITY_MAIN - 5, "openthread", netdev);
+    openthread_netdev_init(ot_thread_stack, sizeof(ot_thread_stack), THREAD_PRIORITY_MAIN - 5, "openthread", netdev);
 }

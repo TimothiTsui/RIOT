@@ -11,7 +11,8 @@
  * @{
  *
  * @file
- * @brief       Register definitions for the Atlas Scientific pH OEM sensor.
+ * @brief       Register definitions for Atlas Scientific pH OEM sensor.
+ *              For detailed description of the register view the datasheet
  *
  * @author      Igor Knippenberg <igor.knippenberg@gmail.com>
  */

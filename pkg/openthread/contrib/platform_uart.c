@@ -67,24 +67,18 @@ static void uart_handler(void* arg, char c) {
 /* OpenThread will call this for enabling UART (required for OpenThread's CLI)*/
 otError otPlatUartEnable(void)
 {
-<<<<<<< HEAD
-=======
     for (uint8_t i = 0; i < OPENTHREAD_NUMBER_OF_SERIAL_BUFFER; i++) {
         gSerialMessage[i].serial_buffer_status = OPENTHREAD_SERIAL_BUFFER_STATUS_FREE;
     }
 
     uart_init(STDIO_UART_DEV, STDIO_UART_BAUDRATE, (uart_rx_cb_t) uart_handler, NULL);
->>>>>>> branch 'master' of https://github.com/RIOT-OS/RIOT.git
     return OT_ERROR_NONE;
 }
 
 /* OpenThread will call this for disabling UART */
 otError otPlatUartDisable(void)
 {
-<<<<<<< HEAD
-=======
     uart_poweroff(STDIO_UART_DEV);
->>>>>>> branch 'master' of https://github.com/RIOT-OS/RIOT.git
     return OT_ERROR_NONE;
 }
 
