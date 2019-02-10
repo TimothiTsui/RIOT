@@ -58,7 +58,7 @@ extern "C"
 
 /**
  * @brief    pH OEM default SMBus/I2C address. Can be overwritten thru CFLAG
- * 			 PH_OEM_PARAM_ADDR
+ *           PH_OEM_PARAM_ADDR
  *
  */
 #ifndef PH_OEM_I2C_ADDRESS
@@ -73,7 +73,7 @@ typedef enum {
     PH_OEM_NODEV                = -1,   /**< No device found on the bus */
     PH_OEM_READ_ERR             = -2,   /**< Reading to device failed*/
     PH_OEM_WRITE_ERR            = -3,   /**< Writing to device failed */
-	PH_OEM_READ_WRITE_ERR		= -4,	/**< Reading or writing to device failed */
+    PH_OEM_READ_WRITE_ERR       = -4,   /**< Reading or writing to device failed */
     PH_OEM_NOT_PH               = -5,   /**< Not an Atlas Scientific pH OEM device */
     PH_OEM_INTERRUPT_GPIO_UNDEF = -6,   /**< Interrupt pin is @ref GPIO_UNDEF */
     PH_OEM_ENABLE_GPIO_UNDEF    = -7,   /**< Enable pin is @ref GPIO_UNDEF */
@@ -141,8 +141,8 @@ typedef struct ph_oem {
 /**
  * @brief   Initialize a pH OEM sensor
  *
- * @param[in,out] 	dev  	 device descriptor
- * @param[in] 		params   device configuration
+ * @param[in,out]   dev      device descriptor
+ * @param[in]       params   device configuration
  *
  * @return zero on successful initialization, non zero on error
  */
@@ -170,11 +170,11 @@ int ph_oem_set_i2c_address(ph_oem_t *dev, uint8_t addr);
 
 /**
  * @brief   Enable the interrupt gpio pin if @ref ph_oem_params_t.interrupt_pin
- * 			is defined
+ *          is defined
  *
- * @param[in] dev   	device descriptor
- * @param[in] cb    	callback called when the pH OEM interrupt pin fires
- * @param[in] arg   	callback argument
+ * @param[in] dev       device descriptor
+ * @param[in] cb        callback called when the pH OEM interrupt pin fires
+ * @param[in] arg       callback argument
  * @param[in] option    @ref ph_oem_irq_option_t
  *
  * @return zero on successful write, non zero on error
@@ -206,8 +206,8 @@ int ph_oem_set_interrupt_pin(const ph_oem_t *dev, ph_oem_irq_option_t option);
  * @brief   Set the LED state of the pH OEM sensor by writing to the
  *          @ref PH_OEM_REG_LED register
  *
- * @param[in] dev   	device descriptor
- * @param[in] state 	@ref ph_oem_led_state_t
+ * @param[in] dev       device descriptor
+ * @param[in] state     @ref ph_oem_led_state_t
  *
  * @return zero on successful write, non zero on error
  */

@@ -18,7 +18,6 @@
  * @}
  */
 
-//#include <fmt.h>
 #include "xtimer.h"
 #include "timex.h"
 
@@ -36,16 +35,16 @@ static ph_oem_t dev;
 
 static void interrupt_pin_cb(void *arg)
 {
-	puts("\n[IRQ - Reading done]");
-    /* stop pH sensor taking readings*/
+    puts("\n[IRQ - Reading done]");
+
+    /* stop pH sensor from taking further readings*/
     ph_oem_set_device_state(&dev, PH_OEM_STOP_READINGS);
 
-    /* reset interrupt flank in case of falling or rising flank */
+    /* reset interrupt pin in case of falling or rising flank */
     if (PH_OEM_IRQ_FLANK != PH_OEM_IRQ_BOTH) {
         ph_oem_set_interrupt_pin(&dev, PH_OEM_IRQ_FLANK);
     }
 
-    /* read and print last read pH value */
     ph_oem_read_ph(&dev, (int16_t *)arg);
     printf("pH value raw: %d\n", *((int16_t *)arg));
 
@@ -56,7 +55,7 @@ static void interrupt_pin_cb(void *arg)
         ph_oem_enable_device(&dev, false);
     }
 
-    /* initiate new reading with "ph_oem_start_new_reading()" for this isr
+    /* initiate new reading with "ph_oem_start_new_reading()" for this callback
        to be called again */
 }
 
@@ -97,8 +96,8 @@ int main(void)
         return -1;
     }
 
-    /* Test changing pH OEM I2C address to 0x66 and back to 0x65 in the sensor as
-     * well as dev->params.addr
+    /* Test changing the pH OEM i2c address to 0x66 and back to 0x65 in the
+     * sensor as well as dev->params.addr
      */
     printf("Setting device address to 0x66... ");
     if (ph_oem_set_i2c_address(&dev, 0x66) == PH_OEM_OK) {
@@ -251,7 +250,7 @@ int main(void)
     }
 
     while (1) {
-        /* Note if you use enable pin:
+        /* Note if you use the enable pin:
          * After powering on the device, it takes a while for the pH value
          * to stabilize. In my tests the value stabilized after around 2 minutes.
          * So sleep 120 seconds and then start a new reading if you want
@@ -259,8 +258,11 @@ int main(void)
          */
         if (dev.params.enable_pin != GPIO_UNDEF) {
             ph_oem_enable_device(&dev, true);
-            /* wait for the device to boot up ~1ms */
-            xtimer_usleep(2 * US_PER_MS);
+
+            /* wait for the device to boot up. Here it is recommended to
+             * sleep 120 seconds for accurate results */
+            xtimer_sleep(1);
+
             /* need to setup interrupt again, because device was off and
                settings are not retained after power cut */
             if (dev.params.interrupt_pin != GPIO_UNDEF) {

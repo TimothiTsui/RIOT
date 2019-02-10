@@ -52,7 +52,7 @@ extern "C" {
                               .enable_pin = PH_OEM_PARAM_EN_PIN }
 #endif
 #ifndef PH_OEM_SAUL_INFO
-#define PH_OEM_SAUL_INFO       { .name = "ph_oem" }
+#define PH_OEM_SAUL_INFO       { .name = "pH OEM sensor" }
 #endif
 /** @} */
 /**
@@ -68,7 +68,7 @@ static const ph_oem_params_t ph_oem_params[] =
  */
 static const saul_reg_info_t ph_oem_saul_info[] =
 {
-        PH_OEM_SAUL_INFO
+    PH_OEM_SAUL_INFO
 };
 
 #ifdef __cplusplus

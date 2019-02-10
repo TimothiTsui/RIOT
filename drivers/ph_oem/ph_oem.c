@@ -13,7 +13,7 @@
  * @file
  * @brief       pH OEM device driver
  *
- * @author      Igor Knippenberg <igor.knippenberg@gmail.com> *
+ * @author      Igor Knippenberg <igor.knippenberg@gmail.com>
  * @}
  */
 
@@ -177,7 +177,7 @@ int ph_oem_set_interrupt_pin(const ph_oem_t *dev, ph_oem_irq_option_t option)
     uint8_t reg;
 
     if (i2c_write_reg(I2C, ADDR, PH_OEM_REG_INTERRUPT, option, 0x0) < 0) {
-        DEBUG("[ph_oem debug] Setting interrupt pin to option %d failed.", option);
+        DEBUG("[ph_oem debug] Setting interrupt pin to option %d failed.\n", option);
         i2c_release(I2C);
         return PH_OEM_WRITE_ERR;
     }
@@ -194,7 +194,7 @@ int ph_oem_set_led_state(const ph_oem_t *dev, ph_oem_led_state_t state)
     i2c_acquire(I2C);
 
     if (i2c_write_reg(I2C, ADDR, PH_OEM_REG_LED, state, 0x0) < 0) {
-        DEBUG("[ph_oem debug] Setting LED state to %d failed.", state);
+        DEBUG("[ph_oem debug] Setting LED state to %d failed.\n", state);
         i2c_release(I2C);
         return PH_OEM_WRITE_ERR;
     }

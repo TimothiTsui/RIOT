@@ -11,7 +11,7 @@
  * @{
  *
  * @file
- * @brief       pH OEM sensor adaption to the sensor/actuator abstraction layer
+ * @brief       pH OEM adaption to the sensor/actuator abstraction layer
  *
  * @author      Igor Knippenberg <igor.knippenberg@gmail.com>
  *
@@ -23,43 +23,46 @@
 
 #include "saul.h"
 #include "ph_oem.h"
-#include "include/ph_oem_regs.h"
+#include "ph_oem_regs.h"
 
+static int read_ph(const void *dev, phydat_t *res)
+{
+    const ph_oem_t *mydev = dev;
 
-//static int read_ph(const void *dev, phydat_t *res)
-//{
-//    const ads101x_t *mydev = dev;
-//
-//    /* Change the mux channel */
-//    ads101x_set_mux_gain(mydev, mydev->params.mux_gain);
-//
-//    /* Read raw value */
-//    if (ads101x_read_raw(mydev, res->val) < 0) {
-//        return ECANCELED;
-//    }
-//
-//    /* Special case for 2.048V */
-//    /* (this is the fixed FSR of ADS1013 and ADS1113) */
-//    if ((mydev->params.mux_gain & ADS101X_PGA_MASK)
-//        == ADS101X_PGA_FSR_2V048) {
-//
-//        /* LSB == 62.5uV to LSB == 100uV */
-//        *(res->val) = (int16_t)((CONV_TO_B10 * (int32_t)*(res->val)) >> 16);
-//
-//        res->unit = UNIT_PH;
-//        res->scale = -3;
-//    }
-//    else {
-//        /* Otherwise let the user deal with it */
-//        res->unit = UNIT_NONE;
-//        res->scale = 0;
-//    }
+    if (mydev->params.enable_pin != GPIO_UNDEF) {
+    	puts("enable pin not supported with SAUL yet");
+        return -ENOTSUP;
+    }
 
-//    return 1;
-//}
+    if (mydev->params.interrupt_pin != GPIO_UNDEF) {
+    	puts("interrupt pin not supported with SAUL yet");
+        return -ENOTSUP;
+    }
+
+    ph_oem_start_new_reading(mydev);
+
+    /* Read raw pH value */
+    if (ph_oem_read_ph(mydev, res->val) < 0) {
+        return -ECANCELED;
+    }
+    res->unit = UNIT_PH;
+    res->scale = -3;
+
+    return 1;
+}
+
+/* Sets the temperature compensation for taking accurate pH readings */
+static int set_temp_compensation(const void *dev, phydat_t *res)
+{
+    const ph_oem_t *mydev = dev;
+
+    ph_oem_set_compensation(mydev, res->val[0]);
+
+    return 1;
+}
 
 const saul_driver_t ph_oem_saul_driver = {
-    .read = saul_notsup,
-    .write = saul_notsup,
+    .read = read_ph,
+    .write = set_temp_compensation,
     .type = SAUL_SENSE_PH,
 };
