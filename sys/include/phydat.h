@@ -95,6 +95,8 @@ enum {
     UNIT_V,         /**< Volts */
     UNIT_GS,        /**< gauss */
     UNIT_DBM,       /**< decibel-milliwatts */
+	/* electrochemical */
+	UNIT_PH,         /**< pH  */
     /* pressure */
     UNIT_BAR,       /**< Beer? */
     UNIT_PA,        /**< Pascal */

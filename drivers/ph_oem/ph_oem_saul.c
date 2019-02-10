@@ -46,9 +46,8 @@
 //        /* LSB == 62.5uV to LSB == 100uV */
 //        *(res->val) = (int16_t)((CONV_TO_B10 * (int32_t)*(res->val)) >> 16);
 //
-//        /* 100uV == 2^-4 V */
-//        res->unit = UNIT_V;
-//        res->scale = -4;
+//        res->unit = UNIT_PH;
+//        res->scale = -3;
 //    }
 //    else {
 //        /* Otherwise let the user deal with it */
@@ -59,8 +58,8 @@
 //    return 1;
 //}
 
-//const saul_driver_t ph_oem_saul_driver = {
-//    .read = read_ph,
-//    .write = saul_notsup,
-//    .type = SAUL_SENSE_PH,
-//};
+const saul_driver_t ph_oem_saul_driver = {
+    .read = saul_notsup,
+    .write = saul_notsup,
+    .type = SAUL_SENSE_PH,
+};
