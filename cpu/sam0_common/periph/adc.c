@@ -82,12 +82,13 @@ static int _adc_configure(adc_res_t res)
     /* Individual comparison necessary because ADC Resolution Bits are not
      * numerically in order and 16Bit (averaging - not currently supported)
      * falls between 12bit and 10bit.  See datasheet for details */
-    assert((res == ADC_RES_8BIT) || (res == ADC_RES_10BIT) ||
-           (res == ADC_RES_12BIT));
+    if (!((res == ADC_RES_8BIT) || (res == ADC_RES_10BIT) ||
+          (res == ADC_RES_12BIT))){
+        return -1;
+    }
     _adc_poweroff();
     if (ADC->CTRLA.reg & ADC_CTRLA_SWRST ||
         ADC->CTRLA.reg & ADC_CTRLA_ENABLE ) {
-        _done();
         DEBUG("adc: not ready\n");
         return -1;
     }
@@ -163,7 +164,7 @@ int adc_init(adc_t line)
     return 0;
 }
 
-int adc_sample(adc_t line, adc_res_t res)
+int32_t adc_sample(adc_t line, adc_res_t res)
 {
     if (line >= ADC_NUMOF) {
         DEBUG("adc: line arg not applicable\n");

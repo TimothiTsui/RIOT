@@ -119,11 +119,16 @@ enum {
  * @brief   Event types triggered by the NimBLE netif module
  */
 typedef enum {
+    NIMBLE_NETIF_ACCEPTING,         /**< accepting incoming connections */
+    NIMBLE_NETIF_ACCEPT_STOP,       /**< stop accepting incoming connections */
+    NIMBLE_NETIF_INIT_MASTER,       /**< conn. procedure started (as mater) */
+    NIMBLE_NETIF_INIT_SLAVE,        /**< conn. procedure started (as slave) */
     NIMBLE_NETIF_CONNECTED_MASTER,  /**< connection established as master */
     NIMBLE_NETIF_CONNECTED_SLAVE,   /**< connection established as slave */
     NIMBLE_NETIF_CLOSED_MASTER,     /**< connection closed (we were master) */
     NIMBLE_NETIF_CLOSED_SLAVE,      /**< connection closed (we were slave) */
-    NIMBLE_NETIF_CONNECT_ABORT,     /**< connection establishment aborted */
+    NIMBLE_NETIF_ABORT_MASTER,      /**< connection est. abort (as master) */
+    NIMBLE_NETIF_ABORT_SLAVE,       /**< connection est. abort (as slave) */
     NIMBLE_NETIF_CONN_UPDATED,      /**< connection parameter update done */
 } nimble_netif_event_t;
 
@@ -150,8 +155,11 @@ enum {
  *
  * @param[in] handle        handle to the connection that triggered the event
  * @param[in] event         type of the event
+ * @param[in] addr          BLE address of the peer in the effected connection
  */
-typedef void(*nimble_netif_eventcb_t)(int handle, nimble_netif_event_t event);
+typedef void(*nimble_netif_eventcb_t)(int handle,
+                                      nimble_netif_event_t event,
+                                      const uint8_t *addr);
 
 /**
  * @brief   Initialize the netif implementation, spawns the netif thread

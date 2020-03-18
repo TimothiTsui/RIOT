@@ -374,14 +374,18 @@ static void run_test(test_ctx_t *ctx, uint32_t interval, unsigned int variant)
     interval += TEST_MIN;
     unsigned int interval_ref = TIM_TEST_TO_REF(interval);
     xtimer_t xt = {
-        .target = 0,
-        .long_target = 0,
+        .start_time = 0,
+        .long_start_time = 0,
+        .offset = 0,
+        .long_offset = 0,
         .callback = cb,
         .arg = ctx,
     };
     xtimer_t xt_parallel = {
-        .target = 0,
-        .long_target = 0,
+        .start_time = 0,
+        .long_start_time = 0,
+        .offset = 0,
+        .long_offset = 0,
         .callback = nop,
         .arg = NULL,
     };
@@ -714,7 +718,7 @@ int main(void)
     if (res < 0) {
         print_str("Error ");
         print_s32_dec(res);
-        print_str(" intializing reference timer\n");
+        print_str(" initializing reference timer\n");
         return res;
     }
     random_init(seed);
@@ -724,7 +728,7 @@ int main(void)
     if (res < 0) {
         print_str("Error ");
         print_s32_dec(res);
-        print_str(" intializing timer under test\n");
+        print_str(" initializing timer under test\n");
         return res;
     }
 #endif

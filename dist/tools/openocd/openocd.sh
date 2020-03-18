@@ -13,7 +13,7 @@
 # Global environment variables used:
 # OPENOCD:             OpenOCD command name, default: "openocd"
 # OPENOCD_CONFIG:      OpenOCD configuration file name,
-#                      default: "${RIOTBOARD}/${BOARD}/dist/openocd.cfg"
+#                      default: "${BOARDSDIR}/${BOARD}/dist/openocd.cfg"
 #
 # The script supports the following actions:
 #
@@ -66,7 +66,7 @@
 # Default TCL port, set to 0 to disable
 : ${TCL_PORT:=6333}
 # Default path to OpenOCD configuration file
-: ${OPENOCD_CONFIG:=${RIOTBOARD}/${BOARD}/dist/openocd.cfg}
+: ${OPENOCD_CONFIG:=${BOARDSDIR}/${BOARD}/dist/openocd.cfg}
 # Default OpenOCD command
 : ${OPENOCD:=openocd}
 # Extra board initialization commands to pass to OpenOCD
@@ -104,6 +104,10 @@
 # the file (default).
 # Valid values: elf, hex, s19, bin (see OpenOCD manual for more information)
 : ${IMAGE_TYPE:=}
+
+# flash bank to read default configuration when probing fails, default to first
+# bank
+: ${FLASH_BANK:=1}
 
 #
 # Examples of alternative debugger configurations
@@ -265,8 +269,7 @@ do_flash() {
     # In case of binary file, IMAGE_OFFSET should include the flash base address
     # This allows flashing normal binary files without env configuration
     if _is_binfile "${IMAGE_FILE}" "${IMAGE_TYPE}"; then
-        # hardwritten to use the first bank
-        FLASH_ADDR=$(_flash_address 1)
+        FLASH_ADDR=$(_flash_address ${FLASH_BANK})
         echo "Binfile detected, adding ROM base address: ${FLASH_ADDR}"
         IMAGE_TYPE=bin
         IMAGE_OFFSET=$(printf "0x%08x\n" "$((${IMAGE_OFFSET} + ${FLASH_ADDR}))")

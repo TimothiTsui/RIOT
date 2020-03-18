@@ -60,7 +60,7 @@
  * @name   SD card interface configuration
  *
  * SD card interface uses SPI_DEV(0) on this board. This configuration cannot
- * be overriden.
+ * be overridden.
  * @{
  */
 #if MODULE_SDCARD_SPI
@@ -79,6 +79,14 @@
 
 /* include common board definitions as last step */
 #include "board_common.h"
+
+/**
+ * @brief Initialize the board specific hardware
+ */
+static inline void board_init(void) {
+    /* there is nothing special to initialize on this board */
+    board_init_common();
+}
 
 #endif /* BOARD_H */
 /** @} */

@@ -1,4 +1,5 @@
 PSEUDOMODULES += at_urc
+PSEUDOMODULES += auto_init_dhcpv6_client
 PSEUDOMODULES += auto_init_gnrc_rpl
 PSEUDOMODULES += can_mbox
 PSEUDOMODULES += can_pm
@@ -10,10 +11,12 @@ PSEUDOMODULES += core_%
 PSEUDOMODULES += cortexm_fpu
 PSEUDOMODULES += cpu_check_address
 PSEUDOMODULES += devfs_%
+PSEUDOMODULES += dhcpv6_%
 PSEUDOMODULES += ecc_%
 PSEUDOMODULES += emb6_router
 PSEUDOMODULES += event_%
 PSEUDOMODULES += fmt_%
+PSEUDOMODULES += gnrc_dhcpv6_%
 PSEUDOMODULES += gnrc_ipv6_default
 PSEUDOMODULES += gnrc_ipv6_router
 PSEUDOMODULES += gnrc_ipv6_router_default
@@ -33,11 +36,11 @@ PSEUDOMODULES += gnrc_sixloenc
 PSEUDOMODULES += gnrc_sixlowpan_border_router_default
 PSEUDOMODULES += gnrc_sixlowpan_default
 PSEUDOMODULES += gnrc_sixlowpan_frag_hint
-PSEUDOMODULES += gnrc_sixlowpan_frag_stats
 PSEUDOMODULES += gnrc_sixlowpan_iphc_nhc
 PSEUDOMODULES += gnrc_sixlowpan_nd_border_router
 PSEUDOMODULES += gnrc_sixlowpan_router
 PSEUDOMODULES += gnrc_sixlowpan_router_default
+PSEUDOMODULES += gnrc_sock_async
 PSEUDOMODULES += gnrc_sock_check_reuse
 PSEUDOMODULES += gnrc_txtsnd
 PSEUDOMODULES += heap_cmd
@@ -80,6 +83,7 @@ PSEUDOMODULES += sched_cb
 PSEUDOMODULES += semtech_loramac_rx
 PSEUDOMODULES += sock
 PSEUDOMODULES += sock_async
+PSEUDOMODULES += sock_dtls
 PSEUDOMODULES += sock_ip
 PSEUDOMODULES += sock_tcp
 PSEUDOMODULES += sock_udp
@@ -88,6 +92,7 @@ PSEUDOMODULES += stdio_ethos
 PSEUDOMODULES += stdio_cdc_acm
 PSEUDOMODULES += stdio_uart_rx
 PSEUDOMODULES += suit_%
+PSEUDOMODULES += wakaama_objects_%
 
 # handle suit_v4 being a distinct module
 NO_PSEUDOMODULES += suit_v4
@@ -102,8 +107,10 @@ PSEUDOMODULES += at86rfa1
 PSEUDOMODULES += at86rfr2
 
 # include variants of the BMX280 drivers as pseudo modules
-PSEUDOMODULES += bmp280
-PSEUDOMODULES += bme280
+PSEUDOMODULES += bmp280_i2c
+PSEUDOMODULES += bmp280_spi
+PSEUDOMODULES += bme280_i2c
+PSEUDOMODULES += bme280_spi
 
 # variants of TI ADCXX1C
 PSEUDOMODULES += adc081c
@@ -118,9 +125,16 @@ PSEUDOMODULES += cc1100
 PSEUDOMODULES += cc1100e
 PSEUDOMODULES += cc1101
 
+# interrupt variant of the ITG320X driver as pseudo module
+PSEUDOMODULES += itg320x_int
+
 # include variants of MPU9X50 drivers as pseudo modules
 PSEUDOMODULES += mpu9150
 PSEUDOMODULES += mpu9250
+
+# include variants of INA2xx drivers as pseudo modules
+PSEUDOMODULES += ina219
+PSEUDOMODULES += ina220
 
 # include variants of mrf24j40 drivers as pseudo modules
 PSEUDOMODULES += mrf24j40m%
@@ -157,6 +171,9 @@ PSEUDOMODULES += rn2903
 PSEUDOMODULES += vcnl4010
 PSEUDOMODULES += vcnl4020
 PSEUDOMODULES += vcnl4040
+
+# implementations of ws281x_write as submodules of ws281x:
+PSEUDOMODULES += ws281x_%
 
 # include variants of lpsxxx drivers as pseudo modules
 PSEUDOMODULES += lps331ap

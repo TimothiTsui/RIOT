@@ -15,6 +15,8 @@
  * @}
  */
 
+#define USB_H_USER_IS_RIOT_INTERNAL
+
 #include "event.h"
 #include "fmt.h"
 #include "kernel_defines.h"
@@ -155,9 +157,7 @@ static void _fill_ethernet(usbus_cdcecm_device_t *cdcecm)
 {
     uint8_t ethernet[ETHERNET_ADDR_LEN];
 
-    luid_get(ethernet, ETHERNET_ADDR_LEN);
-    eui48_set_local((eui48_t*)ethernet);
-    eui48_clear_group((eui48_t*)ethernet);
+    luid_get_eui48((eui48_t*)ethernet);
     fmt_bytes_hex(cdcecm->mac_host, ethernet, sizeof(ethernet));
 
 }

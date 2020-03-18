@@ -42,7 +42,7 @@
  *
  * ## Server Operation ##
  *
- * gcoap listens for requests on GCOAP_PORT, 5683 by default. You can redefine
+ * gcoap listens for requests on CONFIG_GCOAP_PORT, 5683 by default. You can redefine
  * this by uncommenting the appropriate lines in gcoap's make file.
  *
  * gcoap allows an application to specify a collection of request resource paths
@@ -141,8 +141,8 @@
  *
  * Here is the expected sequence for handling a response in the callback.
  *
- * -# Test for a server response or timeout in the _req_state_ callback
- *    parameter. See the GCOAP_MEMO... constants.
+ * -# Test for a server response or timeout in the `state` field of the `memo`
+ *    callback parameter (`memo->state`). See the GCOAP_MEMO... constants.
  * -# Test the response with coap_get_code_class() and coap_get_code_detail().
  * -# Test the response payload with the coap_pkt_t _payload_len_ and
  *    _content_type_ attributes.
@@ -193,7 +193,7 @@
  *
  * By default, the value for the Observe option in a notification is three
  * bytes long. For resources that change slowly, this length can be reduced via
- * GCOAP_OBS_VALUE_WIDTH.
+ * CONFIG_GCOAP_OBS_VALUE_WIDTH.
  *
  * A client always may re-register for a resource with the same token or with
  * a new token to indicate continued interest in receiving notifications about
@@ -365,22 +365,22 @@ extern "C" {
 /**
  * @brief  Size for module message queue
  */
-#ifndef GCOAP_MSG_QUEUE_SIZE
-#define GCOAP_MSG_QUEUE_SIZE    (4)
+#ifndef CONFIG_GCOAP_MSG_QUEUE_SIZE
+#define CONFIG_GCOAP_MSG_QUEUE_SIZE    (4)
 #endif
 
 /**
  * @brief   Server port; use RFC 7252 default if not defined
  */
-#ifndef GCOAP_PORT
-#define GCOAP_PORT              (5683)
+#ifndef CONFIG_GCOAP_PORT
+#define CONFIG_GCOAP_PORT              (5683)
 #endif
 
 /**
  * @brief   Size of the buffer used to build a CoAP request or response
  */
-#ifndef GCOAP_PDU_BUF_SIZE
-#define GCOAP_PDU_BUF_SIZE      (128)
+#ifndef CONFIG_GCOAP_PDU_BUF_SIZE
+#define CONFIG_GCOAP_PDU_BUF_SIZE      (128)
 #endif
 
 /**
@@ -388,9 +388,12 @@ extern "C" {
  *
  * Accommodates writing Content-Format option in gcoap_finish(). May set to
  * zero if function not used.
+ *
+ * @deprecated  Will not be available after the 2020.07 release. Used only by
+ * gcoap_finish(), which also is deprecated.
  */
-#ifndef GCOAP_REQ_OPTIONS_BUF
-#define GCOAP_REQ_OPTIONS_BUF   (4)
+#ifndef CONFIG_GCOAP_REQ_OPTIONS_BUF
+#define CONFIG_GCOAP_REQ_OPTIONS_BUF   (4)
 #endif
 
 /**
@@ -398,9 +401,12 @@ extern "C" {
  *
  * Accommodates writing Content-Format option in gcoap_finish(). May set to
  * zero if function not used.
+ *
+ * @deprecated  Will not be available after the 2020.07 release. Used only by
+ * gcoap_finish(), which also is deprecated.
  */
-#ifndef GCOAP_RESP_OPTIONS_BUF
-#define GCOAP_RESP_OPTIONS_BUF  (4)
+#ifndef CONFIG_GCOAP_RESP_OPTIONS_BUF
+#define CONFIG_GCOAP_RESP_OPTIONS_BUF  (4)
 #endif
 
 /**
@@ -408,16 +414,19 @@ extern "C" {
  *
  * Accommodates writing Content-Format option in gcoap_finish(). May set to
  * zero if function not used.
+ *
+ * @deprecated  Will not be available after the 2020.07 release. Used only by
+ * gcoap_finish(), which also is deprecated.
  */
-#ifndef GCOAP_OBS_OPTIONS_BUF
-#define GCOAP_OBS_OPTIONS_BUF   (4)
+#ifndef CONFIG_GCOAP_OBS_OPTIONS_BUF
+#define CONFIG_GCOAP_OBS_OPTIONS_BUF   (4)
 #endif
 
 /**
  * @brief   Maximum number of requests awaiting a response
  */
-#ifndef GCOAP_REQ_WAITING_MAX
-#define GCOAP_REQ_WAITING_MAX   (2)
+#ifndef CONFIG_GCOAP_REQ_WAITING_MAX
+#define CONFIG_GCOAP_REQ_WAITING_MAX   (2)
 #endif
 /** @} */
 
@@ -437,14 +446,24 @@ extern "C" {
  *
  * Value must be in the range 0 to @ref GCOAP_TOKENLEN_MAX.
  */
-#ifndef GCOAP_TOKENLEN
-#define GCOAP_TOKENLEN          (2)
+#ifndef CONFIG_GCOAP_TOKENLEN
+#define CONFIG_GCOAP_TOKENLEN          (2)
 #endif
 
 /**
  * @brief   Marks the boundary between header and payload
  */
 #define GCOAP_PAYLOAD_MARKER    (0xFF)
+
+/**
+ * @ingroup net_gcoap_conf
+ * @brief   Disables gcoap startup during system auto init
+ *
+ * If disabled, gcoap_init() must be called by some other means.
+ */
+#ifndef CONFIG_GCOAP_NO_AUTO_INIT
+#define CONFIG_GCOAP_NO_AUTO_INIT      0
+#endif
 
 /**
  * @name    States for the memo used to track waiting for a response
@@ -466,8 +485,8 @@ extern "C" {
  * @ingroup net_gcoap_conf
  * @brief   Time in usec that the event loop waits for an incoming CoAP message
  */
-#ifndef GCOAP_RECV_TIMEOUT
-#define GCOAP_RECV_TIMEOUT      (1 * US_PER_SEC)
+#ifndef CONFIG_GCOAP_RECV_TIMEOUT
+#define CONFIG_GCOAP_RECV_TIMEOUT      (1 * US_PER_SEC)
 #endif
 
 #ifdef DOXYGEN
@@ -476,12 +495,11 @@ extern "C" {
  * @brief   Turns off retransmission backoff when defined (undefined per default)
  *
  * In normal operations the timeout between retransmissions doubles. When
- * GCOAP_NO_RETRANS_BACKOFF is defined this doubling does not happen.
+ * CONFIG_GCOAP_NO_RETRANS_BACKOFF is defined this doubling does not happen.
  *
  * @see COAP_ACK_TIMEOUT
- * @see COAP_ACK_VARIANCE
  */
-#define GCOAP_NO_RETRANS_BACKOFF
+#define CONFIG_GCOAP_NO_RETRANS_BACKOFF
 #endif
 
 /**
@@ -490,8 +508,8 @@ extern "C" {
  *
  * Set to 0 to disable timeout.
  */
-#ifndef GCOAP_NON_TIMEOUT
-#define GCOAP_NON_TIMEOUT       (5000000U)
+#ifndef CONFIG_GCOAP_NON_TIMEOUT
+#define CONFIG_GCOAP_NON_TIMEOUT       (5000000U)
 #endif
 
 /**
@@ -511,16 +529,16 @@ extern "C" {
  * @ingroup net_gcoap_conf
  * @brief   Maximum number of Observe clients
  */
-#ifndef GCOAP_OBS_CLIENTS_MAX
-#define GCOAP_OBS_CLIENTS_MAX   (2)
+#ifndef CONFIG_GCOAP_OBS_CLIENTS_MAX
+#define CONFIG_GCOAP_OBS_CLIENTS_MAX   (2)
 #endif
 
 /**
  * @ingroup net_gcoap_conf
  * @brief   Maximum number of registrations for Observable resources
  */
-#ifndef GCOAP_OBS_REGISTRATIONS_MAX
-#define GCOAP_OBS_REGISTRATIONS_MAX     (2)
+#ifndef CONFIG_GCOAP_OBS_REGISTRATIONS_MAX
+#define CONFIG_GCOAP_OBS_REGISTRATIONS_MAX     (2)
 #endif
 
 /**
@@ -552,18 +570,18 @@ extern "C" {
  * sec). For resources that change only slowly, the reduced message length is
  * useful when packet size is limited.
  */
-#ifndef GCOAP_OBS_VALUE_WIDTH
-#define GCOAP_OBS_VALUE_WIDTH   (3)
+#ifndef CONFIG_GCOAP_OBS_VALUE_WIDTH
+#define CONFIG_GCOAP_OBS_VALUE_WIDTH   (3)
 #endif
 
 /**
- * @brief   See GCOAP_OBS_VALUE_WIDTH
+ * @brief   See CONFIG_GCOAP_OBS_VALUE_WIDTH
  */
-#if (GCOAP_OBS_VALUE_WIDTH == 3)
+#if (CONFIG_GCOAP_OBS_VALUE_WIDTH == 3)
 #define GCOAP_OBS_TICK_EXPONENT (5)
-#elif (GCOAP_OBS_VALUE_WIDTH == 2)
+#elif (CONFIG_GCOAP_OBS_VALUE_WIDTH == 2)
 #define GCOAP_OBS_TICK_EXPONENT (16)
-#elif (GCOAP_OBS_VALUE_WIDTH == 1)
+#elif (CONFIG_GCOAP_OBS_VALUE_WIDTH == 1)
 #define GCOAP_OBS_TICK_EXPONENT (24)
 #endif
 
@@ -588,8 +606,8 @@ extern "C" {
  * @ingroup net_gcoap_conf
  * @brief   Count of PDU buffers available for resending confirmable messages
  */
-#ifndef GCOAP_RESEND_BUFS_MAX
-#define GCOAP_RESEND_BUFS_MAX      (1)
+#ifndef CONFIG_GCOAP_RESEND_BUFS_MAX
+#define CONFIG_GCOAP_RESEND_BUFS_MAX      (1)
 #endif
 
 /**
@@ -636,13 +654,19 @@ typedef struct gcoap_listener {
 } gcoap_listener_t;
 
 /**
+ * @brief   Forward declaration of the request memo type
+ */
+typedef struct gcoap_request_memo gcoap_request_memo_t;
+
+/**
  * @brief   Handler function for a server response, including the state for the
  *          originating request
  *
  * If request timed out, the packet header is for the request.
  */
-typedef void (*gcoap_resp_handler_t)(unsigned req_state, coap_pkt_t* pdu,
-                                     sock_udp_ep_t *remote);
+typedef void (*gcoap_resp_handler_t)(const gcoap_request_memo_t *memo,
+                                     coap_pkt_t* pdu,
+                                     const sock_udp_ep_t *remote);
 
 /**
  * @brief  Extends request memo for resending a confirmable request.
@@ -655,7 +679,7 @@ typedef struct {
 /**
  * @brief   Memo to handle a response for a request
  */
-typedef struct {
+struct gcoap_request_memo {
     unsigned state;                     /**< State of this memo, a GCOAP_MEMO... */
     int send_limit;                     /**< Remaining resends, 0 if none;
                                              GCOAP_SEND_LIMIT_NON if non-confirmable */
@@ -667,9 +691,10 @@ typedef struct {
                                              supports resending message */
     sock_udp_ep_t remote_ep;            /**< Remote endpoint */
     gcoap_resp_handler_t resp_handler;  /**< Callback for the response */
+    void *context;                      /**< ptr to user defined context data */
     xtimer_t response_timer;            /**< Limits wait for response */
     msg_t timeout_msg;                  /**< For response timer */
-} gcoap_request_memo_t;
+};
 
 /**
  * @brief   Memo for Observe registration and notifications
@@ -722,6 +747,9 @@ int gcoap_req_init(coap_pkt_t *pdu, uint8_t *buf, size_t len,
  * Assumes the PDU has been initialized with a gcoap_xxx_init() function, like
  * gcoap_req_init().
  *
+ * @deprecated  Will not be available after the 2020.07 release. Use
+ * coap_opt_finish() instead.
+ *
  * @warning To use this function, you only may have added an Option with
  * option number less than COAP_OPT_CONTENT_FORMAT. Otherwise, use the
  * struct-based API described with @link net_nanocoap nanocoap. @endlink With
@@ -765,34 +793,14 @@ static inline ssize_t gcoap_request(coap_pkt_t *pdu, uint8_t *buf, size_t len,
  * @param[in] len           Length of the buffer
  * @param[in] remote        Destination for the packet
  * @param[in] resp_handler  Callback when response received, may be NULL
+ * @param[in] context       User defined context passed to the response handler
  *
  * @return  length of the packet
  * @return  0 if cannot send
  */
 size_t gcoap_req_send(const uint8_t *buf, size_t len,
                       const sock_udp_ep_t *remote,
-                      gcoap_resp_handler_t resp_handler);
-
-/**
- * @brief   Sends a buffer containing a CoAP request to the provided endpoint
- *
- * @deprecated  Migration alias for @ref gcoap_req_send(). Will be removed after
- *              the 2020.01 release.
- *
- * @param[in] buf           Buffer containing the PDU
- * @param[in] len           Length of the buffer
- * @param[in] remote        Destination for the packet
- * @param[in] resp_handler  Callback when response received, may be NULL
- *
- * @return  length of the packet
- * @return  0 if cannot send
- */
-static inline size_t gcoap_req_send2(const uint8_t *buf, size_t len,
-                                     const sock_udp_ep_t *remote,
-                                     gcoap_resp_handler_t resp_handler)
-{
-    return gcoap_req_send(buf, len, remote, resp_handler);
-}
+                      gcoap_resp_handler_t resp_handler, void *context);
 
 /**
  * @brief   Initializes a CoAP response packet on a buffer

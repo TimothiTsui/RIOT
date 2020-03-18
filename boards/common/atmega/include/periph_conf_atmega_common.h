@@ -91,7 +91,7 @@ extern "C" {
  * ATmega2560
  * ==========
  * The timer driver only supports the four 16-bit timers (Timer1, Timer3,
- * Timer4, Timer5), so those are the only onces we can use here.
+ * Timer4, Timer5), so those are the only ones we can use here.
  *
  *
  * ATmega32U4
@@ -210,19 +210,23 @@ extern "C" {
     /* UART0 is used for stdio */
     #define UART_0              MEGA_UART0
     #define UART_0_ISR          USART0_RX_vect
+    #define UART_0_ISR_TX       USART0_TX_vect
 
     #define UART_1              MEGA_UART1
     #define UART_1_ISR          USART1_RX_vect
+    #define UART_1_ISR_TX       USART1_TX_vect
 #elif defined(CPU_ATMEGA328P)
     #define UART_NUMOF          (1U)
 
     #define UART_0              MEGA_UART0
     #define UART_0_ISR          USART_RX_vect
+    #define UART_0_ISR_TX       USART_TX_vect
 #elif defined(CPU_ATMEGA32U4)
     #define UART_NUMOF          (1U)
 
     #define UART_0              MEGA_UART1
     #define UART_0_ISR          USART1_RX_vect
+    #define UART_0_ISR_TX       USART1_TX_vect
 #else
     #define UART_NUMOF          (0U)
 #endif

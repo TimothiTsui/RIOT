@@ -6,6 +6,8 @@ ifeq ($(TOOLCHAIN), llvm)
   CFLAGS += -Wno-gnu-zero-variadic-macro-arguments -Wno-unused-function
 endif
 
+INCLUDES += -I$(RIOTBASE)/pkg/tinydtls/include
+
 ifneq (,$(filter tinydtls,$(USEMODULE)))
   INCLUDES += -I$(PKG_BUILDDIR)
   # Mandatory for tinyDTLS
@@ -27,6 +29,13 @@ ifneq (,$(filter tinydtls,$(USEMODULE)))
     endif
   endif
 
+  # Enable debug when using tinydtls_sock_dtls
+  ifneq (,$(filter -DDTLS_DEBUG,$(CFLAGS)))
+    ifeq (,$(TINYDTLS_LOG))
+      CFLAGS += -DTINYDTLS_DEBUG
+    endif
+  endif
+
   # Handles the verbosity of tinyDTLS. Default: Minimum or just error messages.
   ifeq (,$(filter -DTINYDTLS_DEBUG,$(CFLAGS)))
     ifeq ( , $(TINYDTLS_LOG))
@@ -45,4 +54,9 @@ endif
 
 ifneq (,$(filter tinydtls_ecc,$(USEMODULE)))
   DIRS += $(PKG_BUILDDIR)/ecc
+endif
+
+# For now contrib only contains sock_dtls adaption
+ifneq (,$(filter tinydtls_sock_dtls,$(USEMODULE)))
+  DIRS += $(RIOTBASE)/pkg/tinydtls/contrib
 endif

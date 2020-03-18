@@ -303,7 +303,7 @@ typedef enum {
     CC110X_TX_POWER_0_DBM,                          /**< 0 dBm */
     CC110X_TX_POWER_PLUS_5_DBM,                     /**< 5 dBm */
     CC110X_TX_POWER_PLUS_7_DBM,                     /**< 7 dBm */
-    CC110X_TX_POWER_PLUS_10_DBM,                    /**< 1 dBm */
+    CC110X_TX_POWER_PLUS_10_DBM,                    /**< 10 dBm */
     CC110X_TX_POWER_NUMOF,                          /**< Number of TX power options */
 } cc110x_tx_power_t;
 
@@ -386,7 +386,7 @@ typedef struct {
      * See page 76 in the data sheet.
      *
      * Assuming a 26 MHz crystal the symbol rate of the transceiver is calculated
-     * as fallows (in kBaud):
+     * as follows (in kBaud):
      * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      * uint8_t exponent = mdmcfg4 & 0x0f;
      * int32_t mantissa = mdmcfg3;

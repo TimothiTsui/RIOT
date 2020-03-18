@@ -172,12 +172,12 @@ static void _dispatch_next_header(gnrc_pktsnip_t *pkt, unsigned nh,
 
 static void *_event_loop(void *args)
 {
-    msg_t msg, reply, msg_q[GNRC_IPV6_MSG_QUEUE_SIZE];
+    msg_t msg, reply, msg_q[CONFIG_GNRC_IPV6_MSG_QUEUE_SIZE];
     gnrc_netreg_entry_t me_reg = GNRC_NETREG_ENTRY_INIT_PID(GNRC_NETREG_DEMUX_CTX_ALL,
                                                             sched_active_pid);
 
     (void)args;
-    msg_init_queue(msg_q, GNRC_IPV6_MSG_QUEUE_SIZE);
+    msg_init_queue(msg_q, CONFIG_GNRC_IPV6_MSG_QUEUE_SIZE);
 
     /* initialize fragmentation data-structures */
 #ifdef MODULE_GNRC_IPV6_EXT_FRAG
@@ -354,7 +354,7 @@ static int _fill_ipv6_hdr(gnrc_netif_t *netif, gnrc_pktsnip_t *ipv6)
 
     if (hdr->hl == 0) {
         if (netif == NULL) {
-            hdr->hl = GNRC_NETIF_DEFAULT_HL;
+            hdr->hl = CONFIG_GNRC_NETIF_DEFAULT_HL;
         }
         else {
             hdr->hl = netif->cur_hl;
@@ -382,7 +382,8 @@ static int _fill_ipv6_hdr(gnrc_netif_t *netif, gnrc_pktsnip_t *ipv6)
         int idx;
 
         gnrc_netif_acquire(netif);
-        invalid_src = ((idx = gnrc_netif_ipv6_addr_idx(netif, &hdr->src)) >= 0) &&
+        invalid_src = ((!ipv6_addr_is_loopback(&hdr->dst)) &&
+                       (idx = gnrc_netif_ipv6_addr_idx(netif, &hdr->src)) >= 0) &&
             (gnrc_netif_ipv6_addr_get_state(netif, idx) != GNRC_NETIF_IPV6_ADDRS_FLAGS_STATE_VALID);
         gnrc_netif_release(netif);
         if (invalid_src) {
@@ -830,7 +831,7 @@ static void _receive(gnrc_pktsnip_t *pkt)
           first_nh, byteorder_ntohs(hdr->len));
 
     if ((pkt = gnrc_ipv6_ext_process_hopopt(pkt, &first_nh)) == NULL) {
-        DEBUG("ipv6: packet's extension header was errorneous or packet was "
+        DEBUG("ipv6: packet's extension header was erroneous or packet was "
               "consumed due to it\n");
         return;
     }

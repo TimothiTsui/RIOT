@@ -16,6 +16,8 @@
  * @}
  */
 
+#define USB_H_USER_IS_RIOT_INTERNAL
+
 #include "bitarithm.h"
 #include "event.h"
 #include "thread.h"
@@ -237,9 +239,9 @@ static void *_usbus_thread(void *args)
     usbdev_init(dev);
 
     usbus_add_string_descriptor(usbus, &usbus->config,
-                                USB_CONFIG_CONFIGURATION_STR);
-    usbus_add_string_descriptor(usbus, &usbus->product, USB_CONFIG_PRODUCT_STR);
-    usbus_add_string_descriptor(usbus, &usbus->manuf, USB_CONFIG_MANUF_STR);
+                                CONFIG_USB_CONFIGURATION_STR);
+    usbus_add_string_descriptor(usbus, &usbus->product, CONFIG_USB_PRODUCT_STR);
+    usbus_add_string_descriptor(usbus, &usbus->manuf, CONFIG_USB_MANUF_STR);
 
     usbus->state = USBUS_STATE_DISCONNECT;
 

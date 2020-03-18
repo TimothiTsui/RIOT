@@ -34,6 +34,9 @@
 #include "net/gnrc/netapi.h"
 #include "net/gnrc/pkt.h"
 #include "net/gnrc/netif/conf.h"
+#ifdef MODULE_GNRC_LORAWAN
+#include "net/gnrc/netif/lorawan.h"
+#endif
 #ifdef MODULE_GNRC_SIXLOWPAN
 #include "net/gnrc/netif/6lo.h"
 #endif
@@ -75,6 +78,9 @@ typedef struct {
     rmutex_t mutex;                         /**< Mutex of the interface */
 #ifdef MODULE_NETSTATS_L2
     netstats_t stats;                       /**< transceiver's statistics */
+#endif
+#if defined(MODULE_GNRC_LORAWAN) || DOXYGEN
+    gnrc_netif_lorawan_t lorawan;           /**< LoRaWAN component */
 #endif
 #if defined(MODULE_GNRC_IPV6) || DOXYGEN
     gnrc_netif_ipv6_t ipv6;                 /**< IPv6 component */
@@ -278,7 +284,7 @@ gnrc_netif_t *gnrc_netif_iter(const gnrc_netif_t *prev);
 gnrc_netif_t *gnrc_netif_get_by_pid(kernel_pid_t pid);
 
 /**
- * @brief   Gets the (unicast on anycast) IPv6 addresss of an interface (if IPv6
+ * @brief   Gets the (unicast on anycast) IPv6 address of an interface (if IPv6
  *          is supported)
  *
  * @pre `netif != NULL`
@@ -290,7 +296,7 @@ gnrc_netif_t *gnrc_netif_get_by_pid(kernel_pid_t pid);
  *                      addresses assigned to @p netif. May not be `NULL`
  * @param[in] max_len   Number of *bytes* available in @p addrs. Must be at
  *                      least `sizeof(ipv6_addr_t)`. It is recommended to use
- *                      @p GNRC_NETIF_IPV6_ADDRS_NUMOF `* sizeof(ipv6_addr_t)
+ *                      @p CONFIG_GNRC_NETIF_IPV6_ADDRS_NUMOF `* sizeof(ipv6_addr_t)
  *                      here (and have @p addrs of the according length).
  *
  * @return  Number of addresses in @p addrs times `sizeof(ipv6_addr_t)` on

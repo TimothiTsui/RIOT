@@ -15,6 +15,8 @@
  * @}
  */
 
+#define USB_H_USER_IS_RIOT_INTERNAL
+
 #include <string.h>
 
 #include "kernel_defines.h"
@@ -145,9 +147,7 @@ static int _init(netdev_t *netdev)
 {
     usbus_cdcecm_device_t *cdcecm = _netdev_to_cdcecm(netdev);
 
-    luid_get(cdcecm->mac_netdev, ETHERNET_ADDR_LEN);
-    eui48_set_local((eui48_t*)cdcecm->mac_netdev);
-    eui48_clear_group((eui48_t*)cdcecm->mac_netdev);
+    luid_get_eui48((eui48_t*)cdcecm->mac_netdev);
     return 0;
 }
 

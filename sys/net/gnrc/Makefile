@@ -1,3 +1,6 @@
+ifneq (,$(filter gnrc_dhcpv6,$(USEMODULE)))
+  DIRS += application_layer/dhcpv6
+endif
 ifneq (,$(filter gnrc_icmpv6,$(USEMODULE)))
   DIRS += network_layer/icmpv6
 endif
@@ -58,6 +61,9 @@ endif
 ifneq (,$(filter gnrc_pktbuf_malloc,$(USEMODULE)))
     DIRS += pktbuf_malloc
 endif
+ifneq (,$(filter gnrc_lorawan,$(USEMODULE)))
+    DIRS += link_layer/lorawan
+endif
 ifneq (,$(filter gnrc_gomach,$(USEMODULE)))
     DIRS += link_layer/gomach
 endif
@@ -96,6 +102,9 @@ ifneq (,$(filter gnrc_sixlowpan_frag_fb,$(USEMODULE)))
 endif
 ifneq (,$(filter gnrc_sixlowpan_frag_rb,$(USEMODULE)))
   DIRS += network_layer/sixlowpan/frag/rb
+endif
+ifneq (,$(filter gnrc_sixlowpan_frag_stats,$(USEMODULE)))
+  DIRS += network_layer/sixlowpan/frag/stats
 endif
 ifneq (,$(filter gnrc_sixlowpan_frag_vrb,$(USEMODULE)))
   DIRS += network_layer/sixlowpan/frag/vrb

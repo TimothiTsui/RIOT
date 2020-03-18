@@ -11,18 +11,18 @@ include $(RIOTMAKE)/tools/serial.inc.mk
 include $(RIOTMAKE)/tools/renode.inc.mk
 
 # debugger config
-DEBUGGER = $(RIOTBOARD)/$(BOARD)/dist/debug.sh
+DEBUGGER = $(RIOTBOARD)/cc2538dk/dist/debug.sh
 DEBUGSERVER = JLinkGDBServer -device CC2538SF53
-RESET ?= $(RIOTBOARD)/$(BOARD)/dist/reset.sh
+RESET ?= $(RIOTBOARD)/cc2538dk/dist/reset.sh
 
 # Define the flash-tool and default port:
-export PROGRAMMER ?= cc2538-bsl
+PROGRAMMER ?= cc2538-bsl
 
 ifeq ($(PROGRAMMER),cc2538-bsl)
   FLASHER = $(RIOTTOOLS)/cc2538-bsl/cc2538-bsl.py
   FFLAGS  = -p "$(PROG_DEV)" -e -w -v $(FLASHFILE)
 else ifeq ($(PROGRAMMER),jlink)
-  FLASHER = $(RIOTBOARD)/$(BOARD)/dist/flash.sh
+  FLASHER = $(RIOTBOARD)/cc2538dk/dist/flash.sh
   FFLAGS  = $(BINDIR) $(FLASHFILE)
 endif
 

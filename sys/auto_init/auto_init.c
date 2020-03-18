@@ -96,6 +96,12 @@
 #include "schedstatistics.h"
 #endif
 
+#ifdef MODULE_TEST_UTILS_INTERACTIVE_SYNC
+#if !defined(MODULE_SHELL_COMMANDS) || !defined(MODULE_SHELL)
+#include "test_utils/interactive_sync.h"
+#endif
+#endif
+
 #define ENABLE_DEBUG (0)
 #include "debug.h"
 
@@ -153,8 +159,10 @@ void auto_init(void)
     openthread_bootstrap();
 #endif
 #ifdef MODULE_GCOAP
-    DEBUG("Auto init gcoap module.\n");
-    gcoap_init();
+    if (!IS_ACTIVE(CONFIG_GCOAP_NO_AUTO_INIT)) {
+        DEBUG("Auto init gcoap module.\n");
+        gcoap_init();
+    }
 #endif
 #ifdef MODULE_DEVFS
     DEBUG("Mounting /dev\n");
@@ -261,6 +269,11 @@ void auto_init(void)
 #ifdef MODULE_ETHOS
     extern void auto_init_ethos(void);
     auto_init_ethos();
+#endif
+
+#ifdef MODULE_DOSE
+    extern void auto_init_dose(void);
+    auto_init_dose();
 #endif
 
 #ifdef MODULE_SLIPDEV
@@ -382,7 +395,7 @@ void auto_init(void)
     extern void auto_init_bmp180(void);
     auto_init_bmp180();
 #endif
-#if defined(MODULE_BME280) || defined(MODULE_BMP280)
+#ifdef MODULE_BMX280
     extern void auto_init_bmx280(void);
     auto_init_bmx280();
 #endif
@@ -422,10 +435,14 @@ void auto_init(void)
     extern void auto_init_hts221(void);
     auto_init_hts221();
 #endif
+#ifdef MODULE_INA2XX
+    extern void auto_init_ina2xx(void);
+    auto_init_ina2xx();
+#endif
 #ifdef MODULE_INA3221
     extern void auto_init_ina3221(void);
     auto_init_ina3221();
- #endif
+#endif
 #ifdef MODULE_IO1_XPLAINED
     extern void auto_init_io1_xplained(void);
     auto_init_io1_xplained();
@@ -433,6 +450,10 @@ void auto_init(void)
 #ifdef MODULE_ISL29020
     extern void auto_init_isl29020(void);
     auto_init_isl29020();
+#endif
+#ifdef MODULE_ITG320X
+    extern void auto_init_itg320x(void);
+    auto_init_itg320x();
 #endif
 #ifdef MODULE_JC42
     extern void auto_init_jc42(void);
@@ -522,6 +543,10 @@ void auto_init(void)
     extern void auto_init_sht3x(void);
     auto_init_sht3x();
 #endif
+#ifdef MODULE_SHTC1
+    extern void auto_init_shtc1(void);
+    auto_init_shtc1();
+#endif
 #ifdef MODULE_SDS011
     extern void auto_init_sds011(void);
     auto_init_sds011();
@@ -593,4 +618,25 @@ void auto_init(void)
     extern void suit_init_conditions(void);
     suit_init_conditions();
 #endif /* MODULE_SUIT */
+
+#ifdef MODULE_AUTO_INIT_SECURITY
+
+#ifdef MODULE_CRYPTOAUTHLIB
+    extern void auto_init_atca(void);
+    auto_init_atca();
+#endif  /* MODULE_CRYPTOAUTHLIB */
+
+#endif  /* MODULE_AUTO_INIT_SECURITY */
+
+#ifdef MODULE_TEST_UTILS_INTERACTIVE_SYNC
+#if !defined(MODULE_SHELL_COMMANDS) || !defined(MODULE_SHELL)
+    test_utils_interactive_sync();
+#endif
+#endif /* MODULE_TEST_UTILS_INTERACTIVE_SYNC */
+
+#ifdef MODULE_AUTO_INIT_DHCPV6_CLIENT
+    DEBUG("auto_init DHCPv6 client");
+    extern void dhcpv6_client_auto_init(void);
+    dhcpv6_client_auto_init();
+#endif /* MODULE_AUTO_INIT_DHCPV6_CLIENT */
 }

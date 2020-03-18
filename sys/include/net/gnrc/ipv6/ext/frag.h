@@ -126,7 +126,7 @@ void gnrc_ipv6_ext_frag_send(gnrc_ipv6_ext_frag_send_t *snd_buf);
  *                  the fragment header in the first snip.
  *
  * @return  The reassembled packet when @p pkt completed the reassembly
- * @return  NULL, when there are still fragments missing or an error occured
+ * @return  NULL, when there are still fragments missing or an error occurred
  *          during reassembly
  */
 gnrc_pktsnip_t *gnrc_ipv6_ext_frag_reass(gnrc_pktsnip_t *pkt);
@@ -182,7 +182,7 @@ static inline void gnrc_ipv6_ext_frag_rbuf_del(gnrc_ipv6_ext_frag_rbuf_t *rbuf)
  *
  * This calls @ref gnrc_ipv6_ext_frag_rbuf_del() for all reassembly buffer
  * entries for which * gnrc_ipv6_ext_frag_rbuf_t::arrival is
- * @ref GNRC_IPV6_EXT_FRAG_RBUF_TIMEOUT_US in the past.
+ * @ref CONFIG_GNRC_IPV6_EXT_FRAG_RBUF_TIMEOUT_US in the past.
  */
 void gnrc_ipv6_ext_frag_rbuf_gc(void);
 /** @} */

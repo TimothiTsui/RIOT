@@ -44,8 +44,6 @@ extern "C" {
 /**
  * @brief xtimer configuration
  */
-#define XTIMER_OVERHEAD 14
-
 /* timer_set_absolute() has a high margin for possible underflow if set with
  * value not far in the future. To prevent this, we set high backoff values
  * here.
@@ -90,7 +88,7 @@ extern "C" {
  * cable select lines. Assignment to hardware devices can be configured at
  * runtime using the `--spi` startup parameter.
  *
- * Can be overriden during compile time with a `-DSPI_NUMOF=n` flag.
+ * Can be overridden during compile time with a `-DSPI_NUMOF=n` flag.
  */
 #define SPI_NUMOF (1U)
 #endif

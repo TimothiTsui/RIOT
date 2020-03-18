@@ -142,11 +142,9 @@ extern "C" {
 #define NANOCOAP_BLOCK_SIZE_EXP_MAX  (6)
 #endif
 
-#if defined(MODULE_GCOAP) || defined(DOXYGEN)
 /** @brief   Maximum length of a query string written to a message */
 #ifndef NANOCOAP_QS_MAX
 #define NANOCOAP_QS_MAX             (64)
-#endif
 #endif
 /** @} */
 
@@ -693,7 +691,7 @@ void coap_block_slicer_init(coap_block_slicer_t *slicer, size_t blknum,
  * @param[in]   c           byte array to copy
  * @param[in]   len         length of the byte array
  *
- * @returns     Number of bytes writen to @p bufpos
+ * @returns     Number of bytes written to @p bufpos
  */
 size_t coap_blockwise_put_bytes(coap_block_slicer_t *slicer, uint8_t *bufpos,
                                 const uint8_t *c, size_t len);
@@ -709,7 +707,7 @@ size_t coap_blockwise_put_bytes(coap_block_slicer_t *slicer, uint8_t *bufpos,
  * @param[in]   bufpos      pointer to the current payload buffer position
  * @param[in]   c           character to write
  *
- * @returns     Number of bytes writen to @p bufpos
+ * @returns     Number of bytes written to @p bufpos
  */
 size_t coap_blockwise_put_char(coap_block_slicer_t *slicer, uint8_t *bufpos, char c);
 
@@ -963,6 +961,20 @@ static inline ssize_t coap_opt_add_format(coap_pkt_t *pkt, uint16_t format)
  * @return        -ENOSPC if no available options
  */
 ssize_t coap_opt_add_opaque(coap_pkt_t *pkt, uint16_t optnum, const uint8_t *val, size_t val_len);
+
+/**
+ * @brief   Adds a single Uri-Query option in the form 'key=value' into pkt
+ *
+ * @param[in,out] pkt         The package that is being build
+ * @param[in]     key         Key to add to the query string
+ * @param[in]     val         Value to assign to @p key (may be NULL)
+ *
+ * @pre     ((pkt != NULL) && (key != NULL))
+ *
+ * @return  overall length of new query string
+ * @return  -1 on error
+ */
+ssize_t coap_opt_add_uquery(coap_pkt_t *pkt, const char *key, const char *val);
 
 /**
  * @brief   Encode the given string as option(s) into pkt

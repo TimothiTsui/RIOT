@@ -14,6 +14,7 @@
  * @brief       gcoap CLI support
  *
  * @author      Ken Bannister <kb2ma@runbox.com>
+ * @author      Hauke Petersen <hauke.petersen@fu-berlin.de>
  *
  * @}
  */
@@ -31,8 +32,8 @@
 
 static ssize_t _encode_link(const coap_resource_t *resource, char *buf,
                             size_t maxlen, coap_link_encoder_ctx_t *context);
-static void _resp_handler(unsigned req_state, coap_pkt_t* pdu,
-                          sock_udp_ep_t *remote);
+static void _resp_handler(const gcoap_request_memo_t *memo, coap_pkt_t* pdu,
+                          const sock_udp_ep_t *remote);
 static ssize_t _stats_handler(coap_pkt_t* pdu, uint8_t *buf, size_t len, void *ctx);
 static ssize_t _riot_board_handler(coap_pkt_t* pdu, uint8_t *buf, size_t len, void *ctx);
 
@@ -84,16 +85,16 @@ static ssize_t _encode_link(const coap_resource_t *resource, char *buf,
 /*
  * Response callback.
  */
-static void _resp_handler(unsigned req_state, coap_pkt_t* pdu,
-                          sock_udp_ep_t *remote)
+static void _resp_handler(const gcoap_request_memo_t *memo, coap_pkt_t* pdu,
+                          const sock_udp_ep_t *remote)
 {
     (void)remote;       /* not interested in the source currently */
 
-    if (req_state == GCOAP_MEMO_TIMEOUT) {
+    if (memo->state == GCOAP_MEMO_TIMEOUT) {
         printf("gcoap: timeout for msg ID %02u\n", coap_get_id(pdu));
         return;
     }
-    else if (req_state == GCOAP_MEMO_ERR) {
+    else if (memo->state == GCOAP_MEMO_ERR) {
         printf("gcoap: error in response\n");
         return;
     }
@@ -136,7 +137,7 @@ static void _resp_handler(unsigned req_state, coap_pkt_t* pdu,
                 return;
             }
 
-            gcoap_req_init(pdu, (uint8_t *)pdu->hdr, GCOAP_PDU_BUF_SIZE,
+            gcoap_req_init(pdu, (uint8_t *)pdu->hdr, CONFIG_GCOAP_PDU_BUF_SIZE,
                            COAP_METHOD_GET, _last_req_path);
             if (msg_type == COAP_TYPE_ACK) {
                 coap_hdr_set_type(pdu->hdr, COAP_TYPE_CON);
@@ -144,7 +145,8 @@ static void _resp_handler(unsigned req_state, coap_pkt_t* pdu,
             block.blknum++;
             coap_opt_add_block2_control(pdu, &block);
             int len = coap_opt_finish(pdu, COAP_OPT_FINISH_NONE);
-            gcoap_req_send((uint8_t *)pdu->hdr, len, remote, _resp_handler);
+            gcoap_req_send((uint8_t *)pdu->hdr, len, remote,
+                           _resp_handler, memo->context);
         }
         else {
             puts("--- blockwise complete ---");
@@ -257,7 +259,7 @@ static size_t _send(uint8_t *buf, size_t len, char *addr_str, char *port_str)
         return 0;
     }
 
-    bytes_sent = gcoap_req_send(buf, len, &remote, _resp_handler);
+    bytes_sent = gcoap_req_send(buf, len, &remote, _resp_handler, NULL);
     if (bytes_sent > 0) {
         req_count++;
     }
@@ -268,7 +270,7 @@ int gcoap_cli_cmd(int argc, char **argv)
 {
     /* Ordered like the RFC method code numbers, but off by 1. GET is code 0. */
     char *method_codes[] = {"get", "post", "put"};
-    uint8_t buf[GCOAP_PDU_BUF_SIZE];
+    uint8_t buf[CONFIG_GCOAP_PDU_BUF_SIZE];
     coap_pkt_t pdu;
     size_t len;
 
@@ -280,7 +282,7 @@ int gcoap_cli_cmd(int argc, char **argv)
     if (strcmp(argv[1], "info") == 0) {
         uint8_t open_reqs = gcoap_op_state();
 
-        printf("CoAP server is listening on port %u\n", GCOAP_PORT);
+        printf("CoAP server is listening on port %u\n", CONFIG_GCOAP_PORT);
         printf(" CLI requests sent: %u\n", req_count);
         printf("CoAP open requests: %u\n", open_reqs);
         return 0;
@@ -312,7 +314,7 @@ int gcoap_cli_cmd(int argc, char **argv)
      */
     if (((argc == apos + 3) && (code_pos == 0)) ||
         ((argc == apos + 4) && (code_pos != 0))) {
-        gcoap_req_init(&pdu, &buf[0], GCOAP_PDU_BUF_SIZE, code_pos+1, argv[apos+2]);
+        gcoap_req_init(&pdu, &buf[0], CONFIG_GCOAP_PDU_BUF_SIZE, code_pos+1, argv[apos+2]);
         coap_hdr_set_type(pdu.hdr, msg_type);
 
         memset(_last_req_path, 0, _LAST_REQ_PATH_MAX);
@@ -344,7 +346,7 @@ int gcoap_cli_cmd(int argc, char **argv)
         }
         else {
             /* send Observe notification for /cli/stats */
-            switch (gcoap_obs_init(&pdu, &buf[0], GCOAP_PDU_BUF_SIZE,
+            switch (gcoap_obs_init(&pdu, &buf[0], CONFIG_GCOAP_PDU_BUF_SIZE,
                     &_resources[0])) {
             case GCOAP_OBS_INIT_OK:
                 DEBUG("gcoap_cli: creating /cli/stats notification\n");

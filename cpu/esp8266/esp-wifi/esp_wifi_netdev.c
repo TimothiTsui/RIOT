@@ -74,6 +74,23 @@
 #define CONFIG_TCP_OVERSIZE_MSS 1
 #define LL_ALIGN(s)             (((uint32_t)s + 3) & 0xfffffffcU)
 
+/**
+ * The SDK interface of the WiFi module uses the lwIP `pbuf` structure for
+ * packets sent to and received from the WiFi interface. For compatibility
+ * reasons with the binary SDK libraries we need to incclude the SDK lwIP
+ * `pbuf` header here.
+ *
+ * To avoid compilation errors, we need to undefine all our pkg/lwIP settings
+ * that are also defined by SDK lwIP header files. These definitions do not
+ * affect the implementation of this module.
+ */
+#undef ETHARP_SUPPORT_STATIC_ENTRIES
+#undef LWIP_HAVE_LOOPIF
+#undef LWIP_NETIF_LOOPBACK
+#undef SO_REUSE
+#undef TCPIP_THREAD_PRIO
+#undef TCPIP_THREAD_STACKSIZE
+
 #include "lwip/pbuf.h"
 
 #endif /* MCU_ESP8266 */
@@ -86,9 +103,6 @@
  */
 esp_wifi_netdev_t _esp_wifi_dev;
 static const netdev_driver_t _esp_wifi_driver;
-
-/* device thread stack */
-static char _esp_wifi_stack[ESP_WIFI_STACKSIZE];
 
 /** guard variable to avoid reentrance to _esp_wifi_send function */
 static bool _esp_wifi_send_is_in = false;
@@ -418,7 +432,7 @@ static esp_err_t IRAM_ATTR _esp_system_event_handler(void *ctx, system_event_t *
             break;
 
         case SYSTEM_EVENT_STA_CONNECTED:
-            ESP_WIFI_LOG_INFO("connected to ssid %s, channel %d",
+            ESP_WIFI_LOG_INFO("WiFi connected to ssid %s, channel %d",
                               event->event_info.connected.ssid,
                               event->event_info.connected.channel);
 
@@ -439,7 +453,7 @@ static esp_err_t IRAM_ATTR _esp_system_event_handler(void *ctx, system_event_t *
             else if (reason <= REASON_HANDSHAKE_TIMEOUT) {
                 reason_str = _esp_wifi_disc_reasons[reason - INDEX_BEACON_TIMEOUT];
             }
-            ESP_WIFI_LOG_INFO("disconnected from ssid %s, reason %d (%s)",
+            ESP_WIFI_LOG_INFO("Wifi disconnected from ssid %s, reason %d (%s)",
                               event->event_info.disconnected.ssid,
                               event->event_info.disconnected.reason, reason_str);
 
@@ -513,12 +527,10 @@ static int _esp_wifi_send(netdev_t *netdev, const iolist_t *iolist)
 #if ENABLE_DEBUG
     ESP_WIFI_DEBUG("send %d byte", dev->tx_len);
 #if MODULE_OD && ENABLE_DEBUG_HEXDUMP
-    od_hex_dump(dev->tx_buf, dev->tx_le, OD_WIDTH_DEFAULT);
+    od_hex_dump(dev->tx_buf, dev->tx_len, OD_WIDTH_DEFAULT);
 #endif /* MODULE_OD && ENABLE_DEBUG_HEXDUMP */
 #endif
     critical_exit();
-
-    int ret = 0;
 
     /* send the the packet to the peer(s) mac address */
     if (esp_wifi_internal_tx(ESP_IF_WIFI_STA, dev->tx_buf, dev->tx_len) == ESP_OK) {
@@ -527,14 +539,13 @@ static int _esp_wifi_send(netdev_t *netdev, const iolist_t *iolist)
         _esp_wifi_send_is_in = false;
         netdev->event_callback(netdev, NETDEV_EVENT_TX_COMPLETE);
 #endif
+        return dev->tx_len;
     }
     else {
         _esp_wifi_send_is_in = false;
         ESP_WIFI_DEBUG("sending WiFi packet failed");
-        ret = -EIO;
+        return -EIO;
     }
-
-    return ret;
 }
 
 static int _esp_wifi_recv(netdev_t *netdev, void *buf, size_t len, void *info)
@@ -809,22 +820,5 @@ void esp_wifi_setup (esp_wifi_netdev_t* dev)
     dev->event_conn = 0;
     dev->event_disc = 0;
 }
-
-void auto_init_esp_wifi (void)
-{
-    ESP_WIFI_DEBUG("initializing ESP WiFi device");
-
-    esp_wifi_setup(&_esp_wifi_dev);
-    _esp_wifi_dev.netif = gnrc_netif_ethernet_create(_esp_wifi_stack,
-                                                    ESP_WIFI_STACKSIZE,
-#ifdef MODULE_ESP_NOW
-                                                    ESP_WIFI_PRIO - 1,
-#else
-                                                    ESP_WIFI_PRIO,
-#endif
-                                                    "esp_wifi",
-                                                    (netdev_t *)&_esp_wifi_dev);
-}
-
 #endif /* MODULE_ESP_WIFI */
 /**@}*/
