@@ -306,6 +306,17 @@ ifneq (,$(filter io1_xplained,$(USEMODULE)))
   USEMODULE += sdcard_spi
 endif
 
+ifneq (,$(filter isbd,$(USEMODULE)))
+  FEATURES_REQUIRED += periph_gpio
+  FEATURES_REQUIRED += periph_uart
+  FEATURES_REQUIRED += periph_gpio_irq
+  USEMODULE += iolist
+  USEMODULE += xtimer
+  USEMODULE += isbd
+  USEMODULE += netif
+  USEMODULE += fmt
+endif
+
 ifneq (,$(filter isl29020,$(USEMODULE)))
   FEATURES_REQUIRED += periph_i2c
 endif
